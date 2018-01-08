@@ -166,6 +166,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     JComboBox<String> fitList = new JComboBox<String>();
     JComboBox<String> fitModeList = new JComboBox<String>();
     private JTextField minEventsText = new JTextField(5);
+    private JTextField mipPeakText = new JTextField(5);
     
     public final static PrintStream oldStdout = System.out;
     
@@ -408,6 +409,11 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             if (minEventsText.getText().compareTo("") != 0) {
                 engines[VEFF].fitMinEvents = Integer.parseInt(minEventsText.getText());
             }
+            
+			// Desired MIP peak
+			CtofHVEventListener hvEngine = (CtofHVEventListener) engines[HV];
+			hvEngine.EXPECTED_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
+			hvEngine.setConstraints();            
 
             System.out.println("");
             System.out.println("Configuration settings - Tracking/General");
@@ -422,8 +428,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("Trigger: "+triggerBit);
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
 			System.out.println("Slicefitter mode: "+fitModeList.getSelectedItem());
-			System.out.println("Minimum events per slice: "+minEventsText.getText());            
-            
+			System.out.println("Minimum events per slice: "+minEventsText.getText());  
+			System.out.println("Desired MIP peak position: "+mipPeakText.getText());
             System.out.println("");
         }
         
@@ -812,6 +818,16 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridx = 1;
         c.gridy = 10;
         trPanel.add(minEventsText,c);
+        
+		// Desired MIP peak position
+		c.gridx = 0;
+		c.gridy = 11;
+		trPanel.add(new JLabel("Desired MIP peak position:"),c);
+		c.gridx = 1;
+		c.gridy = 11;
+		mipPeakText.addActionListener(this);
+		mipPeakText.setText("2000");
+		trPanel.add(mipPeakText,c);    
         
         JPanel butPage3 = new configButtonPanel(this, true, "Finish");
         trOuterPanel.add(butPage3, BorderLayout.SOUTH);

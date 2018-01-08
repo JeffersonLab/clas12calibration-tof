@@ -37,7 +37,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 	private String fitOption = "RQ";
 	
-	private final double[] MIN_SIGMA = {0.0, 0.040, 0.040, 0.040};
+	private final double[] MIN_SIGMA = {0.0, 0.080, 0.040, 0.080};
 	private final double[] MAX_SIGMA = {0.0, 0.300, 0.150, 0.300};
 	
 
@@ -167,9 +167,8 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 					fineHist.setTitleX("RF time - vertex time modulo beam bucket (ns)");
 					dg.addDataSet(fineHist, 1);
 
-					// create a dummy function in case there's no data to fit 
-					F1D fineFunc = new F1D("fineFunc","[amp]*gaus(x,[mean],[sigma])+[a]*x^2+[b]*x+[c]", -1.0, 1.0);
-					//F1D fineFunc = new F1D("fineFunc","[amp]*gaus(x,[mean],[sigma])+[b]*x+[c]", -1.0, 1.0);
+					//F1D fineFunc = new F1D("fineFunc","[amp]*gaus(x,[mean],[sigma])+[a]*x^2+[b]*x+[c]", -1.0, 1.0);
+					F1D fineFunc = new F1D("fineFunc","[amp]*gaus(x,[mean],[sigma])+[b]*x+[c]", -1.0, 1.0);
 					fineFunc.setLineColor(FUNC_COLOUR);
 					fineFunc.setLineWidth(FUNC_LINE_WIDTH);
 					dg.addDataSet(fineFunc, 1);
@@ -203,17 +202,15 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
 
-			//			System.out.println("SLC "+sector+layer+component);
-			//			pad.show();
+			//System.out.println("RF Pad process Paddle SLC "+sector+layer+component);
+			//pad.show();
 
-			// fill the fine hists
 			if (pad.goodTrackFound() && hitInSection(pad)) {
-
-				//				System.out.println("Paddle included");
+				
 				dataGroups.getItem(sector,layer,component).getH1F("fineHistRaw").fill(
 						(pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
-				//				dataGroups.getItem(sector,layer,component).getH1F("fineHist").fill(
-				//						(pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+				//double val = (pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET;
+				//System.out.println("Plotting RFPad "+val);
 			}
 		}
 	}    
@@ -252,7 +249,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		}
 
 
-		// fit gaussian +p2
+		// fit gaussian +p1
 		F1D fineFunc = dataGroups.getItem(sector,layer,paddle).getF1D("fineFunc");
 
 		// find the range for the fit
@@ -280,6 +277,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		fineFunc.setParLimits(0, fineHist.getBinContent(maxBin)*0.7, fineHist.getBinContent(maxBin)*1.2);
 		fineFunc.setParameter(1, maxPos);
 		fineFunc.setParameter(2, 0.1);
+		fineFunc.setParLimits(2, MIN_SIGMA[layer], 1.0);
 
 		try {
 			DataFitter.fit(fineFunc, fineHist, fitOption);
@@ -288,6 +286,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		catch(Exception ex) {
 			ex.printStackTrace();
 		}	
+		fineHist.setFunction(null);
 
 	}
 
@@ -417,7 +416,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			hist = dataGroups.getItem(sector,layer,paddle).getH1F("fineHist");
 			func = dataGroups.getItem(sector,layer,paddle).getF1D("fineFunc");
 			//func.setOptStat(0);
-			hist.setTitle("Paddle "+paddle);
+			hist.setTitle("RFPAD "+LAYER_PREFIX[layer]+paddle);
 			hist.setTitleX("");
 			hist.setTitleY("");
 			canvas.draw(hist); 

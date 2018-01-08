@@ -90,7 +90,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					vzHist.setTitleX("vz (cm)");
 					vzHist.setTitleY("delta T (ns)");
 					dg.addDataSet(vzHist, 1);
-
+					
 					H2F hitHist = 
 							new H2F("hitHist","Sector "+sector+" Layer "+" Paddle "+paddle,
 									100, -paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
@@ -146,6 +146,14 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 			int sector = pad.getDescriptor().getSector();
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
+			
+			//if (pad.TDCL==26050 && pad.TDCR==25447) {
+			//if (pad.paddleY()>100.0 && pad.getDescriptor().getLayer()==2) {
+				//System.out.println("Check process Paddle SLC "+sector+layer+component);
+				//pad.showTWCalc();
+				//double val = (pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET;
+				//System.out.println("Check plot value (delta T RF corrected modulo beam bucket) "+val);	
+			//}
 
 			if (pad.goodTrackFound()) {
 
@@ -156,7 +164,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 				dataGroups.getItem(sector,layer,component).getH2F("vzHist").fill(
 						 pad.VERTEX_Z,
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
-				
+							
 				dataGroups.getItem(sector,layer,component).getH2F("hitHist").fill(
 						 pad.paddleY(),
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);

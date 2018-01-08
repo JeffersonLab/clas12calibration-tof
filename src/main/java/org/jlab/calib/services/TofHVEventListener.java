@@ -49,7 +49,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 	private final double 		LR_THRESHOLD_FRACTION = 0.2;
 	private final int			GM_REBIN_THRESHOLD = 50000;
 
-	public final int[]		EXPECTED_MIP_CHANNEL = {800, 2000, 800};
+	public int[]		EXPECTED_MIP_CHANNEL = {800, 2000, 800};
 	public final int		ALLOWED_MIP_DIFF = 50;
 	public final double[]	ALPHA = {13.4, 4.7, 8.6};
 	public final double[]	MAX_VOLTAGE = {2500.0, 2000.0, 2500.0};
@@ -76,18 +76,6 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 		calib.setName("/calibration/ftof/gain_balance");
 		calib.setPrecision(3); // record calibration constants to 3 dp
 
-		for (int i=0; i<3; i++) {
-
-			int layer = i+1;
-			calib.addConstraint(3, EXPECTED_MIP_CHANNEL[i]-ALLOWED_MIP_DIFF, 
-					EXPECTED_MIP_CHANNEL[i]+ALLOWED_MIP_DIFF, 1, layer);
-			// calib.addConstraint(calibration column, min value, max value,
-			// col to check if constraint should apply, value of col if constraint should be applied);
-			// (omit last two if applying to all rows)
-			calib.addConstraint(4, EXPECTED_MIP_CHANNEL[i]-ALLOWED_MIP_DIFF, 
-					EXPECTED_MIP_CHANNEL[i]+ALLOWED_MIP_DIFF, 1, layer);
-		}
-
 		// initialize the counter status
 		for (int sector=1; sector<=6; sector++) {
 			for (int layer=1; layer<=3; layer++) {
@@ -99,6 +87,21 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 					tdcRightStatus.add(1, sector, layer, paddle);
 				}
 			}
+		}
+	}
+	
+	public void setConstraints() {
+		
+		for (int i=0; i<3; i++) {
+
+			int layer = i+1;
+			calib.addConstraint(3, EXPECTED_MIP_CHANNEL[i]-ALLOWED_MIP_DIFF, 
+					EXPECTED_MIP_CHANNEL[i]+ALLOWED_MIP_DIFF, 1, layer);
+			// calib.addConstraint(calibration column, min value, max value,
+			// col to check if constraint should apply, value of col if constraint should be applied);
+			// (omit last two if applying to all rows)
+			calib.addConstraint(4, EXPECTED_MIP_CHANNEL[i]-ALLOWED_MIP_DIFF, 
+					EXPECTED_MIP_CHANNEL[i]+ALLOWED_MIP_DIFF, 1, layer);
 		}
 	}
 
@@ -492,10 +495,11 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 	public double newHV(int sector, int layer, int paddle, double origVoltage, String pmt) {
 
 		// Don't bother recalculating if MIP peak is already acceptable
-		if (isGoodPaddle(sector,layer,paddle)) {
-			System.out.println("SLC "+sector+layer+paddle+": MIP peak already acceptable, no change to voltage");
-			return origVoltage;
-		}
+		// LC Nov 2017 - removing this for now as MIP peak may be acceptable, but log ratio may be non zero
+//		if (isGoodPaddle(sector,layer,paddle)) {
+//			System.out.println("SLC "+sector+layer+paddle+": MIP peak already acceptable, no change to voltage");
+//			return origVoltage;
+//		}
 
 		int layer_index = layer-1;
 		//DetectorDescriptor desc = new DetectorDescriptor();
@@ -505,7 +509,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 		double centroid = getLogRatio(sector, layer, paddle);
 
 		double gainLR = 0.0;
-		if (pmt == "L") {
+		if (pmt.equals("L")) {
 			gainLR = gainIn / (Math.sqrt(Math.exp(centroid)));
 
 			// put the constants in the treemap
@@ -536,11 +540,27 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 		}
 
 		// Don't change voltage if stats are low
-		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() < MIN_STATS) {
-			System.out.println("SLC "+sector+layer+paddle+": Low stats, deltaV set to zero");
+//		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() < MIN_STATS) {
+//			System.out.println("SLC "+sector+layer+paddle+": Low stats, deltaV set to zero");
+//			deltaV = 0.0;
+//		};
+
+		// Don't change voltage if one ADC is missing
+		// Doesn't work as some statuses are ok even though histogram is empty
+		// Must be ADC readings but none over the minimum for including in plot
+		// check for zero stats instead
+//		if (adcLeftStatus.getItem(sector,layer,paddle)!=0 || adcRightStatus.getItem(sector,layer,paddle)!=0) {
+//			System.out.println("SLC "+sector+layer+paddle+": Missing ADC, deltaV set to zero");
+//			deltaV = 0.0;
+//		};
+
+		// Don't change voltage if stats are zero
+		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() == 0) {
+			System.out.println("SLC "+sector+layer+paddle+": Zero stats, deltaV set to zero");
 			deltaV = 0.0;
 		};
 
+		
 		double newVoltage = origVoltage + deltaV;
 
 		// Safety check - don't exceed maximum voltage

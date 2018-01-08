@@ -49,15 +49,12 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	public final int TW2_RIGHT_OVERRIDE = 5;
 	
 	// Preferred ranges
-	private final double[]        FIT_MIN = {0.0,  200.0, 1200.0, 400.0};
-	private final double[]        FIT_MAX = {0.0, 1000.0, 2400.0, 1000.0};
-	//private final double[]        ADC_MIN = {0.0, 150.0,  500.0,  150.0};
-	//private final double[]        ADC_MAX = {0.0, 2000.0, 3500.0, 2000.0};
-	private final double[]        ADC_MIN = {0.0, 20.0,  50.0,  20.0};
+	private final double[]        FIT_MIN = {0.0,  150.0,  200.0,  150.0};
+	private final double[]        FIT_MAX = {0.0, 3500.0, 4000.0, 3500.0};
+	private final double[]        ADC_MIN = {0.0,   20.0,   50.0,   20.0};
 	private final double[]        ADC_MAX = {0.0, 4000.0, 7000.0, 4000.0};
 	
 	// Preferred bins
-	//private int[] xbins = {0, 80, 40, 80};
 	private int[] xbins = {0, 166, 87, 166};
 	private int ybins = 60;
 

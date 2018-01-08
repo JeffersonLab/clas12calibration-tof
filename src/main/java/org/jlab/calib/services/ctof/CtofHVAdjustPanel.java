@@ -112,18 +112,46 @@ public class CtofHVAdjustPanel 	extends JPanel
 			BufferedWriter outputBw = new BufferedWriter(outputFw);
 			
 			// Write the header
+			// my header
+//			outputBw.write("--- Start BURT header");
+//			outputBw.newLine();
+//			outputBw.write("CTOF Calibration HV recalculation");
+//			outputBw.newLine();
+//			Date today = new Date();
+//			DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
+//			String todayString = dateFormat.format(today);
+//			outputBw.write("Date and time: "+todayString);
+//			outputBw.newLine();
+//			outputBw.write("Login ID: "+System.getProperty("user.name"));
+//			outputBw.newLine();
+//			outputBw.write("Input HV file: "+fc.getSelectedFile().getAbsolutePath());
+//			outputBw.newLine();
+//			outputBw.write("--- End BURT header");
+//			outputBw.newLine();
+			
+			// replicate slow controls header exactly
 			outputBw.write("--- Start BURT header");
 			outputBw.newLine();
-			outputBw.write("CTOF Calibration HV recalculation");
-			outputBw.newLine();
 			Date today = new Date();
-			DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
+			DateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy");
 			String todayString = dateFormat.format(today);
-			outputBw.write("Date and time: "+todayString);
+			outputBw.write("Time:     "+todayString);
 			outputBw.newLine();
-			outputBw.write("Login ID: "+System.getProperty("user.name"));
+			outputBw.write("Login ID: clasrun (Online DAQ)");
 			outputBw.newLine();
-			outputBw.write("Input HV file: "+fc.getSelectedFile().getAbsolutePath());
+			outputBw.write("Eff  UID: 2508");
+			outputBw.newLine();
+			outputBw.write("Group ID: 9998");
+			outputBw.newLine();
+			outputBw.write("Keywords: ");
+			outputBw.newLine();
+			outputBw.write("Comments: ");
+			outputBw.newLine();
+			outputBw.write("Type:     Absolute");
+			outputBw.newLine();
+			outputBw.write("Directory /home/clasrun");
+			outputBw.newLine();
+			outputBw.write("Req File: /usr/clas12/release/1.3.0/epics/tools/burtreq/CTOF_HV.req");
 			outputBw.newLine();
 			outputBw.write("--- End BURT header");
 			outputBw.newLine();
@@ -163,7 +191,7 @@ public class CtofHVAdjustPanel 	extends JPanel
                 // write to file only if voltage is changing
                 if (newHV != origVoltage) {
                 	String commandString = line.split(" ")[0];
-                	outputBw.write(commandString+" 1 "+ new DecimalFormat("0.00000E00").format(newHV).replace("E", "+e"));
+                	outputBw.write(commandString+" 1 "+ new DecimalFormat("0.00000E00").format(newHV).replace("E", "e+"));
                 	outputBw.newLine();
 
                 }

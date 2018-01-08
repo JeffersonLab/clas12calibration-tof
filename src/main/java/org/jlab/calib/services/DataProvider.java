@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jlab.calib.temp.BaseHit;
-import org.jlab.calib.temp.DetectorLocation;
-import org.jlab.calib.temp.IMatchedHit;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
@@ -145,9 +142,9 @@ public class DataProvider {
 		}
 		
 		// Only continue if we have adc and tdc banks
-		if (!event.hasBank("FTOF::adc") || !event.hasBank("FTOF::tdc")) {
-			return paddleList;
-		}
+//		if (!event.hasBank("FTOF::adc") || !event.hasBank("FTOF::tdc")) {
+//			return paddleList;
+//		}
 
 		DataBank  adcBank = event.getBank("FTOF::adc");
 		DataBank  tdcBank = event.getBank("FTOF::tdc");
@@ -197,7 +194,7 @@ public class DataProvider {
 					
 					if (event.hasBank("RUN::config")) {
 						DataBank  configBank = event.getBank("RUN::config");
-						paddle.TRIGGER_BIT = configBank.getInt("trigger", 0);
+						paddle.TRIGGER_BIT = configBank.getLong("trigger", 0);
 					}
 					
 					// get the RF time with id=1

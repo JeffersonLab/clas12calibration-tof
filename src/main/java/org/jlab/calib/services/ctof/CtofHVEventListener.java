@@ -51,7 +51,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 	private final double         LR_THRESHOLD_FRACTION = 0.2;
 	private final int            GM_REBIN_THRESHOLD = 50000;
 
-	public final int        EXPECTED_MIP_CHANNEL = 2000;
+	public int        EXPECTED_MIP_CHANNEL = 2000;
 	public final int        ALLOWED_MIP_DIFF = 50;
 	public final double[]    ALPHA = {4.0};
 	public final double[]    MAX_VOLTAGE = {2500.0};
@@ -78,15 +78,6 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		calib.setName("/calibration/ctof/gain_balance");
 		calib.setPrecision(3); // record calibration constants to 3 dp
 
-		calib.addConstraint(3, EXPECTED_MIP_CHANNEL-ALLOWED_MIP_DIFF, 
-				EXPECTED_MIP_CHANNEL+ALLOWED_MIP_DIFF);
-
-		// calib.addConstraint(calibration column, min value, max value,
-		// col to check if constraint should apply, value of col if constraint should be applied);
-		// (omit last two if applying to all rows)
-		calib.addConstraint(4, EXPECTED_MIP_CHANNEL-ALLOWED_MIP_DIFF, 
-				EXPECTED_MIP_CHANNEL+ALLOWED_MIP_DIFF);
-
 		// initialize the counter status
 		for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 			adcLeftStatus.add(1, 1, 1, paddle);
@@ -94,6 +85,14 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			tdcLeftStatus.add(1, 1, 1, paddle);
 			tdcRightStatus.add(1, 1, 1, paddle);
 		}
+	}
+	
+	public void setConstraints() {
+
+		calib.addConstraint(3, EXPECTED_MIP_CHANNEL-ALLOWED_MIP_DIFF, 
+				EXPECTED_MIP_CHANNEL+ALLOWED_MIP_DIFF);
+		calib.addConstraint(4, EXPECTED_MIP_CHANNEL-ALLOWED_MIP_DIFF, 
+				EXPECTED_MIP_CHANNEL+ALLOWED_MIP_DIFF);
 	}
 
 	@Override
@@ -479,10 +478,11 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 	public double newHV(int sector, int layer, int paddle, double origVoltage, String pmt) {
 
 		// Don''t bother recalculating if MIP peak is already acceptable
-		if (isGoodPaddle(sector,layer,paddle)) {
-			System.out.println("Paddle "+paddle+": MIP peak already acceptable, no change to voltage");
-			return origVoltage;
-		}
+		// LC Nov 2017 - removing this for now as MIP peak may be acceptable, but log ratio may be non zero
+//		if (isGoodPaddle(sector,layer,paddle)) {
+//			System.out.println("Paddle "+paddle+": MIP peak already acceptable, no change to voltage");
+//			return origVoltage;
+//		}
 
 		int layer_index = layer-1;
 		//DetectorDescriptor desc = new DetectorDescriptor();
@@ -492,7 +492,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		double centroid = getLogRatio(sector, layer, paddle);
 
 		double gainLR = 0.0;
-		if (pmt == "L") {
+		if (pmt.equals("L")) {
 			gainLR = gainIn / (Math.sqrt(Math.exp(centroid)));
 
 			// put the constants in the treemap
@@ -523,8 +523,14 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		}
 
 		// Don''t change voltage if stats are low
-		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() < MIN_STATS) {
-			System.out.println("SLC "+sector+layer+paddle+": Low stats, deltaV set to zero");
+//		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() < MIN_STATS) {
+//			System.out.println("SLC "+sector+layer+paddle+": Low stats, deltaV set to zero");
+//			deltaV = 0.0;
+//		};
+		
+		// Don't change voltage if stats are zero
+		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() == 0) {
+			System.out.println("SLC "+sector+layer+paddle+": Zero stats, deltaV set to zero");
 			deltaV = 0.0;
 		};
 

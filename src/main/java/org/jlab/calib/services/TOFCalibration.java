@@ -52,6 +52,7 @@ import org.jlab.detector.calib.utils.CalibrationConstantsView;
 import org.jlab.detector.view.DetectorListener;
 import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
+import org.jlab.groot.base.GStyle;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
@@ -174,7 +175,8 @@ ChangeListener {
 	JComboBox<String> fitList = new JComboBox<String>();
 	JComboBox<String> fitModeList = new JComboBox<String>();
 	private JTextField minEventsText = new JTextField(5);
-
+	private JTextField mipPeakText[] = {new JTextField(5),new JTextField(5),new JTextField(5)};
+	
 	public final static PrintStream oldStdout = System.out;
 
 	public static int DATA_TYPE = 0;
@@ -183,6 +185,9 @@ ChangeListener {
 	public static boolean dataTypeKnown = false;
 
 	public TOFCalibration() {
+		
+        GStyle.setGraphicsFrameLineWidth(1);
+        GStyle.getH1FAttributes().setLineWidth(1);
 
 		configFrame.setModalityType(ModalityType.APPLICATION_MODAL);
 		configure();
@@ -436,6 +441,13 @@ ChangeListener {
 			if (minEventsText.getText().compareTo("") != 0) {
 				engines[TDC_CONV].fitMinEvents = Integer.parseInt(minEventsText.getText());
 			}
+			
+			// Desired MIP peak
+			TofHVEventListener hvEngine = (TofHVEventListener) engines[HV];
+			for (int i=0; i<3; i++) {
+				hvEngine.EXPECTED_MIP_CHANNEL[i] = Integer.parseInt(mipPeakText[i].getText());
+			}
+			hvEngine.setConstraints();
 
 			System.out.println("");
 			System.out.println("Configuration settings - Tracking/General");
@@ -453,6 +465,8 @@ ChangeListener {
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
 			System.out.println("Slicefitter mode: "+fitModeList.getSelectedItem());
 			System.out.println("Minimum events per slice: "+minEventsText.getText());
+			System.out.println("Minimum events per slice: "+minEventsText.getText());
+			System.out.println("Desired MIP peak position 1a/1b/2: "+mipPeakText[0].getText()+"/"+mipPeakText[1].getText()+"/"+mipPeakText[2].getText());
 			System.out.println("");
 		}
 	}
@@ -871,7 +885,29 @@ ChangeListener {
 		c.gridx = 2;
 		c.gridy = 12;
 		//trPanel.add(new JLabel("Applied to subtracted nominal correction"),c);
-		trPanel.add(new JLabel("<html>Applied to subtracted nominal correction<br/> in time walk plot</html>"),c);
+		//trPanel.add(new JLabel("<html>Applied to subtracted nominal correction<br/> in time walk plot</html>"),c);
+		trPanel.add(new JLabel(""),c);
+		
+		// Desired MIP peak position
+		c.gridx = 0;
+		c.gridy = 13;
+		trPanel.add(new JLabel("Desired MIP peak position 1a/1b/2:"),c);
+		c.gridx = 1;
+		c.gridy = 13;
+		JPanel mipPeakPanel = new JPanel();
+		mipPeakText[0].addActionListener(this);
+		mipPeakText[0].setText("800");
+		mipPeakPanel.add(mipPeakText[0]);
+		mipPeakText[1].addActionListener(this);
+		mipPeakText[1].setText("2000");
+		mipPeakPanel.add(mipPeakText[1]);
+		mipPeakText[2].addActionListener(this);
+		mipPeakText[2].setText("800");
+		mipPeakPanel.add(mipPeakText[2]);
+		trPanel.add(mipPeakPanel,c);
+		c.gridx = 2;
+		c.gridy = 13;
+		trPanel.add(new JLabel(""),c);
 
 		JPanel butPage3 = new configButtonPanel(this, true, "Finish");
 		trOuterPanel.add(butPage3, BorderLayout.SOUTH);

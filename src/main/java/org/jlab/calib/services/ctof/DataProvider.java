@@ -9,9 +9,6 @@ import java.util.Map;
 import org.jlab.calib.services.TOFCalibrationEngine;
 //import org.jlab.calib.services.TOFCalibrationEngine;
 import org.jlab.calib.services.TOFPaddle;
-import org.jlab.calib.temp.BaseHit;
-import org.jlab.calib.temp.DetectorLocation;
-import org.jlab.calib.temp.IMatchedHit;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
@@ -115,9 +112,10 @@ public class DataProvider {
 		}
 
 		ArrayList<TOFPaddle>  paddleList = new ArrayList<TOFPaddle>();
-		
+		//System.out.println("Louise 118");
 		// Set the status flags
 		if (event.hasBank("CTOF::adc")) {
+			//System.out.println("Louise 121");
 			DataBank adcBank = event.getBank("CTOF::adc");
 			
 			for (int i = 0; i < adcBank.rows(); i++) {
@@ -131,8 +129,10 @@ public class DataProvider {
 					CTOFCalibrationEngine.adcRightStatus.add(0, 1,1,component);
 				}
 			}
+			//System.out.println("Louise 135");
 		}
 		if (event.hasBank("CTOF::tdc")) {
+			//System.out.println("Louise 138");
 			DataBank tdcBank = event.getBank("CTOF::tdc");
 			
 			for (int i = 0; i < tdcBank.rows(); i++) {
@@ -146,13 +146,14 @@ public class DataProvider {
 					CTOFCalibrationEngine.tdcRightStatus.add(0, 1,1,component);
 				}
 			}
+			//System.out.println("Louise 152");
 		}
 				
 
 		// Only continue if we have adc and tdc banks
-		if (!event.hasBank("CTOF::adc") || !event.hasBank("CTOF::tdc")) {
-			return paddleList;
-		}
+		//if (!event.hasBank("CTOF::adc") || !event.hasBank("CTOF::tdc")) {
+		//	return paddleList;
+		//}
 
 		DataBank  adcBank = event.getBank("CTOF::adc");
 		DataBank  tdcBank = event.getBank("CTOF::tdc");
@@ -160,6 +161,7 @@ public class DataProvider {
 
 		// iterate through hits bank getting corresponding adc and tdc
 		if (event.hasBank("CTOF::hits")) {
+			//System.out.println("Louise 167");
 			DataBank  hitsBank = event.getBank("CTOF::hits");
 
 			for (int hitIndex=0; hitIndex<hitsBank.rows(); hitIndex++) {
@@ -199,7 +201,7 @@ public class DataProvider {
 				paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
 								
 				//paddle.show();
-				
+				//System.out.println("Louise 207");
 				if (event.hasBank("CVTRec::Tracks") && event.hasBank("RUN::rf")) {
 
 					DataBank  trkBank = event.getBank("CVTRec::Tracks");
@@ -207,7 +209,7 @@ public class DataProvider {
 					
 					if (event.hasBank("RUN::config")) {
 						DataBank  configBank = event.getBank("RUN::config");
-						paddle.TRIGGER_BIT = configBank.getInt("trigger", 0);
+						paddle.TRIGGER_BIT = configBank.getLong("trigger", 0);
 					}
 					
 					// get the RF time with id=1
@@ -261,16 +263,20 @@ public class DataProvider {
 						}
 						
 					}
+					//System.out.println("Louise 269");
 				}
 
 //				paddle.show();
 //				System.out.println("Adding paddle to list");
 				if (paddle.includeInCalib()) {
+					//System.out.println("Louise 275");
 					paddleList.add(paddle);
+					//System.out.println("Louise 277");
 				}
 			}
 		}
 		else {
+			//System.out.println("Louise 280");
 			// no hits bank, so just use adc and tdc
 
 			// based on cosmic data
@@ -350,14 +356,14 @@ public class DataProvider {
 						paddle.ADC_TIMEL = adcTimeL;
 						paddle.ADC_TIMER = adcTimeR;
 
-						if (paddle.includeInCalib()) {
+						//if (paddle.includeInCalib()) {
 
 							if (test) {
 								System.out.println("Adding paddle "+component);
 								System.out.println(adcL + " "+adcR+" "+tdcL+" "+tdcR);
 							}
 							paddleList.add(paddle);							
-						}
+						//}
 					}
 				}
 			}

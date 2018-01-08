@@ -38,6 +38,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public final static int[] NUM_PADDLES = { 23, 62, 5 };
 	public final static int 	NUM_LAYERS = 3;
 	public final static String[] LAYER_NAME = { "FTOF1A", "FTOF1B", "FTOF2" };
+	public final static String[] LAYER_PREFIX = { "", "1a-", "1b-", "2-"};
 	public final static double UNDEFINED_OVERRIDE = Double.NEGATIVE_INFINITY;
 
 	// plot settings
