@@ -302,15 +302,27 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         if (result == JOptionPane.OK_OPTION) {
 
             double overrideValue = toDouble(panel.textFields[0].getText());
+            
+			int minP = paddle;
+			int maxP = paddle;
+			if (panel.applyLevel == panel.APPLY_P) {
+				// 
+			}
+			else {
+				minP = 1;
+				maxP = NUM_PADDLES[layer-1];
+			}
+			
+			for (int p=minP; p<=maxP; p++) {
+				// save the override values
+				Double[] consts = constants.getItem(sector, layer, p);
+				consts[LEFTRIGHT_OVERRIDE] = overrideValue;
 
-            // save the override values
-            Double[] consts = constants.getItem(sector, layer, paddle);
-            consts[LEFTRIGHT_OVERRIDE] = overrideValue;
+				fit(sector, layer, p);
 
-            fit(sector, layer, paddle);
-
-            // update the table
-            saveRow(sector,layer,paddle);
+				// update the table
+				saveRow(sector,layer,p);
+			}
             calib.fireTableDataChanged();
 
         }     

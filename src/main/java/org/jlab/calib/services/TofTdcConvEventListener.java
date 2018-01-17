@@ -49,7 +49,7 @@ import org.jlab.utils.groups.IndexedList;
 public class TofTdcConvEventListener extends TOFCalibrationEngine {
 
     public final int OVERRIDE_LEFT = 0;
-    public final int OVERRIDE_RIGHT = 0;
+    public final int OVERRIDE_RIGHT = 1;
 
     public final double EXPECTED_CONV = TOFPaddle.NS_PER_CH;
     public final double ALLOWED_DIFF = 0.1;
@@ -80,6 +80,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
     public TofTdcConvEventListener() {
 
         stepName = "TDC - Time";
+        histTitle = "TDC_CONV";
         fileNamePrefix = "FTOF_CALIB_TDC_CONV_";
         // get file name here so that each timer update overwrites it
         filename = nextFileName();
@@ -213,21 +214,19 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
                 for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 
                     // create all the histograms
-                    H2F histL = new H2F("tdcConvLeft","tdcConvLeft",50, TDC_MIN[layer], TDC_MAX[layer], 
+                    H2F histL = new H2F("tdcConvLeft",histTitle(sector,layer,paddle),
+                    		50, TDC_MIN[layer], TDC_MAX[layer], 
                                     50, -1.0, 1.0);
 
                     histL.setName("tdcConvLeft");
-                    histL.setTitle("RF offset vs TDC left : " + LAYER_NAME[layer_index] 
-                            + " Sector "+sector+" Paddle "+paddle);
                     histL.setTitleX("TDC Left");
                     histL.setTitleY("RF offset (ns)");
 
-                    H2F histR = new H2F("tdcConvRight","tdcConvRight",50, TDC_MIN[layer], TDC_MAX[layer], 
+                    H2F histR = new H2F("tdcConvRight",histTitle(sector,layer,paddle),
+                    				50, TDC_MIN[layer], TDC_MAX[layer], 
                                     50, -1.0, 1.0);
 
                     histR.setName("tdcConvRight");
-                    histR.setTitle("RF offset vs TDC right : " + LAYER_NAME[layer_index] 
-                            + " Sector "+sector+" Paddle "+paddle);
                     histR.setTitleX("TDC Right");
                     histR.setTitleY("RF offset (ns)");
                     
@@ -235,6 +234,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
                     F1D convFuncLeft = new F1D("convFuncLeft", "[a]+[b]*x", FIT_MIN[layer], FIT_MAX[layer]);
                     GraphErrors convGraphLeft = new GraphErrors("convGraphLeft");
                     convGraphLeft.setName("convGraphLeft");
+                    convGraphLeft.setTitle(histTitle(sector,layer,paddle));
                     convFuncLeft.setLineColor(FUNC_COLOUR);
                     convFuncLeft.setLineWidth(FUNC_LINE_WIDTH);
                     convGraphLeft.setMarkerSize(MARKER_SIZE);
@@ -243,6 +243,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
                     F1D convFuncRight = new F1D("convFuncRight", "[a]+[b]*x", FIT_MIN[layer], FIT_MAX[layer]);
                     GraphErrors convGraphRight = new GraphErrors("convGraphRight");
                     convGraphRight.setName("convGraphRight");
+                    convGraphRight.setTitle(histTitle(sector,layer,paddle));
                     convFuncRight.setLineColor(FUNC_COLOUR);
                     convFuncRight.setLineWidth(FUNC_LINE_WIDTH);
                     convGraphRight.setMarkerSize(MARKER_SIZE);
@@ -432,25 +433,33 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
 
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
+			int minS = sector;
+			int maxS = sector;
+			if (panel.applyLevel == panel.APPLY_P) {
+				// if fitting one paddle then show inspectFits view
+				showSlices = true;
+			}
+			else {
 				minP = 1;
 				maxP = NUM_PADDLES[layer-1];
 			}
-			else {
-				// if fitting one panel then show inspectFits view
-				showSlices = true;
+			if (panel.applyLevel == panel.APPLY_L) {
+				minS = 1;
+				maxS = 6;
 			}
 			
-			for (int p=minP; p<=maxP; p++) {
-				// save the override values
-				Double[] consts = constants.getItem(sector, layer, p);
-				consts[OVERRIDE_LEFT] = overrideValueL;
-				consts[OVERRIDE_RIGHT] = overrideValueR;
+			for (int s=minS; s<=maxS; s++) {
+				for (int p=minP; p<=maxP; p++) {
+					// save the override values
+					Double[] consts = constants.getItem(s, layer, p);
+					consts[OVERRIDE_LEFT] = overrideValueL;
+					consts[OVERRIDE_RIGHT] = overrideValueR;
 
-				fit(sector, layer, p, minRange, maxRange);
+					fit(s, layer, p, minRange, maxRange);
 
-				// update the table
-				saveRow(sector,layer,p);
+					// update the table
+					saveRow(s,layer,p);
+				}
 			}
             calib.fireTableDataChanged();
 

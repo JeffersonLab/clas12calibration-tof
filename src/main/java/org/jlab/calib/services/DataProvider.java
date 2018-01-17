@@ -307,6 +307,9 @@ public class DataProvider {
 				//System.out.println("Adding paddle to list");
 				if (paddle.includeInCalib()) {
 					paddleList.add(paddle);
+					if (test) {
+						paddle.show();
+					}
 //					System.out.println("Paddle added to list SLC "+paddle.getDescriptor().getSector()+paddle.getDescriptor().getLayer()+paddle.getDescriptor().getComponent());
 //					System.out.println("Particle ID "+paddle.PARTICLE_ID);
 //					System.out.println("position "+paddle.XPOS+" "+paddle.YPOS);

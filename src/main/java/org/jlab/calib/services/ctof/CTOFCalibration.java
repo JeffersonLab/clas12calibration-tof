@@ -650,7 +650,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 
     public void configure() {
         
-        configFrame.setSize(800, 800);
+        configFrame.setSize(800, 700);
         //configFrame.setSize(1000, 600);
         configFrame.setLocationRelativeTo(pane);
         configFrame.setDefaultCloseOperation(configFrame.DO_NOTHING_ON_CLOSE);

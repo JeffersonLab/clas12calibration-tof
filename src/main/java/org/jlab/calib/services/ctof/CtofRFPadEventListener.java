@@ -293,15 +293,27 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			double minRange = toDouble(panel.textFields[0].getText());
 			double maxRange = toDouble(panel.textFields[1].getText());
 			double override = toDouble(panel.textFields[2].getText());
+			
+			int minP = paddle;
+			int maxP = paddle;
+			if (panel.applyLevel == panel.APPLY_P) {
+				// 
+			}
+			else {
+				minP = 1;
+				maxP = NUM_PADDLES[layer-1];
+			}
+			
+			for (int p=minP; p<=maxP; p++) {
+				// save the override values
+				Double[] consts = constants.getItem(sector, layer, p);
+				consts[OFFSET_OVERRIDE] = override;
 
-			// save the override values
-			Double[] consts = constants.getItem(sector, layer, paddle);
-			consts[OFFSET_OVERRIDE] = override;
+				fit(sector, layer, p, minRange, maxRange);
 
-			fit(sector, layer, paddle, minRange, maxRange);
-
-			// update the table
-			saveRow(sector,layer,paddle);
+				// update the table
+				saveRow(sector,layer,p);
+			}
 			calib.fireTableDataChanged();
 
 		}     

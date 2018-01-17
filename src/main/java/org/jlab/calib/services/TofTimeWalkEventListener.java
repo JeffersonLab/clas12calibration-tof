@@ -72,6 +72,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	public TofTimeWalkEventListener() {
 		
 		stepName = "Timewalk";
+		histTitle = "TW";
 		fileNamePrefix = "FTOF_CALIB_TIMEWALK_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
@@ -207,24 +208,18 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					
 					// create all the histograms
 					H2F leftHist = new H2F("trLeftHist",
-							"Time residual vs ADC LEFT Sector "+sector+
-							" Paddle "+paddle,
+							"",
 							xbins[layer], ADC_MIN[layer], ADC_MAX[layer],
 							ybins, -1.5, 1.5);
 					H2F rightHist = new H2F("trRightHist",
-							"Time residual vs ADC RIGHT Sector "+sector+
-							" Paddle "+paddle,
+							"",
 							xbins[layer], ADC_MIN[layer], ADC_MAX[layer],
 							ybins, -1.5, 1.5);
 
-					leftHist.setTitle("Time residual vs ADC LEFT : " + LAYER_NAME[layer_index] 
-							+ " Sector "+sector+" Paddle "+paddle);
-					leftHist.setTitleX("ADC LEFT");
-					leftHist.setTitleY("Time residual (ns) % "+BEAM_BUCKET);
-					rightHist.setTitle("Time residual vs ADC RIGHT : " + LAYER_NAME[layer_index] 
-							+ " Sector "+sector+" Paddle "+paddle);
-					rightHist.setTitleX("ADC RIGHT");
-					rightHist.setTitleY("Time residual (ns)% "+BEAM_BUCKET);
+//					leftHist.setTitleX("ADC LEFT");
+					leftHist.setTitleY("#Delta t");
+//					rightHist.setTitleX("ADC RIGHT");
+					rightHist.setTitleY("#Delta t");
 
 					dg.addDataSet(leftHist, 0);
 					dg.addDataSet(rightHist, 1);
@@ -241,6 +236,9 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					
 					GraphErrors trLeftGraph = new GraphErrors("trLeftGraph");
 					trLeftGraph.setName("trLeftGraph");   
+					trLeftGraph.setTitle(histTitle(sector,layer,paddle));
+					trLeftGraph.setTitleX("ADC LEFT");
+					trLeftGraph.setTitleY("#Delta t");
 					
 					//F1D trRightFunc = new F1D("trRightFunc", "(([a]/(x^[b]))+[c])", FIT_MIN[layer], FIT_MAX[layer]);
 					//F1D trRightFunc = new F1D("trRightFunc", "(([a]/(x^[b]))-(40.0/(x^0.5))+[c])", FIT_MIN[layer], FIT_MAX[layer]);
@@ -253,6 +251,9 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					
 					GraphErrors trRightGraph = new GraphErrors("trRightGraph");
 					trRightGraph.setName("trRightGraph");
+					trRightGraph.setTitle(histTitle(sector,layer,paddle));
+					trRightGraph.setTitleY("#Delta t");
+					trRightGraph.setTitleX("ADC RIGHT");
 
 					trLeftFunc.setLineColor(FUNC_COLOUR);
 					trLeftFunc.setLineWidth(FUNC_LINE_WIDTH);
@@ -279,16 +280,18 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 						double n = NUM_OFFSET_HISTS;
 						double offset = i*(BEAM_BUCKET/n);
 						H2F offLeftHist = new H2F("offsetLeft",
-								"Time residual vs ADC Left Sector "+sector+
-								" Paddle "+paddle+" Offset = "+offset+"+ ns",
+								histTitle(sector,layer,paddle),
 								xbins[layer], ADC_MIN[layer], ADC_MAX[layer],
 								ybins, -1.5, 1.5);
+						offLeftHist.setTitleY("#Delta t");
+						offLeftHist.setTitleX("ADC LEFT");
 
 						H2F offRightHist = new H2F("offsetRight",
-								"Time residual vs ADC Right Sector "+sector+
-								" Paddle "+paddle+" Offset = "+offset+"+ ns",
+								histTitle(sector,layer,paddle),
 								xbins[layer], ADC_MIN[layer], ADC_MAX[layer],
 								ybins, -1.5, 1.5);
+						offRightHist.setTitleY("#Delta t");
+						offRightHist.setTitleX("ADC RIGHT");
 
 						H2F[] hists = {offLeftHist, offRightHist};
 						offsetHists.add(hists, sector,layer,paddle,i);
@@ -608,29 +611,37 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
+			int minS = sector;
+			int maxS = sector;
+			if (panel.applyLevel == panel.APPLY_P) {
+				// if fitting one paddle then show inspectFits view
+				showSlices = true;
+			}
+			else {
 				minP = 1;
 				maxP = NUM_PADDLES[layer-1];
 			}
-			else {
-				// if fitting one panel then show inspectFits view
-				showSlices = true;
+			if (panel.applyLevel == panel.APPLY_L) {
+				minS = 1;
+				maxS = 6;
 			}
 			
-			for (int p=minP; p<=maxP; p++) {
-				// save the override values
-				Double[] consts = constants.getItem(sector, layer, p);
-				consts[LAMBDA_LEFT_OVERRIDE] = overrideLL;
-				consts[TW1_LEFT_OVERRIDE] = overrideTW1L;
-				consts[TW2_LEFT_OVERRIDE] = overrideTW2L;
-				consts[LAMBDA_RIGHT_OVERRIDE] = overrideLR;
-				consts[TW1_RIGHT_OVERRIDE] = overrideTW1R;
-				consts[TW2_RIGHT_OVERRIDE] = overrideTW2R;
-			
-				fit(sector, layer, p, minRange, maxRange);
+			for (int s=minS; s<=maxS; s++) {
+				for (int p=minP; p<=maxP; p++) {
+					// save the override values
+					Double[] consts = constants.getItem(s, layer, p);
+					consts[LAMBDA_LEFT_OVERRIDE] = overrideLL;
+					consts[TW1_LEFT_OVERRIDE] = overrideTW1L;
+					consts[TW2_LEFT_OVERRIDE] = overrideTW2L;
+					consts[LAMBDA_RIGHT_OVERRIDE] = overrideLR;
+					consts[TW1_RIGHT_OVERRIDE] = overrideTW1R;
+					consts[TW2_RIGHT_OVERRIDE] = overrideTW2R;
 
-				// update the table
-				saveRow(sector,layer,p);
+					fit(s, layer, p, minRange, maxRange);
+
+					// update the table
+					saveRow(s,layer,p);
+				}
 			}
 			calib.fireTableDataChanged();
 
@@ -738,10 +749,10 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	@Override
 	public void setPlotTitle(int sector, int layer, int paddle) {
 		// reset hist title as may have been set to null by show all 
-		dataGroups.getItem(sector,layer,paddle).getGraph("trLeftGraph").setTitleX("ADC LEFT");
-		dataGroups.getItem(sector,layer,paddle).getGraph("trLeftGraph").setTitleY("Time residual (ns)");
-		dataGroups.getItem(sector,layer,paddle).getGraph("trRightGraph").setTitleX("ADC LEFT");
-		dataGroups.getItem(sector,layer,paddle).getGraph("trRightGraph").setTitleY("Time residual (ns)");
+//		dataGroups.getItem(sector,layer,paddle).getGraph("trLeftGraph").setTitleX("ADC LEFT");
+//		dataGroups.getItem(sector,layer,paddle).getGraph("trLeftGraph").setTitleY("Time residual (ns)");
+//		dataGroups.getItem(sector,layer,paddle).getGraph("trRightGraph").setTitleX("ADC LEFT");
+//		dataGroups.getItem(sector,layer,paddle).getGraph("trRightGraph").setTitleY("Time residual (ns)");
 		//System.out.println("Setting TW graph titles");
 	}
 
@@ -751,8 +762,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		if (showPlotType == "TW_LEFT") {
 			GraphErrors graph = dataGroups.getItem(sector,layer,paddle).getGraph("trLeftGraph");
 			if (graph.getDataSize(0) != 0) {
-				graph.setTitleX("");
-				graph.setTitleY("");
+				//graph.setTitleX("");
+				//graph.setTitleY("");
 				canvas.draw(graph);
 				canvas.draw(dataGroups.getItem(sector,layer,paddle).getF1D("trLeftFunc"), "same");
 			}
@@ -760,8 +771,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		else {
 			GraphErrors graph = dataGroups.getItem(sector,layer,paddle).getGraph("trRightGraph");
 			if (graph.getDataSize(0) != 0) {
-				graph.setTitleX("");
-				graph.setTitleY("");
+				//graph.setTitleX("");
+				//graph.setTitleY("");
 				canvas.draw(graph);
 				canvas.draw(dataGroups.getItem(sector,layer,paddle).getF1D("trRightFunc"), "same");
 			}
@@ -786,9 +797,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			//smfunc = dataGroups.getItem(sector,layer,paddle).getF1D("smRightFunc");
 		}
 
-		hist.setTitle("Paddle "+paddle);
-		hist.setTitleX("");
-		hist.setTitleY("");
+		//hist.setTitleX("");
+		//hist.setTitleY("");
 		canvas.draw(hist);    
 		canvas.draw(func, "same");
 		//canvas.draw(smfunc, "same");
@@ -873,7 +883,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					e.printStackTrace();
 				}
 
-				leftGraph.setTitle("Chi squared "+nomFunc.getChiSquare());
+				//leftGraph.setTitle("Chi squared "+nomFunc.getChiSquare());
 				//System.out.println("Chi Squared "+i+nomFunc.getChiSquare());
 				leftCanvas.draw(leftGraph);
 				leftCanvas.draw(nomFunc, "same");
@@ -896,7 +906,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					e.printStackTrace();
 				}
 
-				rightGraph.setTitle("Chi squared "+nomFunc.getChiSquare());
+				//rightGraph.setTitle("Chi squared "+nomFunc.getChiSquare());
 				rightCanvas.draw(rightGraph);
 				rightCanvas.draw(nomFunc, "same");
 				

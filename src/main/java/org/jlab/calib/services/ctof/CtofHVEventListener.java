@@ -375,9 +375,12 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
+			if (panel.applyLevel == panel.APPLY_P) {
+				// 
+			}
+			else {
 				minP = 1;
-				maxP = NUM_PADDLES[0];
+				maxP = NUM_PADDLES[layer-1];
 			}
 
 			for (int p=minP; p<=maxP; p++) {

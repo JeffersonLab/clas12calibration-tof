@@ -341,29 +341,30 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
             double overrideUnc = toDouble(panel.textFields[5].getText());
             double overrideLR = toDouble(panel.textFields[6].getText());
             
-            int minP = paddle;
-            int maxP = paddle;
-            if (panel.applyToAll) {
-                minP = 1;
-                maxP = NUM_PADDLES[0];
-            }
-            else {
-                // if fitting one panel then show inspectFits view
-                showSlices = true;
-            }
+			int minP = paddle;
+			int maxP = paddle;
+			if (panel.applyLevel == panel.APPLY_P) {
+				// if fitting one paddle then show inspectFits view
+				showSlices = true;
+			}
+			else {
+				minP = 1;
+				maxP = NUM_PADDLES[layer-1];
+			}
 
-            for (int p=minP; p<=maxP; p++) {
-                // save the override values
-                Double[] consts = constants.getItem(sector, layer, p);
-                consts[VEFF_OVERRIDE] = overrideValue;
-                consts[VEFF_UNC_OVERRIDE] = overrideUnc;
-                consts[VEFF_LR_OVERRIDE] = overrideLR;
+			for (int p=minP; p<=maxP; p++) {
+				// save the override values
+				Double[] consts = constants.getItem(sector, layer, p);
+				consts[VEFF_OVERRIDE] = overrideValue;
+				consts[VEFF_UNC_OVERRIDE] = overrideUnc;
+				consts[VEFF_LR_OVERRIDE] = overrideLR;
 
-                fit(sector, layer, p, minRange, maxRange);
+				fit(sector, layer, p, minRange, maxRange);
 
-                // update the table
-                saveRow(sector,layer,p);
-            }
+				// update the table
+				saveRow(sector,layer,p);
+			}
+			
             calib.fireTableDataChanged();
 
         }     

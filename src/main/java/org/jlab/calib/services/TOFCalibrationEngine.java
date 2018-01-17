@@ -58,6 +58,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public String stepName = "Unknown";
 	public String fileNamePrefix = "Unknown";
 	public String filename = "Unknown.txt";
+	public String histTitle = "Unknown";
 
 	// configuration
 	public int calDBSource = 0;
@@ -180,51 +181,54 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 		// overridden in calibration step class
 	}
 
-	public void saveCounterStatus() {
-
-		System.out.println("sector layer component stat_left stat_right");
-		for (int sector = 1; sector <= 6; sector++) {
-			for (int layer = 1; layer <= 3; layer++) {
-				int layer_index = layer - 1;
-				for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
-
-					int adcLStat = adcLeftStatus.getItem(sector,layer,paddle);
-					int adcRStat = adcRightStatus.getItem(sector,layer,paddle);
-					int tdcLStat = tdcLeftStatus.getItem(sector,layer,paddle);
-					int tdcRStat = tdcRightStatus.getItem(sector,layer,paddle);					
-					int counterStatusLeft = 0;
-					int counterStatusRight = 0;
-
-					if (adcLStat==1 && tdcLStat==1) {
-						counterStatusLeft = 3;
-					}
-					else if (adcLStat==1) {
-						counterStatusLeft = 1;
-					}
-					else if (tdcLStat==1) {
-						counterStatusLeft = 2;
-					}
-
-					if (adcRStat==1 && tdcRStat==1) {
-						counterStatusRight = 3;
-					}
-					else if (adcRStat==1) {
-						counterStatusRight = 1;
-					}
-					else if (tdcRStat==1) {
-						counterStatusRight = 2;
-					}
-
-					System.out.println(
-							sector+" "+
-									layer+" "+
-									paddle+" "+
-									counterStatusLeft+" "+
-									counterStatusRight+" ");
-				}
-			}
-		}
+	public void saveCounterStatus(String filename) {
+		// overridden in HV engine
 	}
+//	public void saveCounterStatus() {
+//
+//		System.out.println("sector layer component stat_left stat_right");
+//		for (int sector = 1; sector <= 6; sector++) {
+//			for (int layer = 1; layer <= 3; layer++) {
+//				int layer_index = layer - 1;
+//				for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
+//
+//					int adcLStat = adcLeftStatus.getItem(sector,layer,paddle);
+//					int adcRStat = adcRightStatus.getItem(sector,layer,paddle);
+//					int tdcLStat = tdcLeftStatus.getItem(sector,layer,paddle);
+//					int tdcRStat = tdcRightStatus.getItem(sector,layer,paddle);					
+//					int counterStatusLeft = 0;
+//					int counterStatusRight = 0;
+//
+//					if (adcLStat==1 && tdcLStat==1) {
+//						counterStatusLeft = 3;
+//					}
+//					else if (adcLStat==1) {
+//						counterStatusLeft = 1;
+//					}
+//					else if (tdcLStat==1) {
+//						counterStatusLeft = 2;
+//					}
+//
+//					if (adcRStat==1 && tdcRStat==1) {
+//						counterStatusRight = 3;
+//					}
+//					else if (adcRStat==1) {
+//						counterStatusRight = 1;
+//					}
+//					else if (tdcRStat==1) {
+//						counterStatusRight = 2;
+//					}
+//
+//					System.out.println(
+//							sector+" "+
+//									layer+" "+
+//									paddle+" "+
+//									counterStatusLeft+" "+
+//									counterStatusRight+" ");
+//				}
+//			}
+//		}
+//	}
 
 	public void save() {
 
@@ -444,6 +448,10 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 
 	public void setPlotTitle(int sector, int layer, int paddle) {
 		// Overridden in calibration step classes
+	}
+	
+	public String histTitle(int sector, int layer, int paddle) {
+		return "S"+sector+" "+histTitle+" "+LAYER_PREFIX[layer]+paddle;
 	}
 
 	public void drawPlots(int sector, int layer, int paddle,

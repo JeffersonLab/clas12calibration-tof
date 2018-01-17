@@ -223,9 +223,17 @@ public class TOFPaddle {
 		return p2pAverageHitTime() + rfpad();
 	}
 
+	public double vertexCorr() {
+		if (TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES) {
+			return VERTEX_Z/29.98;
+		}
+		else {
+			return 0.0;
+		}
+	}
 
 	public double refTime() {
-		return this.RF_TIME - this.startTime();
+		return this.RF_TIME - (this.startTime() - vertexCorr());
 	}
 
 	public double refTimeCorr() {
@@ -330,7 +338,7 @@ public class TOFPaddle {
 
 		double dtL = tdcToTime(TDCL) - (lr/2) + rfpad() 
 				- ((0.5*paddleLength() + paddleY())/this.veff())
-				- (PATH_LENGTH/(beta*29.98))
+				- (PATH_LENGTH/(beta*29.98)) - vertexCorr()
 				- this.RF_TIME;
 
 		// subtract the correction based on previous calibration values
@@ -353,7 +361,7 @@ public class TOFPaddle {
 
 		double dtR = tdcToTime(TDCR) + (lr/2) + rfpad()
 				- ((0.5*paddleLength() - paddleY())/this.veff())
-				- (PATH_LENGTH/(beta*29.98))
+				- (PATH_LENGTH/(beta*29.98)) - vertexCorr()
 				- this.RF_TIME;
 
 		// subtract the correction based on previous calibration values
@@ -606,7 +614,7 @@ public class TOFPaddle {
 		System.out.println("BETA "+BETA+" P "+P+" RF_TIME "+RF_TIME+" RECON_TIME "+RECON_TIME);
 		System.out.println("VERTEX_Z "+VERTEX_Z+" TRACK_REDCHI2 "+TRACK_REDCHI2+" CHARGE "+CHARGE+" TRIGGER_BIT "+TRIGGER_BIT);
 		System.out.println("goodTrackFound "+goodTrackFound()+" chargeMatch "+chargeMatch());
-		System.out.println("refTime "+refTime()+" startTime "+startTime()+" averageHitTime "+p2pAverageHitTime());
+		System.out.println("refTime "+refTime()+" startTime "+startTime()+" averageHitTime "+p2pAverageHitTime()+" vertexCorr "+vertexCorr());
 		System.out.println("tofTimeRFCorr "+tofTimeRFCorr()+" startTimeRFCorr "+startTimeRFCorr()+" startTimeP2PCorr "+startTimeP2PCorr());
 		System.out.println("rfpad "+rfpad()+" p2p "+p2p()+" lamL "+lamL()+" tw1L "+tw1L()+" tw2L "+tw2L()+" lamR "+lamR()+" tw1R "+tw1R()+" tw2R "+tw2R()+" LR "+leftRightAdjustment()+" veff "+veff());
 		System.out.println("paddleLength "+paddleLength()+" paddleY "+paddleY());

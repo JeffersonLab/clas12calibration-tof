@@ -64,6 +64,7 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 	public TofAttenEventListener() {
 
 		stepName = "Attenuation Length";
+		histTitle = "ATTEN";
 		fileNamePrefix = "FTOF_CALIB_ATTEN_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
@@ -108,12 +109,9 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 					int numBins = (int) (paddleLength(sector,layer,paddle)*0.6);  // 1 bin per 2cm + 10% either side
 					double min = paddleLength(sector,layer,paddle) * -0.6;
 					double max = paddleLength(sector,layer,paddle) * 0.6;
-					H2F hist = new H2F("atten", "Log Ratio vs Position : Paddle "
-							+ paddle, numBins, min, max, 100, -3.0, 3.0);
+					H2F hist = new H2F("atten", histTitle(sector,layer,paddle), numBins, min, max, 100, -3.0, 3.0);
 
 					hist.setName("atten");
-					hist.setTitle("Log Ratio vs Position : " + LAYER_NAME[layer_index] 
-							+ " Sector "+sector+" Paddle "+paddle);
 					hist.setTitleX("Position (cm)");
 					hist.setTitleY("ln(ADC R / ADC L)");
 
@@ -122,6 +120,7 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 					attenFunc.setParameter(1, 2.0/expectedAttlen(sector,layer,paddle));
 					GraphErrors meanGraph = new GraphErrors("meanGraph");
 					meanGraph.setName("meanGraph");
+					meanGraph.setTitle(histTitle(sector,layer,paddle));
 					attenFunc.setLineColor(FUNC_COLOUR);
 					attenFunc.setLineWidth(FUNC_LINE_WIDTH);
 					meanGraph.setMarkerSize(MARKER_SIZE);
@@ -308,27 +307,35 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 			
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
+			int minS = sector;
+			int maxS = sector;
+			if (panel.applyLevel == panel.APPLY_P) {
+				// if fitting one paddle then show inspectFits view
+				showSlices = true;
+			}
+			else {
 				minP = 1;
 				maxP = NUM_PADDLES[layer-1];
 			}
-			else {
-				// if fitting one panel then show inspectFits view
-				showSlices = true;
+			if (panel.applyLevel == panel.APPLY_L) {
+				minS = 1;
+				maxS = 6;
 			}
 
-			for (int p=minP; p<=maxP; p++) {			
+			for (int s=minS; s<=maxS; s++) {
+				for (int p=minP; p<=maxP; p++) {			
 
-				// save the override values
-				Double[] consts = constants.getItem(sector, layer, p);
-				consts[ATTEN_OVERRIDE] = overrideValue;
-				consts[ATTEN_UNC_OVERRIDE] = overrideUnc;
-				consts[OFFSET_OVERRIDE] = overrideOffset;
+					// save the override values
+					Double[] consts = constants.getItem(s, layer, p);
+					consts[ATTEN_OVERRIDE] = overrideValue;
+					consts[ATTEN_UNC_OVERRIDE] = overrideUnc;
+					consts[OFFSET_OVERRIDE] = overrideOffset;
 
-				fit(sector, layer, p, minRange, maxRange);
+					fit(s, layer, p, minRange, maxRange);
 
-				// update the table
-				saveRow(sector,layer,p);
+					// update the table
+					saveRow(s,layer,p);
+				}
 			}
 			calib.fireTableDataChanged();
 		}	 

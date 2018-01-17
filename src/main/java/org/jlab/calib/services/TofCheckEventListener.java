@@ -38,6 +38,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 	public TofCheckEventListener() {
 
 		stepName = "Check";
+		histTitle = "";
 		fileNamePrefix = "FTOF_CALIB_CHECK_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
@@ -76,23 +77,23 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 
 					// create all the histograms and functions
 					H2F momHist = 
-							new H2F("momHist","Sector "+sector+" Layer "+" Paddle "+paddle,
-									100, 0.5, 5.0,
+							new H2F("momHist",histTitle(sector,layer,paddle),
+									100, 0.2, 5.0,
 									160, -2.0, 2.0);
 					momHist.setTitleX("p (GeV)");
 					momHist.setTitleY("delta T (ns)");
 					dg.addDataSet(momHist, 0);
 
 					H2F vzHist = 
-							new H2F("vzHist","Sector "+sector+" Layer "+" Paddle "+paddle,
-									100, 0.0, 10.0,
+							new H2F("vzHist",histTitle(sector,layer,paddle),
+									100, -20.0, 20.0,
 									160, -2.0, 2.0);
 					vzHist.setTitleX("vz (cm)");
 					vzHist.setTitleY("delta T (ns)");
 					dg.addDataSet(vzHist, 1);
 					
 					H2F hitHist = 
-							new H2F("hitHist","Sector "+sector+" Layer "+" Paddle "+paddle,
+							new H2F("hitHist",histTitle(sector,layer,paddle),
 									100, -paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
 									160, -2.0, 2.0);
 					hitHist.setTitleX("hit position (cm)");
@@ -100,15 +101,15 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					dg.addDataSet(hitHist, 2);
 
 					H2F pathHist = 
-							new H2F("pathHist","Sector "+sector+" Layer "+" Paddle "+paddle,
-									100, 660, 740,
+							new H2F("pathHist",histTitle(sector,layer,paddle),
+									100, 630, 740,
 									160, -2.0, 2.0);
 					pathHist.setTitleX("path (cm)");
 					pathHist.setTitleY("delta T (ns)");
 					dg.addDataSet(pathHist, 3);
 
 					H2F adcLHist = 
-							new H2F("adcLHist","Sector "+sector+" Layer "+" Paddle "+paddle,
+							new H2F("adcLHist",histTitle(sector,layer,paddle),
 									100, ADC_MIN[layer], ADC_MAX[layer],
 									160, -2.0, 2.0);
 					adcLHist.setTitleX("ADC Left");
@@ -116,7 +117,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					dg.addDataSet(adcLHist, 4);
 
 					H2F adcRHist = 
-							new H2F("adcRHist","Sector "+sector+" Layer "+" Paddle "+paddle,
+							new H2F("adcRHist",histTitle(sector,layer,paddle),
 									100, ADC_MIN[layer], ADC_MAX[layer],
 									160, -2.0, 2.0);
 					adcRHist.setTitleX("ADC Right");
@@ -232,7 +233,6 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 			hist = dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist");
 		}
 		
-		hist.setTitle("Paddle "+paddle);
 		hist.setTitleX("");
 		hist.setTitleY("");
 		canvas.draw(hist);    

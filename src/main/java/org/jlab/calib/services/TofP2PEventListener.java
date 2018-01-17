@@ -37,6 +37,7 @@ public class TofP2PEventListener extends TOFCalibrationEngine {
 	public TofP2PEventListener() {
 
 		stepName = "P2P";
+		histTitle = "P2P";
 		fileNamePrefix = "FTOF_CALIB_P2P_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
@@ -148,7 +149,7 @@ public class TofP2PEventListener extends TOFCalibrationEngine {
 
 					// create all the histograms and functions
 					H1F vertexDiffHist = 
-							new H1F("vertexDiffHist","Vertex time difference Sector "+sector+" Paddle "+paddle, 
+							new H1F("vertexDiffHist",histTitle(sector,layer,paddle), 
 									99,-49.5*BEAM_BUCKET,49.5*BEAM_BUCKET);
 					vertexDiffHist.setTitleX("#Delta t (vertex) (ns)");
 					dg.addDataSet(vertexDiffHist, 0);
@@ -219,18 +220,29 @@ public class TofP2PEventListener extends TOFCalibrationEngine {
 
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
+			int minS = sector;
+			int maxS = sector;
+			if (panel.applyLevel == panel.APPLY_P) {
+				//
+			}
+			else {
 				minP = 1;
 				maxP = NUM_PADDLES[layer-1];
 			}
+			if (panel.applyLevel == panel.APPLY_L) {
+				minS = 1;
+				maxS = 6;
+			}
 
-			for (int p=minP; p<=maxP; p++) {
-				// save the override values
-				Double[] consts = constants.getItem(sector, layer, p);
-				consts[OFFSET_OVERRIDE] = override;
+			for (int s=minS; s<=maxS; s++) {
+				for (int p=minP; p<=maxP; p++) {
+					// save the override values
+					Double[] consts = constants.getItem(s, layer, p);
+					consts[OFFSET_OVERRIDE] = override;
 
-				// update the table
-				saveRow(sector,layer,p);
+					// update the table
+					saveRow(s,layer,p);
+				}
 			}
 			calib.fireTableDataChanged();			
 
@@ -270,7 +282,7 @@ public class TofP2PEventListener extends TOFCalibrationEngine {
 	public void drawPlots(int sector, int layer, int paddle, EmbeddedCanvas canvas) {
 
 		H1F hist = dataGroups.getItem(sector,layer,paddle).getH1F("vertexDiffHist");
-		hist.setTitle("Paddle "+paddle);
+		//hist.setTitle("Paddle "+paddle);
 		hist.setTitleX("");
 		hist.setTitleY("");
 		canvas.draw(hist); 
@@ -290,25 +302,43 @@ public class TofP2PEventListener extends TOFCalibrationEngine {
 
 		int layer_index = layer-1;
 		double[] paddleNumbers = new double[NUM_PADDLES[layer_index]];
-		double[] paddleUncs = new double[NUM_PADDLES[layer_index]];
-		double[] values = new double[NUM_PADDLES[layer_index]];
-		double[] valueUncs = new double[NUM_PADDLES[layer_index]];
+		double[] offsets = new double[NUM_PADDLES[layer_index]];
+		double[] zeroUncs = new double[NUM_PADDLES[layer_index]];
+		double[] centroids = new double[NUM_PADDLES[layer_index]];
 
 		for (int p = 1; p <= NUM_PADDLES[layer_index]; p++) {
 
 			paddleNumbers[p - 1] = (double) p;
-			paddleUncs[p - 1] = 0.0;
-			values[p - 1] = getOffset(sector, layer, p);
-			valueUncs[p - 1] = 0.0;
+			offsets[p - 1] = getOffset(sector, layer, p);
+			H1F dtHist = dataGroups.getItem(sector,layer,p).getH1F("vertexDiffHist");
+			if (dtHist.getEntries() != 0) {
+				int maxBin = dtHist.getMaximumBin();
+				centroids[p - 1] = dtHist.getXaxis().getBinCenter(maxBin);
+			}
+			else {
+				centroids[p - 1] = 0.0;
+			}
+				
+			zeroUncs[p - 1] = 0.0;
 		}
 
-		GraphErrors summ = new GraphErrors("summ", paddleNumbers,
-				values, paddleUncs, valueUncs);
-		summ.setMarkerSize(MARKER_SIZE);
-		summ.setLineThickness(MARKER_LINE_WIDTH);
+		GraphErrors offsetSumm = new GraphErrors("offsetSumm", paddleNumbers,
+				offsets, zeroUncs, zeroUncs);
+		offsetSumm.setTitleX("Paddle Number");
+		offsetSumm.setTitleY("New P2P value");
+		offsetSumm.setMarkerSize(MARKER_SIZE);
+		offsetSumm.setLineThickness(MARKER_LINE_WIDTH);
 
-		DataGroup dg = new DataGroup(1,1);
-		dg.addDataSet(summ, 0);
+		GraphErrors centroidSumm = new GraphErrors("centroidSumm", paddleNumbers,
+				centroids, zeroUncs, zeroUncs);
+		centroidSumm.setTitleX("Paddle Number");
+		centroidSumm.setTitleY("Centroid");
+		centroidSumm.setMarkerSize(MARKER_SIZE);
+		centroidSumm.setLineThickness(MARKER_LINE_WIDTH);
+
+		DataGroup dg = new DataGroup(2,1);
+		dg.addDataSet(offsetSumm, 0);
+		dg.addDataSet(centroidSumm, 1);
 		return dg;
 
 	}

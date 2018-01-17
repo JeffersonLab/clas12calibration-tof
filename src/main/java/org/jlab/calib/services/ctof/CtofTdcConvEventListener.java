@@ -381,13 +381,13 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
-				minP = 1;
-				maxP = NUM_PADDLES[layer-1];
+			if (panel.applyLevel == panel.APPLY_P) {
+				// if fitting one paddle then show inspectFits view
+				showSlices = true;
 			}
 			else {
-				// if fitting one panel then show inspectFits view
-				showSlices = true;
+				minP = 1;
+				maxP = NUM_PADDLES[layer-1];
 			}
 
 			for (int p=minP; p<=maxP; p++) {
@@ -401,6 +401,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 				// update the table
 				saveRow(sector,layer,p);
 			}
+
 			calib.fireTableDataChanged();
 
 		}     

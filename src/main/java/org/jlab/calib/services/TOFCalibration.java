@@ -13,6 +13,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -147,6 +151,13 @@ ChangeListener {
 	public static double minV = -9999.0;
 	private JTextField maxVText = new JTextField(5);
 	public static double maxV = 9999.0;
+	
+	// Vertex time correction setting
+	JComboBox<String> vertexCorrList = new JComboBox<String>();
+	public static int vertexCorr = 0;
+	public final static int VERTEX_CORR_YES = 0;
+	public final static int VERTEX_CORR_NO = 1;
+	
 	private JTextField minPText = new JTextField(5);
 	public static double minP = 0.0;
 	JComboBox<String> trackChargeList = new JComboBox<String>();
@@ -170,8 +181,6 @@ ChangeListener {
 	public final static int TW_POS_INDEP = 0;
 	public final static int TW_POS_DEP = 1;
 
-
-
 	JComboBox<String> fitList = new JComboBox<String>();
 	JComboBox<String> fitModeList = new JComboBox<String>();
 	private JTextField minEventsText = new JTextField(5);
@@ -186,6 +195,12 @@ ChangeListener {
 
 	public TOFCalibration() {
 		
+		GStyle.getAxisAttributesX().setLabelFontName("Avenir");
+        GStyle.getAxisAttributesY().setLabelFontName("Avenir");
+        GStyle.getAxisAttributesZ().setLabelFontName("Avenir");
+        GStyle.getAxisAttributesX().setTitleFontName("Avenir");
+        GStyle.getAxisAttributesY().setTitleFontName("Avenir");
+        GStyle.getAxisAttributesZ().setTitleFontName("Avenir");
         GStyle.setGraphicsFrameLineWidth(1);
         GStyle.getH1FAttributes().setLineWidth(1);
 
@@ -330,6 +345,8 @@ ChangeListener {
 			engine.writeFile(outputFilename);
 			JOptionPane.showMessageDialog(new JPanel(),
 					engine.stepName + " calibration values written to "+outputFilename);
+			// update the files that contain the snapshot of latest values saved
+			writeFiles();
 		}
 
 		// config settings
@@ -400,6 +417,7 @@ ChangeListener {
 			if (maxVText.getText().compareTo("") != 0) {
 				maxV = Double.parseDouble(maxVText.getText());
 			}    
+			vertexCorr = vertexCorrList.getSelectedIndex();
 			if (minPText.getText().compareTo("") != 0) {
 				minP = Double.parseDouble(minPText.getText());
 			}
@@ -455,6 +473,7 @@ ChangeListener {
 			System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
 			System.out.println("Minimum vertex z: "+minV);
 			System.out.println("Maximum vertex z: "+maxV);
+			System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(vertexCorr));
 			System.out.println("Minimum momentum from tracking (GeV): "+minP);
 			System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
 			System.out.println("PID: "+pidList.getItemAt(trackPid));
@@ -515,8 +534,73 @@ ChangeListener {
 				}
 			}
 		}
+		if (event.getType()==DataEventType.EVENT_STOP) {
+			writeFiles();
+		}
 	}
+	
+	private void writeFiles() {
+		// write current status of all files
+		// hv
+		engines[HV].writeFile("FTOF_CALIB_GAIN_BALANCE.txt");
+		// atten
+		engines[ATTEN].writeFile("FTOF_CALIB_ATTENUATION.txt");
+		// status
+		engines[HV].saveCounterStatus("FTOF_CALIB_STATUS.txt");
+		// effective velocity
+		engines[VEFF].writeFile("FTOF_CALIB_EFFECTIVE_VELOCITY.txt");
+		// time walk
+		engines[TW].writeFile("FTOF_CALIB_TIME_WALK.txt");
+		// tres
+		TofRFPadEventListener rfpadEng = (TofRFPadEventListener) engines[RFPAD];
+		rfpadEng.writeSigmaFile("FTOF_CALIB_TRES.txt");
+		// time offsets
+		writeTimeOffsets("FTOF_CALIB_TIME_OFFSETS.txt");
+		// TDC conv
+		engines[TDC_CONV].writeFile("FTOF_CALIB_TDC_CONV.txt");
+		//
+	}
+	
+	public void writeTimeOffsets(String filename) {
+		
+		try { 
+			
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+			
+			// get the engines
+			TofLeftRightEventListener lrEng = (TofLeftRightEventListener) engines[LEFT_RIGHT];
+			TofRFPadEventListener rfpadEng = (TofRFPadEventListener) engines[RFPAD];
+			TofP2PEventListener p2pEng = (TofP2PEventListener) engines[P2P];
+			
+			for (int sector = 1; sector <= 6; sector++) {
+				for (int layer = 1; layer <= 3; layer++) {
+					int layer_index = layer - 1;
+					for (int paddle = 1; paddle <= TOFCalibrationEngine.NUM_PADDLES[layer_index]; paddle++) {
+						String line = new String();
+						line = sector+" "+layer+" "+paddle
+								+" "+new DecimalFormat("0.000").format(lrEng.getCentroid(sector, layer, paddle))
+								+" "+new DecimalFormat("0.000").format(rfpadEng.getOffset(sector, layer, paddle))
+								+" "+new DecimalFormat("0.000").format(p2pEng.getOffset(sector, layer, paddle));
+						outputBw.write(line);
+						outputBw.newLine();
+					}
+				}
+			}
 
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error writing file '" );                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}
+
+	}	
+	
 	private String todayString() {
 		Date today = new Date();
 		DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
@@ -620,7 +704,7 @@ ChangeListener {
 			this.canvas.clear();
 			this.canvas.draw(dataGroup);
 			getSelectedEngine().rescaleGraphs(canvas, selectedSector, selectedLayer, selectedPaddle);
-			canvas.getPad(0).setTitle(TOFCalibrationEngine.LAYER_NAME[selectedLayer-1]+" Sector "+selectedSector+" Paddle "+selectedPaddle);
+			//canvas.getPad(0).setTitle(TOFCalibrationEngine.LAYER_NAME[selectedLayer-1]+" Sector "+selectedSector+" Paddle "+selectedPaddle);
 			this.canvas.update();
 		} else {
 			System.out.println(" ERROR: can not find the data group");
@@ -686,7 +770,7 @@ ChangeListener {
 
 	public void configure() {
 
-		configFrame.setSize(900, 800);
+		configFrame.setSize(900, 730);
 		//configFrame.setSize(1000, 600);
 		configFrame.setLocationRelativeTo(pane);
 		configFrame.setDefaultCloseOperation(configFrame.DO_NOTHING_ON_CLOSE);
@@ -709,7 +793,7 @@ ChangeListener {
 		JPanel butPage1 = new configButtonPanel(this, false, "Next");
 		stepOuterPanel.add(butPage1, BorderLayout.SOUTH);
 
-		configPane.add("Select steps", stepOuterPanel);    
+		//configPane.add("Select steps", stepOuterPanel);    
 
 		// Previous calibration values
 		JPanel confOuterPanel = new JPanel(new BorderLayout());
@@ -725,12 +809,13 @@ ChangeListener {
 			confPanel.add(engPanels[i-3]);
 		}
 
-		JPanel butPage2 = new configButtonPanel(this, true, "Next");
+		JPanel butPage2 = new configButtonPanel(this, false, "Next");
 		confOuterPanel.add(confPanel, BorderLayout.NORTH);
 		confOuterPanel.add(butPage2, BorderLayout.SOUTH);
 
 		configPane.add("Previous calibration values", confOuterPanel);
 
+		int y=0;
 		// Tracking options
 		JPanel trOuterPanel = new JPanel(new BorderLayout());
 		JPanel trPanel = new JPanel(new GridBagLayout());
@@ -740,85 +825,106 @@ ChangeListener {
 		c.insets = new Insets(3,3,3,3);
 		// Chi squared
 		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = y;
 		trPanel.add(new JLabel("Maximum reduced chi squared for track:"),c);
 		rcsText.addActionListener(this);
 		rcsText.setText("75.0");
 		c.gridx = 1;
-		c.gridy = 0;
+		c.gridy = y;
 		trPanel.add(rcsText,c);
 		c.gridx = 2;
-		c.gridy = 0;
+		c.gridy = y;
 		trPanel.add(new JLabel("Enter 0 for no cut"),c);
 		// vertex min
+		y++;
 		c.gridx = 0;
-		c.gridy = 1;
+		c.gridy = y;
 		trPanel.add(new JLabel("Minimum vertex z:"),c);
 		minVText.addActionListener(this);
 		minVText.setText("-10.0");
 		c.gridx = 1;
-		c.gridy = 1;
+		c.gridy = y;
 		trPanel.add(minVText,c);
 		// vertex max
+		y++;
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = y;
 		trPanel.add(new JLabel("Maximum vertex z:"),c);
 		maxVText.addActionListener(this);
 		maxVText.setText("10.0");
 		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = y;
 		trPanel.add(maxVText,c);
-		// p min
+		// Vertex time correction
+		y++;
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = y;
+		trPanel.add(new JLabel("Vertex time correction?:"),c);
+		vertexCorrList.addItem("Yes");
+		vertexCorrList.addItem("No");
+		vertexCorrList.addActionListener(this);
+		c.gridx = 1;
+		c.gridy = y;
+		trPanel.add(vertexCorrList,c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""),c);		
+		// p min
+		y++;
+		c.gridx = 0;
+		c.gridy = y;
 		trPanel.add(new JLabel("Minimum momentum from tracking (GeV):"),c);
 		minPText.addActionListener(this);
 		minPText.setText("1.0");
 		c.gridx = 1;
-		c.gridy = 3;
+		c.gridy = y;
 		trPanel.add(minPText,c);
 		// track charge
+		y++;
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = y;
 		trPanel.add(new JLabel("Track charge:"),c);
 		trackChargeList.addItem("Both");
 		trackChargeList.addItem("Negative");
 		trackChargeList.addItem("Positive");
 		trackChargeList.addActionListener(this);
 		c.gridx = 1;
-		c.gridy = 4;
+		c.gridy = y;
 		trPanel.add(trackChargeList,c);
 		// PID
+		y++;
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = y;
 		trPanel.add(new JLabel("PID:"),c);
 		pidList.addItem("Both");
 		pidList.addItem("Electrons");
 		pidList.addItem("Pions");
 		pidList.addActionListener(this);
 		c.gridx = 1;
-		c.gridy = 5;
+		c.gridy = y;
 		trPanel.add(pidList,c);
 		c.gridx = 2;
-		c.gridy = 5;
+		c.gridy = y;
 		trPanel.add(new JLabel("Not currently used"),c);
 		// trigger
+		y++;
 		c.gridx = 0;
-		c.gridy = 6;
+		c.gridy = y;
 		trPanel.add(new JLabel("Trigger:"),c);
 		triggerText.addActionListener(this);
 		c.gridx = 1;
-		c.gridy = 6;
+		c.gridy = y;
 		trPanel.add(triggerText,c);        
 		c.gridx = 2;
-		c.gridy = 6;
+		c.gridy = y;
 		trPanel.add(new JLabel("Not currently used"),c);
 		// counter section
+		y++;
 		c.gridx = 0;
-		c.gridy = 7;
+		c.gridy = y;
 		trPanel.add(new JLabel("Counter section:"),c);
 		c.gridx = 1;
-		c.gridy = 7;
+		c.gridy = y;
 		counterSectionList.addItem("Full counter");
 		counterSectionList.addItem("Center section");
 		counterSectionList.addItem("Left end");
@@ -826,74 +932,80 @@ ChangeListener {
 		trPanel.add(counterSectionList,c);
 		counterSectionList.addActionListener(this);
 		c.gridx = 2;
-		c.gridy = 7;
+		c.gridy = y;
 		trPanel.add(new JLabel("Applied to Time walk and RF paddle"),c);
 		// position cut
+		y++;
 		c.gridx = 0;
-		c.gridy = 8;
+		c.gridy = y;
 		trPanel.add(new JLabel("Section width (cm):"),c);
 		sectionWidthText.addActionListener(this);
 		sectionWidthText.setText("20.0");
 		c.gridx = 1;
-		c.gridy = 8;
+		c.gridy = y;
 		trPanel.add(sectionWidthText,c);            
 		c.gridx = 2;
-		c.gridy = 8;
+		c.gridy = y;
 		trPanel.add(new JLabel("Applied to Time walk and RF paddle"),c);
 
 		// graph type
+		y++;
 		c.gridx = 0;
-		c.gridy = 9;
+		c.gridy = y;
 		trPanel.add(new JLabel("2D histogram graph method:"),c);
 		c.gridx = 1;
-		c.gridy = 9;
+		c.gridy = y;
 		fitList.addItem("Max position of slices");
 		fitList.addItem("Gaussian mean of slices");
 		fitList.addActionListener(this);
 		trPanel.add(fitList,c);
 		// fit mode
+		y++;
 		c.gridx = 0;
-		c.gridy = 10;
+		c.gridy = y;
 		trPanel.add(new JLabel("Slicefitter mode:"),c);
 		c.gridx = 1;
-		c.gridy = 10;
+		c.gridy = y;
 		//fitModeList.addItem("L");
 		fitModeList.addItem("");
 		fitModeList.addItem("N");
 		trPanel.add(fitModeList,c);
 		fitModeList.addActionListener(this);
 		// min events
+		y++;
 		c.gridx = 0;
-		c.gridy = 11;
+		c.gridy = y;
 		trPanel.add(new JLabel("Minimum events per slice:"),c);
 		minEventsText.addActionListener(this);
 		minEventsText.setText("10");
 		c.gridx = 1;
-		c.gridy = 11;
+		c.gridy = y;
 		trPanel.add(minEventsText,c);
 
 		// Position dependent time walk
+		y++;
 		c.gridx = 0;
-		c.gridy = 12;
+		c.gridy = y;
 		trPanel.add(new JLabel("Position dependent TW correction?:"),c);
 		twMethodList.addItem("No");
 		twMethodList.addItem("Yes");
 		twMethodList.addActionListener(this);
 		c.gridx = 1;
-		c.gridy = 12;
+		c.gridy = y;
 		trPanel.add(twMethodList,c);
 		c.gridx = 2;
-		c.gridy = 12;
+		c.gridy = y;
 		//trPanel.add(new JLabel("Applied to subtracted nominal correction"),c);
 		//trPanel.add(new JLabel("<html>Applied to subtracted nominal correction<br/> in time walk plot</html>"),c);
 		trPanel.add(new JLabel(""),c);
 		
 		// Desired MIP peak position
+		y++;
 		c.gridx = 0;
-		c.gridy = 13;
+		c.gridy = y;
 		trPanel.add(new JLabel("Desired MIP peak position 1a/1b/2:"),c);
 		c.gridx = 1;
-		c.gridy = 13;
+		c.gridy = y;
 		JPanel mipPeakPanel = new JPanel();
 		mipPeakText[0].addActionListener(this);
 		mipPeakText[0].setText("800");
@@ -906,7 +1018,7 @@ ChangeListener {
 		mipPeakPanel.add(mipPeakText[2]);
 		trPanel.add(mipPeakPanel,c);
 		c.gridx = 2;
-		c.gridy = 13;
+		c.gridy = y;
 		trPanel.add(new JLabel(""),c);
 
 		JPanel butPage3 = new configButtonPanel(this, true, "Finish");

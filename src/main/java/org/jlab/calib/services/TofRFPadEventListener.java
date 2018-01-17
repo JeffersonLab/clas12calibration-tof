@@ -32,6 +32,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 	// indices for constants
 	public final int OFFSET_OVERRIDE = 0;
+	public final int SIGMA_OVERRIDE = 1;
 
 	private String showPlotType = "VERTEX_RF";
 
@@ -44,6 +45,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 	public TofRFPadEventListener() {
 
 		stepName = "RF paddle";
+		histTitle = "RFPAD";
 		fileNamePrefix = "FTOF_CALIB_RFPAD_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
@@ -156,13 +158,13 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 					// create all the histograms and functions
 					H1F fineHistRaw = 
-							new H1F("fineHistRaw","Fine offset Sector "+sector+" Layer "+" Paddle "+paddle,
+							new H1F("fineHistRaw",histTitle(sector, layer, paddle),
 									160, -2.0, 2.0);
 					fineHistRaw.setTitleX("RF time - vertex time modulo beam bucket (ns)");
 					dg.addDataSet(fineHistRaw, 0);
 
 					H1F fineHist = 
-							new H1F("fineHist","Fine offset Sector "+sector+" Layer "+" Paddle "+paddle,
+							new H1F("fineHist",histTitle(sector, layer, paddle),
 									160, -2.0, 2.0);
 					fineHist.setTitleX("RF time - vertex time modulo beam bucket (ns)");
 					dg.addDataSet(fineHist, 1);
@@ -177,7 +179,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 					dataGroups.add(dg,sector,layer,paddle);    
 
 					// initialize the constants array
-					Double[] consts = {UNDEFINED_OVERRIDE};
+					Double[] consts = {UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE};
 					// override values
 					constants.add(consts, sector, layer, paddle);
 				}
@@ -299,7 +301,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
 				//				"Amp:", "Mean:", "Sigma:", "Offset:", "SPACE",
-		"Override offset:"};
+		"Override offset:", "Override sigma"};
 		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
 		int result = JOptionPane.showConfirmDialog(null, panel, 
@@ -308,16 +310,38 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 			double minRange = toDouble(panel.textFields[0].getText());
 			double maxRange = toDouble(panel.textFields[1].getText());
-			double override = toDouble(panel.textFields[2].getText());
+			double overrideOffset = toDouble(panel.textFields[2].getText());
+			double overrideSigma = toDouble(panel.textFields[3].getText());
+			
+			int minP = paddle;
+			int maxP = paddle;
+			int minS = sector;
+			int maxS = sector;
+			if (panel.applyLevel == panel.APPLY_P) {
+				//
+			}
+			else {
+				minP = 1;
+				maxP = NUM_PADDLES[layer-1];
+			}
+			if (panel.applyLevel == panel.APPLY_L) {
+				minS = 1;
+				maxS = 6;
+			}
 
-			// save the override values
-			Double[] consts = constants.getItem(sector, layer, paddle);
-			consts[OFFSET_OVERRIDE] = override;
+			for (int s=minS; s<=maxS; s++) {
+				for (int p=minP; p<=maxP; p++) {
+					// save the override values
+					Double[] consts = constants.getItem(s, layer, p);
+					consts[OFFSET_OVERRIDE] = overrideOffset;
+					consts[SIGMA_OVERRIDE] = overrideSigma;
 
-			fit(sector, layer, paddle, minRange, maxRange);
+					fit(s, layer, p, minRange, maxRange);
 
-			// update the table
-			saveRow(sector,layer,paddle);
+					// update the table
+					saveRow(s,layer,p);
+				}
+			}
 			calib.fireTableDataChanged();
 
 		}     
@@ -344,9 +368,18 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 	}    
 	
 	public Double getSigma(int sector, int layer, int paddle) {
+		
+		double sigma = 0.0;
+		double overrideVal = constants.getItem(sector, layer, paddle)[SIGMA_OVERRIDE];
 
-		F1D fineFunc = dataGroups.getItem(sector,layer,paddle).getF1D("fineFunc");
-		return fineFunc.getParameter(2);
+		if (overrideVal != UNDEFINED_OVERRIDE) {
+			sigma = overrideVal;
+		}
+		else {
+			F1D fineFunc = dataGroups.getItem(sector,layer,paddle).getF1D("fineFunc");
+			sigma = fineFunc.getParameter(2);
+		}
+		return sigma;
 	}    
 	
 
@@ -360,16 +393,12 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 	}
 
-	//@Override - no need to override as sigmas are in table
-	// rename back to writeFile and Override if sigmas to go in separate file
-	public void sigmaWriteFile(String filename) {
+	public void writeSigmaFile(String filename) {
 
-		// write sigmas to a file then call the super method to write the rfpad
 		try { 
 
-			String sigFilename = filename.replace("RFPAD", "RFPAD_SIGMA");
 			// Open the output file
-			File outputFile = new File(sigFilename);
+			File outputFile = new File(filename);
 			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
 			BufferedWriter outputBw = new BufferedWriter(outputFw);
 
@@ -394,8 +423,6 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			ex.printStackTrace();
 		}
 
-		super.writeFile(filename);
-
 	}	
 
 	@Override
@@ -416,7 +443,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			hist = dataGroups.getItem(sector,layer,paddle).getH1F("fineHist");
 			func = dataGroups.getItem(sector,layer,paddle).getF1D("fineFunc");
 			//func.setOptStat(0);
-			hist.setTitle("RFPAD "+LAYER_PREFIX[layer]+paddle);
+			//hist.setTitle("RFPAD "+LAYER_PREFIX[layer]+paddle);
 			hist.setTitleX("");
 			hist.setTitleY("");
 			canvas.draw(hist); 

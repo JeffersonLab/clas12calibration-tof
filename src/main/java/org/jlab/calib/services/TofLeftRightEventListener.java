@@ -56,6 +56,7 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 	public TofLeftRightEventListener() {
 
 		stepName = "Left Right";
+		histTitle = "LR";
 		fileNamePrefix = "FTOF_CALIB_LEFTRIGHT_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
@@ -168,11 +169,8 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 				for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 
 					// create all the histograms
-					H1F hist = new H1F("left_right","Left Right: Paddle "+paddle, 
+					H1F hist = new H1F("left_right",histTitle(sector,layer,paddle),
 							2001, -50.05, 50.05);
-
-					hist.setTitle("Left Right  : " + LAYER_NAME[layer_index] 
-							+ " Sector "+sector+" Paddle "+paddle);
 
 					// create all the functions
 					F1D edgeToEdgeFunc = new F1D("edgeToEdgeFunc","[height]",
@@ -321,15 +319,35 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 		if (result == JOptionPane.OK_OPTION) {
 
 			double overrideValue = toDouble(panel.textFields[0].getText());
+			
+			int minP = paddle;
+			int maxP = paddle;
+			int minS = sector;
+			int maxS = sector;
+			if (panel.applyLevel == panel.APPLY_P) {
+				//
+			}
+			else {
+				minP = 1;
+				maxP = NUM_PADDLES[layer-1];
+			}
+			if (panel.applyLevel == panel.APPLY_L) {
+				minS = 1;
+				maxS = 6;
+			}
 
-			// save the override values
-			Double[] consts = constants.getItem(sector, layer, paddle);
-			consts[LEFTRIGHT_OVERRIDE] = overrideValue;
+			for (int s=minS; s<=maxS; s++) {
+				for (int p=minP; p<=maxP; p++) {
+					// save the override values
+					Double[] consts = constants.getItem(s, layer, p);
+					consts[LEFTRIGHT_OVERRIDE] = overrideValue;
 
-			fit(sector, layer, paddle);
+					fit(s, layer, p);
 
-			// update the table
-			saveRow(sector,layer,paddle);
+					// update the table
+					saveRow(s,layer,p);
+				}
+			}
 			calib.fireTableDataChanged();
 
 		}	 

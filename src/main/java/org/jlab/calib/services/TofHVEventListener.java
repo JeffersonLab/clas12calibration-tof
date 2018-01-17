@@ -66,6 +66,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 	public TofHVEventListener() {
 
 		stepName = "HV";
+		histTitle = "HV";
 		fileNamePrefix = "FTOF_CALIB_HV_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
@@ -127,11 +128,11 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 
 					// create all the histograms
 					TOFH1F geoMeanHist = new TOFH1F("geomean",
-							"Geometric Mean Sector "+sector+" Paddle "+paddle, 
+							histTitle(sector,layer,paddle), 
 							GM_HIST_BINS[layer_index], 0.0, GM_HIST_MAX[layer_index]);
 					geoMeanHist.setName("geomean");
 					H1F logRatioHist = new TOFH1F("logratio", 
-							"Log Ratio Sector "+sector+" Paddle "+paddle, 
+							histTitle(sector,layer,paddle), 
 							300,-6.0,6.0);
 					logRatioHist.setName("logratio");
 
@@ -200,7 +201,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
     @Override
     public void analyze() {
     
-        saveCounterStatus();
+        saveCounterStatus(statusFileName);
         super.analyze();
     
     }	
@@ -392,23 +393,34 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
+			int minS = sector;
+			int maxS = sector;
+			if (panel.applyLevel == panel.APPLY_P) {
+				//
+			}
+			else {
 				minP = 1;
 				maxP = NUM_PADDLES[layer-1];
 			}
+			if (panel.applyLevel == panel.APPLY_L) {
+				minS = 1;
+				maxS = 6;
+			}
 
-			for (int p=minP; p<=maxP; p++) {
-				// save the override values
-				Double[] consts = constants.getItem(sector, layer, p);
-				consts[GEOMEAN_OVERRIDE] = overrideGM;
-				consts[GEOMEAN_UNC_OVERRIDE] = overrideGMUnc;
-				consts[LOGRATIO_OVERRIDE] = overrideLR;
-				consts[LOGRATIO_UNC_OVERRIDE] = overrideLRUnc;
+			for (int s=minS; s<=maxS; s++) {
+				for (int p=minP; p<=maxP; p++) {
+					// save the override values
+					Double[] consts = constants.getItem(s, layer, p);
+					consts[GEOMEAN_OVERRIDE] = overrideGM;
+					consts[GEOMEAN_UNC_OVERRIDE] = overrideGMUnc;
+					consts[LOGRATIO_OVERRIDE] = overrideLR;
+					consts[LOGRATIO_UNC_OVERRIDE] = overrideLRUnc;
 
-				fitGeoMean(sector, layer, p, minRange, maxRange);
+					fitGeoMean(s, layer, p, minRange, maxRange);
 
-				// update the table
-				saveRow(sector,layer,p);
+					// update the table
+					saveRow(s,layer,p);
+				}
 			}
 			calib.fireTableDataChanged();
 
@@ -813,13 +825,13 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 		return filePrefix + "." + newFileNum + ".txt";
 	}
 
-	
-	public void saveCounterStatus() {
+	@Override
+	public void saveCounterStatus(String filename) {
 
 		try { 
-
+			
 			// Open the output file
-			File outputFile = new File(statusFileName); 
+			File outputFile = new File(filename); 
 			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
 			BufferedWriter outputBw = new BufferedWriter(outputFw);
 

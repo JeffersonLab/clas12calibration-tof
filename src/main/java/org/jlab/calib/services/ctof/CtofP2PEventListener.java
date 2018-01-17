@@ -203,7 +203,10 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
+			if (panel.applyLevel == panel.APPLY_P) {
+				// 
+			}
+			else {
 				minP = 1;
 				maxP = NUM_PADDLES[layer-1];
 			}

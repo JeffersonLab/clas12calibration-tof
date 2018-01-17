@@ -18,7 +18,10 @@ import javax.swing.JTextField;
 public class TOFCustomFitPanel extends JPanel implements ActionListener {
 	
 	public JTextField[] textFields;
-	public boolean applyToAll = false;
+	public int applyLevel = 0;
+	public static final int APPLY_P = 0;
+	public static final int APPLY_SL = 1;
+	public static final int APPLY_L = 2;
 
 	public TOFCustomFitPanel(String[] fields, int sector, int layer){
 		
@@ -62,16 +65,20 @@ public class TOFCustomFitPanel extends JPanel implements ActionListener {
 		JRadioButton singleRad = new JRadioButton("Single paddle");
 		JRadioButton allRad = new JRadioButton("All paddles in sector "+sector
 				+" layer "+layer);
+		JRadioButton allLayerRad = new JRadioButton("All paddles in layer "+layer);
 		singleRad.setSelected(true);
 		ButtonGroup radGroup = new ButtonGroup();
 		radGroup.add(singleRad);
 		radGroup.add(allRad);
+		radGroup.add(allLayerRad);
 		singleRad.addActionListener(this);
 		allRad.addActionListener(this);
+		allLayerRad.addActionListener(this);
 		
 		JPanel radPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		radPanel.add(singleRad);
 		radPanel.add(allRad);
+		radPanel.add(allLayerRad);
 		
 		this.add(fieldsPanel, BorderLayout.NORTH);
 		this.add(radPanel, BorderLayout.SOUTH);
@@ -81,12 +88,14 @@ public class TOFCustomFitPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		if (e.getActionCommand().startsWith("Single")) {
-			applyToAll = false;
+			applyLevel = APPLY_P;
 		}
-		else if (e.getActionCommand().startsWith("All paddles")) {
-			applyToAll = true;
+		else if (e.getActionCommand().startsWith("All paddles in sector")) {
+			applyLevel = APPLY_SL;
 		}
-		
+		else if (e.getActionCommand().startsWith("All paddles in layer")) {
+			applyLevel = APPLY_L;
+		}
 		
 	}	
 	

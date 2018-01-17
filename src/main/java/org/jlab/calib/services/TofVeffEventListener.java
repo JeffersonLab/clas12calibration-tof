@@ -62,6 +62,7 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 	public TofVeffEventListener() {
 
 		stepName = "Effective Velocity";
+		histTitle = "VEFF";
 		fileNamePrefix = "FTOF_CALIB_VEFF_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
@@ -177,14 +178,12 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 
 					H2F hist = 
 							new H2F("veff",
-									"veff",
+									histTitle(sector,layer,paddle),
 									numBins, min, max, 
 									100, -15.0, 15.0);
 //									100, 0.0, 30.0);
 
 					hist.setName("veff");
-					hist.setTitle("Half Time Diff vs Position : " + LAYER_NAME[layer_index] 
-							+ " Sector "+sector+" Paddle "+paddle);
 					hist.setTitleX("Hit position from tracking (cm)");
 					hist.setTitleY("Half Time Diff (ns)");
 
@@ -194,6 +193,7 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 					//GraphErrors veffGraph = new GraphErrors("veffGraph",dummyPoint,dummyPoint,dummyPoint,dummyPoint);
 					GraphErrors veffGraph = new GraphErrors("veffGraph");
 					veffGraph.setName("veffGraph");
+					veffGraph.setTitle(histTitle(sector,layer,paddle));
 					veffFunc.setLineColor(FUNC_COLOUR);
 					veffFunc.setLineWidth(FUNC_LINE_WIDTH);
 					veffGraph.setMarkerSize(MARKER_SIZE);
@@ -358,26 +358,34 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 			
 			int minP = paddle;
 			int maxP = paddle;
-			if (panel.applyToAll) {
+			int minS = sector;
+			int maxS = sector;
+			if (panel.applyLevel == panel.APPLY_P) {
+				// if fitting one paddle then show inspectFits view
+				showSlices = true;
+			}
+			else {
 				minP = 1;
 				maxP = NUM_PADDLES[layer-1];
 			}
-			else {
-				// if fitting one panel then show inspectFits view
-				showSlices = true;
+			if (panel.applyLevel == panel.APPLY_L) {
+				minS = 1;
+				maxS = 6;
 			}
+	
+			for (int s=minS; s<=maxS; s++) {
+				for (int p=minP; p<=maxP; p++) {
+					// save the override values
+					Double[] consts = constants.getItem(s, layer, p);
+					consts[VEFF_OVERRIDE] = overrideValue;
+					consts[VEFF_UNC_OVERRIDE] = overrideUnc;
+					consts[VEFF_LR_OVERRIDE] = overrideLR;
 
-			for (int p=minP; p<=maxP; p++) {
-				// save the override values
-				Double[] consts = constants.getItem(sector, layer, p);
-				consts[VEFF_OVERRIDE] = overrideValue;
-				consts[VEFF_UNC_OVERRIDE] = overrideUnc;
-				consts[VEFF_LR_OVERRIDE] = overrideLR;
+					fit(s, layer, p, minRange, maxRange);
 
-				fit(sector, layer, p, minRange, maxRange);
-
-				// update the table
-				saveRow(sector,layer,p);
+					// update the table
+					saveRow(s,layer,p);
+				}
 			}
 			calib.fireTableDataChanged();
 
