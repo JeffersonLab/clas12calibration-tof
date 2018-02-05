@@ -52,7 +52,9 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
     // indices for override values
     public final int LEFTRIGHT_OVERRIDE = 0;
 
-    final double LEFT_RIGHT_RATIO = 0.1;
+    final double LEFT_RIGHT_RATIO = 0.2;
+    final double MIN_DIST = -35.0;
+    final double MAX_DIST = -15.0;
     final double MAX_LEFTRIGHT = 10.0;
 
     public CtofLeftRightEventListener() {
@@ -207,9 +209,11 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
             int sector = paddle.getDescriptor().getSector();
             int layer = paddle.getDescriptor().getLayer();
             int component = paddle.getDescriptor().getComponent();
-
-            dataGroups.getItem(sector,layer,component).getH1F("left_right").fill(
+            
+            if (paddle.includeInTiming()) {
+            	dataGroups.getItem(sector,layer,component).getH1F("left_right").fill(
                     paddle.leftRight());
+            }
         }
     }
 
@@ -252,8 +256,10 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         int nonZeroBins = 0;
         double meanBinContent=0;
         for(int i=1;i<=nBin;i++) {
-        	meanBinContent+=leftRightHist.getBinContent(i);
-        	if (leftRightHist.getBinContent(i) > 0) nonZeroBins++;
+        	if (leftRightHist.getXaxis().getBinCenter(i)>MIN_DIST && leftRightHist.getXaxis().getBinCenter(i)<MAX_DIST) {
+        		meanBinContent+=leftRightHist.getBinContent(i);
+        		if (leftRightHist.getBinContent(i) > 0) nonZeroBins++;
+        	}
         }
         meanBinContent/=nonZeroBins;
         
@@ -261,13 +267,15 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         double threshold=meanBinContent*LEFT_RIGHT_RATIO;
         int leftEdgeBin=0, rightEdgeBin=nBin;
         for(int i=0; i<nBin; i++){
-            if(leftRightHist.getBinContent(i)>threshold){
+            if(leftRightHist.getBinContent(i)>threshold 
+            		&& leftRightHist.getXaxis().getBinCenter(i)>MIN_DIST && leftRightHist.getXaxis().getBinCenter(i)<MAX_DIST){
                 leftEdgeBin=i;
                 break;
             }
         }
         for(int i=nBin; i>0; i--){
-            if(leftRightHist.getBinContent(i)>threshold){
+            if(leftRightHist.getBinContent(i)>threshold
+            		&& leftRightHist.getXaxis().getBinCenter(i)>MIN_DIST && leftRightHist.getXaxis().getBinCenter(i)<MAX_DIST){
                 rightEdgeBin=i;
                 break;
             }

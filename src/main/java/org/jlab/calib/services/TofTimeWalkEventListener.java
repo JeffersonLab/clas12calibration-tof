@@ -745,6 +745,43 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		calib.setDoubleValue(getTW2Right(sector,layer,paddle),
 				"tw2_right", sector, layer, paddle);
 	}
+	
+	@Override
+	public void writeFile(String filename) {
+
+		try { 
+
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+
+			for (int sector = 1; sector <= 6; sector++) {
+				for (int layer = 1; layer <= 3; layer++) {
+					int layer_index = layer - 1;
+					for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
+						String line = new String();
+						line = sector+" "+layer+" "+paddle+" "
+								+new DecimalFormat("0.000").format(getLambdaLeft(sector,layer,paddle))
+								+" 0.500"+" 0.000 "
+								+new DecimalFormat("0.000").format(getLambdaRight(sector,layer,paddle))
+								+" 0.500"+" 0.000";
+						outputBw.write(line);
+						outputBw.newLine();
+					}
+				}
+			}
+
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error writing file '" );                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}
+
+	}	
 
 	@Override
 	public void setPlotTitle(int sector, int layer, int paddle) {

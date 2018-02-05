@@ -93,6 +93,10 @@ public class TOFPaddle {
 		int layer = this.getDescriptor().getLayer();
 		return (ADCL > minAdc[layer] && ADCR > minAdc[layer]);
 	}
+	
+	public boolean includeInTiming() {
+		return (TDCL>0 && TDCR>0);
+	}
 
 	//	public boolean includeInCtofVeff() {
 	//		// exclude if position is zero or veff is unrealistic

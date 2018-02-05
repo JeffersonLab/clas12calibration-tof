@@ -159,7 +159,8 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			dg.addDataSet(fineHist, 1);
 
 			// create a dummy function in case there's no data to fit 
-			F1D fineFunc = new F1D("fineFunc","[amp]*gaus(x,[mean],[sigma])+[a]*x^2+[b]*x+[c]", -1.0, 1.0);
+			//F1D fineFunc = new F1D("fineFunc","[amp]*gaus(x,[mean],[sigma])+[a]*x^2+[b]*x+[c]", -1.0, 1.0);
+			F1D fineFunc = new F1D("fineFunc","[amp]*gaus(x,[mean],[sigma])+[b]*x+[c]", -1.0, 1.0);
 			fineFunc.setLineColor(FUNC_COLOUR);
 			fineFunc.setLineWidth(FUNC_LINE_WIDTH);
 			dg.addDataSet(fineFunc, 1);
@@ -192,7 +193,7 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			int component = pad.getDescriptor().getComponent();
 
 			// fill the fine hists
-			if (pad.goodTrackFound()) {
+			if (pad.goodTrackFound() && pad.includeInTiming()) {
 				//pad.show();
 				dataGroups.getItem(sector,layer,component).getH1F("fineHistRaw").fill(
 						(pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
@@ -236,7 +237,7 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 		}
 
 
-		// fit gaussian +p2
+		// fit gaussian +p1
 		F1D fineFunc = dataGroups.getItem(sector,layer,paddle).getF1D("fineFunc");
 
 		// find the range for the fit
@@ -261,7 +262,8 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 		fineFunc.setParameter(0, fineHist.getBinContent(maxBin));
 		fineFunc.setParLimits(0, fineHist.getBinContent(maxBin)*0.7, fineHist.getBinContent(maxBin)*1.2);
 		fineFunc.setParameter(1, maxPos);
-		fineFunc.setParameter(2, 0.5);
+		fineFunc.setParameter(2, 0.1);
+		fineFunc.setParLimits(2, 0.050, 1.0);
 
 		try {
 			DataFitter.fit(fineFunc, fineHist, fitOption);
@@ -269,7 +271,8 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();
-		}	
+		}
+		fineHist.setFunction(null);
 		//System.out.println("RFPad 270 SLC "+paddle);
 
 	}
@@ -355,24 +358,20 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 
 	}
 
-	//@Override - no need to override as sigmas are in table
-	// rename back to writeFile and Override if sigmas to go in separate file
-	public void sigmaWriteFile(String filename) {
+	public void writeSigmaFile(String filename) {
 
-		// write sigmas to a file then call the super method to write the rfpad
 		try { 
 
-			String sigFilename = filename.replace("RFPAD", "RFPAD_SIGMA");
 			// Open the output file
-			File outputFile = new File(sigFilename);
+			File outputFile = new File(filename);
 			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
 			BufferedWriter outputBw = new BufferedWriter(outputFw);
 
 			for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
-				String line = new String();
-				line = 1+" "+1+" "+paddle+" "+new DecimalFormat("0.000").format(getSigma(1,1,paddle));
-				outputBw.write(line);
-				outputBw.newLine();
+						String line = new String();
+						line = 1+" "+1+" "+paddle+" "+new DecimalFormat("0.000").format(getSigma(1,1,paddle));
+						outputBw.write(line);
+						outputBw.newLine();
 			}
 
 			outputBw.close();
@@ -384,10 +383,7 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			ex.printStackTrace();
 		}
 
-		super.writeFile(filename);
-
-	}	
-
+	}
 	@Override
 	public void showPlots(int sector, int layer) {
 

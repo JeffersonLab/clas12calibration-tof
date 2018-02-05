@@ -185,7 +185,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
     @Override
     public void analyze() {
     
-        saveCounterStatus();
+        saveCounterStatus(statusFileName);
         super.analyze();
     
     }		
@@ -195,13 +195,14 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			double minRange, double maxRange){
 		fitGeoMean(sector, layer, paddle, minRange, maxRange);
 		fitLogRatio(sector, layer, paddle, minRange, maxRange);
+		
 	}
 
 	public void fitGeoMean(int sector, int layer, int paddle,
 			double minRange, double maxRange){
 
 		TOFH1F h = (TOFH1F) dataGroups.getItem(sector,layer,paddle).getH1F("geomean");
-
+		
 		// First rebin depending on number of entries
 		//        int nEntries = h.getEntries(); 
 		//        if ((nEntries != 0) && (h.getAxis().getNBins() == GM_HIST_BINS[layer_index])) {
@@ -280,8 +281,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		} catch (Exception e) {
 			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
 			e.printStackTrace();
-		}
-
+		}		
 	}
 
 	public void fitLogRatio(int sector, int layer, int paddle,
@@ -787,12 +787,12 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 	}
 
 
-	public void saveCounterStatus() {
+	public void saveCounterStatus(String fileName) {
 
 		try { 
 
 			// Open the output file
-			File outputFile = new File(statusFileName); 
+			File outputFile = new File(fileName); 
 			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
 			BufferedWriter outputBw = new BufferedWriter(outputFw);
 

@@ -47,24 +47,12 @@ import org.jlab.utils.groups.IndexedTable;
 public class DataProvider {
 
 	private static	boolean test = false;
-//	public static CodaEventDecoder codaDecoder;
-//	public static DetectorEventDecoder eventDecoder;
-//	public static List<DetectorDataDgtz> detectorData;
-
-//	public static void init() {
-//
-//		codaDecoder = new CodaEventDecoder();
-//		eventDecoder = new DetectorEventDecoder();
-//		detectorData = new ArrayList<DetectorDataDgtz>();
-//	}
-
+	private static double[] massList = {0.139, 0.938};
+	
 	public static List<TOFPaddle> getPaddleList(DataEvent event) {
 
 		List<TOFPaddle>  paddleList = new ArrayList<TOFPaddle>();
-
 		paddleList = getPaddleListHipo(event);
-		//paddleList = getPaddleListDgtzNew(event);
-
 		return paddleList;
 
 	}
@@ -85,37 +73,9 @@ public class DataProvider {
 
 	public static List<TOFPaddle> getPaddleListHipo(DataEvent event){
 
-		if (test) {
-
-			event.show();
-			if (event.hasBank("CTOF::adc")) {
-				event.getBank("CTOF::adc").show();
-			}
-			if (event.hasBank("CTOF::tdc")) {
-				event.getBank("CTOF::tdc").show();
-			}
-			if (event.hasBank("CTOF::hits")) {
-				event.getBank("CTOF::hits").show();
-			}
-			if (event.hasBank("CVTRec::Tracks")) {
-				event.getBank("CVTRec::Tracks").show();
-			}
-			if (event.hasBank("RUN::rf")) {
-				event.getBank("RUN::rf").show();
-			}
-			if (event.hasBank("RUN::config")) {
-				event.getBank("RUN::config").show();
-			}
-			if (event.hasBank("MC::Particle")) {
-				event.getBank("MC::Particle").show();
-			}
-		}
-
 		ArrayList<TOFPaddle>  paddleList = new ArrayList<TOFPaddle>();
-		//System.out.println("Louise 118");
 		// Set the status flags
 		if (event.hasBank("CTOF::adc")) {
-			//System.out.println("Louise 121");
 			DataBank adcBank = event.getBank("CTOF::adc");
 			
 			for (int i = 0; i < adcBank.rows(); i++) {
@@ -129,10 +89,10 @@ public class DataProvider {
 					CTOFCalibrationEngine.adcRightStatus.add(0, 1,1,component);
 				}
 			}
-			//System.out.println("Louise 135");
+			////System.out.println("Louise 135");
 		}
 		if (event.hasBank("CTOF::tdc")) {
-			//System.out.println("Louise 138");
+			////System.out.println("Louise 138");
 			DataBank tdcBank = event.getBank("CTOF::tdc");
 			
 			for (int i = 0; i < tdcBank.rows(); i++) {
@@ -146,14 +106,14 @@ public class DataProvider {
 					CTOFCalibrationEngine.tdcRightStatus.add(0, 1,1,component);
 				}
 			}
-			//System.out.println("Louise 152");
+			////System.out.println("Louise 152");
 		}
 				
 
 		// Only continue if we have adc and tdc banks
-		//if (!event.hasBank("CTOF::adc") || !event.hasBank("CTOF::tdc")) {
-		//	return paddleList;
-		//}
+		if (!event.hasBank("CTOF::adc") || !event.hasBank("CTOF::tdc")) {
+			return paddleList;
+		}
 
 		DataBank  adcBank = event.getBank("CTOF::adc");
 		DataBank  tdcBank = event.getBank("CTOF::tdc");
@@ -161,7 +121,7 @@ public class DataProvider {
 
 		// iterate through hits bank getting corresponding adc and tdc
 		if (event.hasBank("CTOF::hits")) {
-			//System.out.println("Louise 167");
+			////System.out.println("Louise 167");
 			DataBank  hitsBank = event.getBank("CTOF::hits");
 
 			for (int hitIndex=0; hitIndex<hitsBank.rows(); hitIndex++) {
@@ -179,28 +139,22 @@ public class DataProvider {
 				int tdcIdx1 = getIdx(tdcBank,2, component);
 				int tdcIdx2 = getIdx(tdcBank,3, component);
 				
-//				System.out.println("Paddle "+component);
-//				System.out.println("tx ty tz"+tx+" "+ty+" "+tz);
-//				System.out.println("ADC L idx "+adcIdx1);
-//				System.out.println("ADC R idx "+adcIdx2);
-//				System.out.println("TDC L idx "+tdcIdx1);
-//				System.out.println("TDC R idx "+tdcIdx2);
+				int adcL = 0;
+				int adcR = 0;
+				int tdcL = 0;
+				int tdcR = 0;
+				if (adcIdx1!=-1) adcL = adcBank.getInt("ADC", adcIdx1); 
+				if (adcIdx2!=-1) adcR = adcBank.getInt("ADC", adcIdx2);
+				if (tdcIdx1!=-1) tdcL = tdcBank.getInt("TDC", tdcIdx1); 
+				if (tdcIdx2!=-1) tdcR = tdcBank.getInt("TDC", tdcIdx2);
 				
-				paddle.setAdcTdc(
-						adcBank.getInt("ADC", adcIdx1),
-						adcBank.getInt("ADC", adcIdx2),
-						tdcBank.getInt("TDC", tdcIdx1),
-						tdcBank.getInt("TDC", tdcIdx2));
-//						adcBank.getInt("ADC", hitsBank.getShort("adc_idx1", hitIndex)),
-//						adcBank.getInt("ADC", hitsBank.getShort("adc_idx2", hitIndex)),
-//						tdcBank.getInt("TDC", hitsBank.getShort("tdc_idx1", hitIndex)),
-//						tdcBank.getInt("TDC", hitsBank.getShort("tdc_idx2", hitIndex)));
+				
+				paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
 				paddle.setPos(tx,ty,tz); 
 				paddle.ADC_TIMEL = adcBank.getFloat("time", adcIdx1);
 				paddle.ADC_TIMER = adcBank.getFloat("time", adcIdx2);
 				paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
-								
-				//paddle.show();
+				
 				//System.out.println("Louise 207");
 				if (event.hasBank("CVTRec::Tracks") && event.hasBank("RUN::rf")) {
 
@@ -219,64 +173,92 @@ public class DataProvider {
 							trf = rfBank.getFloat("time",rfIdx);
 						}
 					}
-
-					// Get track
+					//System.out.println("Louise 226");
 					int trkId = hitsBank.getShort("trkID", hitIndex);
+					// Get track
 					double energy = hitsBank.getFloat("energy", hitIndex);
 					
 					// only use hit with associated track and a minimum energy
 					if (trkId!=-1 && energy>1.5) {
-						
-						double c3x  = trkBank.getFloat("c_x",trkId);
-						double c3y  = trkBank.getFloat("c_y",trkId);
-						double c3z  = trkBank.getFloat("c_z",trkId);
-						double path = trkBank.getFloat("pathlength",trkId) + Math.sqrt((tx-c3x)*(tx-c3x)+(ty-c3y)*(ty-c3y)+(tz-c3z)*(tz-c3z));
-						// calculated path length
-						//paddle.PATH_LENGTH = path;
+						//System.out.println("Louise 233");
 						
 						// path length from bank
 						paddle.PATH_LENGTH = hitsBank.getFloat("pathLength", hitIndex);
-						//System.out.println("Path length calc "+path);
-						//System.out.println("Path length bank "+hitsBank.getFloat("pathLength", hitIndex));
-						//double diff = path - hitsBank.getFloat("pathLength", hitIndex);
-						//System.out.println("Path length diff "+diff);
+						//System.out.println("Louise 237");
 						paddle.RF_TIME = trf;
+						//System.out.println("Louise 239");
 						
 						// Get the momentum and record the beta (assuming every hit is a pion!)
-//						double px  = tbtBank.getFloat("p0_x",trkId-1);
-//						double py  = tbtBank.getFloat("p0_y",trkId-1);
-//						double pz  = tbtBank.getFloat("p0_z",trkId-1);
-//						double mom = Math.sqrt(px*px + py*py + pz*pz);
-						double mom = trkBank.getFloat("p", trkId);
-						double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
+						double mom = trkBank.getFloat("p", trkId-1);
+						//System.out.println("Louise 243");
+						double mass = massList[CTOFCalibration.massAss];
+						//double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
+						double beta = mom/Math.sqrt(mom*mom+mass*mass);
+						//System.out.println("Louise 246");
 						paddle.BETA = beta;
+						//System.out.println("Louise 248");
 						paddle.P = mom;
+						//System.out.println("Louise 250");
 						paddle.TRACK_ID = trkId;
-						paddle.VERTEX_Z = trkBank.getFloat("z0", trkId);
-						paddle.CHARGE = trkBank.getInt("q", trkId);
+						//System.out.println("Louise 252");
+						//paddle.VERTEX_Z = trkBank.getFloat("z0", trkId-1);
+						// CTOF vertex z is in mm -> convert to cm
+						paddle.VERTEX_Z = trkBank.getFloat("z0", trkId-1)/10.0;
 						
+						//System.out.println("Louise 254");
+						paddle.CHARGE = trkBank.getByte("q", trkId-1);
+						//System.out.println("Louise 256");
+						
+						//System.out.println("Louise 263");
 						if (CTOFCalibration.maxRcs != 0.0) {
-							paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkId);
+							//paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkId);
+							paddle.TRACK_REDCHI2 = trkBank.getFloat("chi2", trkId-1) / trkBank.getShort("ndf", trkId-1);
 						}
 						else {
 							paddle.TRACK_REDCHI2 = -1.0;
 						}
+						//System.out.println("Louise 271");
 						
 					}
-					//System.out.println("Louise 269");
+					//System.out.println("Louise 274");
 				}
 
-//				paddle.show();
+				if (test && paddle.TRACK_ID != -1) {
+					paddle.show();
+					event.show();
+					if (event.hasBank("CTOF::adc")) {
+						event.getBank("CTOF::adc").show();
+					}
+					if (event.hasBank("CTOF::tdc")) {
+						event.getBank("CTOF::tdc").show();
+					}
+					if (event.hasBank("CTOF::hits")) {
+						event.getBank("CTOF::hits").show();
+					}
+					if (event.hasBank("CVTRec::Tracks")) {
+						event.getBank("CVTRec::Tracks").show();
+					}
+					if (event.hasBank("RUN::rf")) {
+						event.getBank("RUN::rf").show();
+					}
+					if (event.hasBank("RUN::config")) {
+						event.getBank("RUN::config").show();
+					}
+					if (event.hasBank("MC::Particle")) {
+						event.getBank("MC::Particle").show();
+					}
+				}
+
 //				System.out.println("Adding paddle to list");
 				if (paddle.includeInCalib()) {
-					//System.out.println("Louise 275");
+					////System.out.println("Louise 275");
 					paddleList.add(paddle);
-					//System.out.println("Louise 277");
+					////System.out.println("Louise 277");
 				}
 			}
 		}
 		else {
-			//System.out.println("Louise 280");
+			////System.out.println("Louise 280");
 			// no hits bank, so just use adc and tdc
 
 			// based on cosmic data

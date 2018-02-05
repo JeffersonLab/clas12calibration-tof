@@ -235,7 +235,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			int layer = paddle.getDescriptor().getLayer();
 			int component = paddle.getDescriptor().getComponent();
 
-			if (paddle.goodTrackFound() && paddle.TDCL!=0 && paddle.TDCR!=0) {
+			if (paddle.goodTrackFound() && paddle.includeInTiming()) {
 				dataGroups.getItem(sector,layer,component).getH2F("tdcConvLeft").fill(
 						paddle.TDCL, 
 						(paddle.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);

@@ -165,47 +165,6 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         // overridden in calibration step class
     }
 
-    public void saveCounterStatus() {
-
-        System.out.println("sector layer component stat_left stat_right");
-        for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
-
-            int adcLStat = adcLeftStatus.getItem(1,1,paddle);
-            int adcRStat = adcRightStatus.getItem(1,1,paddle);
-            int tdcLStat = tdcLeftStatus.getItem(1,1,paddle);
-            int tdcRStat = tdcRightStatus.getItem(1,1,paddle);                    
-            int counterStatusLeft = 0;
-            int counterStatusRight = 0;
-
-            if (adcLStat==1 && tdcLStat==1) {
-                counterStatusLeft = 3;
-            }
-            else if (adcLStat==1) {
-                counterStatusLeft = 1;
-            }
-            else if (tdcLStat==1) {
-                counterStatusLeft = 2;
-            }
-
-            if (adcRStat==1 && tdcRStat==1) {
-                counterStatusRight = 3;
-            }
-            else if (adcRStat==1) {
-                counterStatusRight = 1;
-            }
-            else if (tdcRStat==1) {
-                counterStatusRight = 2;
-            }
-
-            System.out.println(
-                    1+" "+
-                            1+" "+
-                            paddle+" "+
-                            counterStatusLeft+" "+
-                            counterStatusRight+" ");
-        }
-    }
-
     public void save() {
 
         for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {

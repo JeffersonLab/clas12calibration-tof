@@ -169,7 +169,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 
 		for (TOFPaddle ctofPaddle : ctofPaddleList) {
 
-			if (ctofPaddle.goodTrackFound()) {   
+			if (ctofPaddle.goodTrackFound() && ctofPaddle.includeInTiming()) {   
 
 				int sector = ctofPaddle.getDescriptor().getSector();
 				int layer = ctofPaddle.getDescriptor().getLayer();
@@ -180,9 +180,6 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 					if (ftofPaddle.goodTrackFound()) {
 						dataGroups.getItem(sector,layer,component).getH1F("vertexDiffHist").fill(
 								ctofPaddle.startTimeP2PCorr() - ftofPaddle.reconStartTime());
-//						ctofPaddle.show();
-//						dataGroups.getItem(sector,layer,component).getH1F("vertexDiffHist").fill(
-//						ctofPaddle.startTimeP2PCorr() - 124.25);
 					}
 				}
 			}
@@ -276,25 +273,43 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 
 		int layer_index = layer-1;
 		double[] paddleNumbers = new double[NUM_PADDLES[layer_index]];
-		double[] paddleUncs = new double[NUM_PADDLES[layer_index]];
-		double[] values = new double[NUM_PADDLES[layer_index]];
-		double[] valueUncs = new double[NUM_PADDLES[layer_index]];
+		double[] offsets = new double[NUM_PADDLES[layer_index]];
+		double[] zeroUncs = new double[NUM_PADDLES[layer_index]];
+		double[] centroids = new double[NUM_PADDLES[layer_index]];
 
 		for (int p = 1; p <= NUM_PADDLES[layer_index]; p++) {
-
+			
 			paddleNumbers[p - 1] = (double) p;
-			paddleUncs[p - 1] = 0.0;
-			values[p - 1] = getOffset(sector, layer, p);
-			valueUncs[p - 1] = 0.0;
+			offsets[p - 1] = getOffset(sector, layer, p);
+			H1F dtHist = dataGroups.getItem(sector,layer,p).getH1F("vertexDiffHist");
+			if (dtHist.getEntries() != 0) {
+				int maxBin = dtHist.getMaximumBin();
+				centroids[p - 1] = dtHist.getXaxis().getBinCenter(maxBin);
+			}
+			else {
+				centroids[p - 1] = 0.0;
+			}
+				
+			zeroUncs[p - 1] = 0.0;
 		}
 
-		GraphErrors summ = new GraphErrors("summ", paddleNumbers,
-				values, paddleUncs, valueUncs);
-		summ.setMarkerSize(MARKER_SIZE);
-		summ.setLineThickness(MARKER_LINE_WIDTH);
+		GraphErrors offsetSumm = new GraphErrors("offsetSumm", paddleNumbers,
+				offsets, zeroUncs, zeroUncs);
+		offsetSumm.setTitleX("Paddle Number");
+		offsetSumm.setTitleY("New P2P value");
+		offsetSumm.setMarkerSize(MARKER_SIZE);
+		offsetSumm.setLineThickness(MARKER_LINE_WIDTH);
 
-		DataGroup dg = new DataGroup(1,1);
-		dg.addDataSet(summ, 0);
+		GraphErrors centroidSumm = new GraphErrors("centroidSumm", paddleNumbers,
+				centroids, zeroUncs, zeroUncs);
+		centroidSumm.setTitleX("Paddle Number");
+		centroidSumm.setTitleY("Centroid");
+		centroidSumm.setMarkerSize(MARKER_SIZE);
+		centroidSumm.setLineThickness(MARKER_LINE_WIDTH);
+
+		DataGroup dg = new DataGroup(2,1);
+		dg.addDataSet(offsetSumm, 0);
+		dg.addDataSet(centroidSumm, 1);
 		return dg;
 
 	}

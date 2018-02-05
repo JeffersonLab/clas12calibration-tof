@@ -75,7 +75,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			// create all the histograms and functions
 			H2F momHist = 
 					new H2F("momHist","Paddle "+paddle,
-							100, 0.5, 5.0,
+							100, 0.2, 2.0,
 							160, -2.0, 2.0);
 			momHist.setTitleX("p (GeV)");
 			momHist.setTitleY("delta T (ns)");
@@ -83,7 +83,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 
 			H2F vzHist = 
 					new H2F("vzHist","Paddle "+paddle,
-							100, 0.0, 10.0,
+							100, -20.0, 20.0,
 							160, -2.0, 2.0);
 			vzHist.setTitleX("vz (cm)");
 			vzHist.setTitleY("delta T (ns)");
@@ -143,7 +143,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
 
-			if (pad.goodTrackFound()) {
+			if (pad.goodTrackFound() && pad.includeInTiming()) {
 
 				dataGroups.getItem(sector,layer,component).getH2F("momHist").fill(
 						pad.P,

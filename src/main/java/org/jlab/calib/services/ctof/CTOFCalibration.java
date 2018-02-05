@@ -13,6 +13,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -43,8 +47,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 
+import org.jlab.calib.services.TOFCalibration;
+import org.jlab.calib.services.TOFCustomFitPanel;
 import org.jlab.calib.services.TOFPaddle;
 import org.jlab.calib.services.TofPrevConfigPanel;
+import org.jlab.calib.services.TofTimingOptionsPanel;
 import org.jlab.calib.services.configButtonPanel;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.calib.tasks.CalibrationEngine;
@@ -55,6 +62,7 @@ import org.jlab.detector.calib.utils.CalibrationConstantsView;
 import org.jlab.detector.view.DetectorListener;
 import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
+import org.jlab.groot.base.GStyle;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
@@ -71,6 +79,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
                                        CalibrationConstantsListener, DetectorListener,
                                        ChangeListener {
 
+	
     // main panel
     JPanel          pane         = null;
     JFrame  innerConfigFrame = new JFrame("Configure CTOF calibration settings");
@@ -148,8 +157,18 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     public static double minV = -9999.0;
     private JTextField maxVText = new JTextField(5);
     public static double maxV = 9999.0;
+    
+	// Vertex time correction setting
+	JComboBox<String> vertexCorrList = new JComboBox<String>();
+    
     private JTextField minPText = new JTextField(5);
     public static double minP = 0.0;
+
+    JComboBox<String> massAssList = new JComboBox<String>();
+    public static int massAss = 2;
+    public final static int MASS_PION = 0;
+    public final static int MASS_PROTON = 1;
+    
     JComboBox<String> trackChargeList = new JComboBox<String>();
     public static int trackCharge = 2;
     public final static int TRACK_BOTH = 0;
@@ -176,6 +195,18 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 	public static boolean dataTypeKnown = false;    
     
     public CTOFCalibration() {
+    	
+
+		GStyle.getAxisAttributesX().setLabelFontName("Avenir");
+        GStyle.getAxisAttributesY().setLabelFontName("Avenir");
+        GStyle.getAxisAttributesZ().setLabelFontName("Avenir");
+        GStyle.getAxisAttributesX().setTitleFontName("Avenir");
+        GStyle.getAxisAttributesY().setTitleFontName("Avenir");
+        GStyle.getAxisAttributesZ().setTitleFontName("Avenir");
+        GStyle.setGraphicsFrameLineWidth(1);
+        GStyle.getH1FAttributes().setLineWidth(1);
+    	
+    	TOFCalibration.vertexCorr = TOFCalibration.VERTEX_CORR_NO;
         
         configFrame.setModalityType(ModalityType.APPLICATION_MODAL);
         configure();
@@ -316,6 +347,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             engine.writeFile(outputFilename);
             JOptionPane.showMessageDialog(new JPanel(),
                     engine.stepName + " calibration values written to "+outputFilename);
+            writeFiles();
         }
         
         // config settings
@@ -388,10 +420,15 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             }
             if (maxVText.getText().compareTo("") != 0) {
                 maxV = Double.parseDouble(maxVText.getText());
-            }    
+            }   
+            TOFCalibration.vertexCorr = vertexCorrList.getSelectedIndex();
+			
             if (minPText.getText().compareTo("") != 0) {
                 minP = Double.parseDouble(minPText.getText());
             }
+            
+            massAss = massAssList.getSelectedIndex();
+            
             trackCharge = trackChargeList.getSelectedIndex();
             trackPid = pidList.getSelectedIndex();
             if (triggerText.getText().compareTo("") != 0) {
@@ -422,7 +459,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
             System.out.println("Minimum vertex z: "+minV);
             System.out.println("Maximum vertex z: "+maxV);
-            System.out.println("Minimum momentum from tracking (GeV): "+minP);
+            System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(TOFCalibration.vertexCorr));
+			System.out.println("Minimum momentum from tracking (GeV): "+minP);
+            System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(massAss));
             System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
             System.out.println("PID: "+pidList.getItemAt(trackPid));
             System.out.println("Trigger: "+triggerBit);
@@ -484,8 +523,98 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
                 }
             }
         }
+		if (event.getType()==DataEventType.EVENT_STOP) {
+			writeFiles();
+		}
+
     }
 
+	private void writeFiles() {
+		
+    	TofTimingOptionsPanel panel = new TofTimingOptionsPanel();
+    	int result = JOptionPane.showConfirmDialog(null, panel, 
+				"Choose time offsets", JOptionPane.OK_CANCEL_OPTION);
+        
+		if (result == JOptionPane.OK_OPTION) {
+			// write current status of all files
+			// hv
+			engines[HV].writeFile("CTOF_CALIB_GAIN_BALANCE.txt");
+			// atten
+			engines[ATTEN].writeFile("CTOF_CALIB_ATTENUATION.txt");
+			// status
+			CtofHVEventListener hvEng = (CtofHVEventListener) engines[HV];
+			hvEng.saveCounterStatus("CTOF_CALIB_STATUS.txt");
+			// effective velocity
+			engines[VEFF].writeFile("CTOF_CALIB_EFFECTIVE_VELOCITY.txt");
+			// tres
+			CtofRFPadEventListener rfpadEng = (CtofRFPadEventListener) engines[RFPAD];
+			rfpadEng.writeSigmaFile("CTOF_CALIB_TRES.txt");
+			// time offsets
+			writeTimeOffsets("CTOF_CALIB_TIME_OFFSETS.txt", panel.stepOptions);
+			// TDC conv
+			engines[TDC_CONV].writeFile("CTOF_CALIB_TDC_CONV.txt");
+			//
+		}
+	}
+	
+	public void writeTimeOffsets(String filename, int[] stepOptions) {
+		
+		try { 
+			
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+			
+			// get the engines
+			CtofLeftRightEventListener lrEng = (CtofLeftRightEventListener) engines[LEFT_RIGHT];
+			CtofRFPadEventListener rfpadEng = (CtofRFPadEventListener) engines[RFPAD];
+			CtofP2PEventListener p2pEng = (CtofP2PEventListener) engines[P2P];
+			
+			for (int paddle = 1; paddle <= CTOFCalibrationEngine.NUM_PADDLES[0]; paddle++) {
+				
+				double upDown = 0.0;
+				if (stepOptions[0]==0) {
+					upDown = lrEng.leftRightValues.getDoubleValue("upstream_downstream", 1,1,paddle);
+				}
+				else {
+					upDown = lrEng.getCentroid(1, 1, paddle);
+				}
+				double rfpad = 0.0;
+				if (stepOptions[1]==0) {
+					rfpad = rfpadEng.rfpadValues.getDoubleValue("rfpad", 1,1,paddle);
+				}
+				else {
+					rfpad = rfpadEng.getOffset(1, 1, paddle);
+				}
+				double p2p = 0.0;
+				if (stepOptions[2]==0) {
+					p2p = p2pEng.p2pValues.getDoubleValue("paddle2paddle", 1,1,paddle);
+				}
+				else {
+					p2p = p2pEng.getOffset(1, 1, paddle);
+				}
+					
+				String line = new String();
+				line = 1+" "+1+" "+paddle
+						+" "+new DecimalFormat("0.000").format(upDown)
+						+" "+new DecimalFormat("0.000").format(rfpad)
+						+" "+new DecimalFormat("0.000").format(p2p);
+				outputBw.write(line);
+				outputBw.newLine();
+			}
+
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error writing file '" );                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}
+
+	}	
+    
     private String todayString() {
         Date today = new Date();
         DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
@@ -704,129 +833,166 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.anchor = c.NORTHWEST;
         c.insets = new Insets(3,3,3,3);
         // CTOF z position
+        int y=0;
         c.gridx = 0;
-        c.gridy = 0;
+        c.gridy = y;
         trPanel.add(new JLabel("CTOF Center z (cm):"),c);
         ctofCenterText.addActionListener(this);
         ctofCenterText.setText("-19.3");
         c.gridx = 1;
-        c.gridy = 0;
+        c.gridy = y;
         trPanel.add(ctofCenterText,c);
         // Chi squared
+        y++;
         c.gridx = 0;
-        c.gridy = 1;
+        c.gridy = y;
         trPanel.add(new JLabel("Maximum reduced chi squared for track:"),c);
         rcsText.addActionListener(this);
         rcsText.setText("75.0");
         c.gridx = 1;
-        c.gridy = 1;
+        c.gridy = y;
         trPanel.add(rcsText,c);
         c.gridx = 2;
-        c.gridy = 1;
+        c.gridy = y;
         trPanel.add(new JLabel("Enter 0 for no cut"),c);
         // vertex min
+        y++;
         c.gridx = 0;
-        c.gridy = 2;
+        c.gridy = y;
         trPanel.add(new JLabel("Minimum vertex z:"),c);
         minVText.addActionListener(this);
         minVText.setText("-10.0");
         c.gridx = 1;
-        c.gridy = 2;
+        c.gridy = y;
         trPanel.add(minVText,c);
         // vertex max
+        y++;
         c.gridx = 0;
-        c.gridy = 3;
+        c.gridy = y;
         trPanel.add(new JLabel("Maximum vertex z:"),c);
         maxVText.addActionListener(this);
         maxVText.setText("10.0");
         c.gridx = 1;
-        c.gridy = 3;
+        c.gridy = y;
         trPanel.add(maxVText,c);
+		// Vertex time correction
+		y++;
+		c.gridx = 0;
+		c.gridy = y;
+		trPanel.add(new JLabel("Vertex time correction?:"),c);
+		vertexCorrList.addItem("Yes");
+		vertexCorrList.addItem("No");
+		vertexCorrList.addActionListener(this);
+		c.gridx = 1;
+		c.gridy = y;
+		trPanel.add(vertexCorrList,c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""),c);
         // p min
+        y++;
         c.gridx = 0;
-        c.gridy = 4;
+        c.gridy = y;
         trPanel.add(new JLabel("Minimum momentum from tracking (GeV):"),c);
         minPText.addActionListener(this);
         minPText.setText("0.6");
         c.gridx = 1;
-        c.gridy = 4;
+        c.gridy = y;
         trPanel.add(minPText,c);
-        // track charge
+        // mass assumption
+        y++;
         c.gridx = 0;
-        c.gridy = 5;
+        c.gridy = y;
+        trPanel.add(new JLabel("Mass assumption for beta calculation:"),c);
+        massAssList.addItem("Pion");
+        massAssList.addItem("Proton");
+        massAssList.addActionListener(this);
+        c.gridx = 1;
+        c.gridy = y;
+        trPanel.add(massAssList,c);
+        // track charge
+        y++;
+        c.gridx = 0;
+        c.gridy = y;
         trPanel.add(new JLabel("Track charge:"),c);
         trackChargeList.addItem("Both");
         trackChargeList.addItem("Negative");
         trackChargeList.addItem("Positive");
         trackChargeList.addActionListener(this);
         c.gridx = 1;
-        c.gridy = 5;
+        c.gridy = y;
         trPanel.add(trackChargeList,c);
         // PID
+        y++;
         c.gridx = 0;
-        c.gridy = 6;
+        c.gridy = y;
         trPanel.add(new JLabel("PID:"),c);
         pidList.addItem("Both");
         pidList.addItem("Electrons");
         pidList.addItem("Pions");
         pidList.addActionListener(this);
         c.gridx = 1;
-        c.gridy = 6;
+        c.gridy = y;
         trPanel.add(pidList,c);
         c.gridx = 2;
-        c.gridy = 6;
+        c.gridy = y;
         trPanel.add(new JLabel("Not currently used"),c);
         // trigger
+        y++;
         c.gridx = 0;
-        c.gridy = 7;
+        c.gridy = y;
         trPanel.add(new JLabel("Trigger:"),c);
         triggerText.addActionListener(this);
         c.gridx = 1;
-        c.gridy = 7;
+        c.gridy = y;
         trPanel.add(triggerText,c);        
         c.gridx = 2;
-        c.gridy = 7;
+        c.gridy = y;
         trPanel.add(new JLabel("Not currently used"),c);
 
         // graph type
+        y++;
         c.gridx = 0;
-        c.gridy = 8;
+        c.gridy = y;
         trPanel.add(new JLabel("2D histogram graph method:"),c);
         c.gridx = 1;
-        c.gridy = 8;
+        c.gridy = y;
         fitList.addItem("Max position of slices");
         fitList.addItem("Gaussian mean of slices");
         fitList.addActionListener(this);
         trPanel.add(fitList,c);
         // fit mode
+        y++;
         c.gridx = 0;
-        c.gridy = 9;
+        c.gridy = y;
         trPanel.add(new JLabel("Slicefitter mode:"),c);
         c.gridx = 1;
-        c.gridy = 9;
+        c.gridy = y;
         //fitModeList.addItem("L");
         fitModeList.addItem("");
         fitModeList.addItem("N");
         trPanel.add(fitModeList,c);
         fitModeList.addActionListener(this);
         // min events
+        y++;
         c.gridx = 0;
-        c.gridy = 10;
+        c.gridy = y;
         trPanel.add(new JLabel("Minimum events per slice:"),c);
         minEventsText.addActionListener(this);
         minEventsText.setText("10");
         c.gridx = 1;
-        c.gridy = 10;
+        c.gridy = y;
         trPanel.add(minEventsText,c);
         
 		// Desired MIP peak position
+        y++;
 		c.gridx = 0;
-		c.gridy = 11;
+		c.gridy = y;
 		trPanel.add(new JLabel("Desired MIP peak position:"),c);
 		c.gridx = 1;
-		c.gridy = 11;
+		c.gridy = y;
 		mipPeakText.addActionListener(this);
-		mipPeakText.setText("2000");
+		mipPeakText.setText("1500");
 		trPanel.add(mipPeakText,c);    
         
         JPanel butPage3 = new configButtonPanel(this, true, "Finish");

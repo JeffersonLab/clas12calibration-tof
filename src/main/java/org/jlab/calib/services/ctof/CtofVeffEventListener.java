@@ -224,7 +224,7 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
             int layer = paddle.getDescriptor().getLayer();
             int component = paddle.getDescriptor().getComponent();
            
-            if (paddle.goodTrackFound()) {
+            if (paddle.goodTrackFound() && paddle.includeInTiming()) {
                 dataGroups.getItem(sector,layer,component).getH2F("veff").fill(
                         paddle.zPosCTOF(), 
                         paddle.veffHalfTimeDiff());

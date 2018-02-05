@@ -165,8 +165,10 @@ public class CtofAttenEventListener extends CTOFCalibrationEngine {
 //			System.out.println("timeLeftAfterTW "+paddle.timeLeftAfterTW()+" timeRightAfterTW "+paddle.timeRightAfterTW());
 //			
 //			paddle.show();
-			dataGroups.getItem(sector,layer,component).getH2F("atten").fill(
-					paddle.position(), paddle.logRatio());
+			if (paddle.includeInTiming()) {
+				dataGroups.getItem(sector,layer,component).getH2F("atten").fill(
+						paddle.position(), paddle.logRatio());
+			}
 
 			// cooked data - position from timing and veff
 			//			if (paddle.recPosition()!=0) {
