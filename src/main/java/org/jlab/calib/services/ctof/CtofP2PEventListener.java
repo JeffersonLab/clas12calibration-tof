@@ -156,32 +156,26 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 		}
 	}
 
-	@Override
-	public void processEvent(DataEvent event) {
+    @Override
+    public void processEvent(DataEvent event) {
 
-		List<TOFPaddle> ctofPaddleList = DataProvider.getPaddleList(event);
-		List<TOFPaddle> ftofPaddleList = org.jlab.calib.services.DataProvider.getPaddleList(event);
-		processP2PPaddleList(ctofPaddleList, ftofPaddleList);
+        List<TOFPaddle> paddleList = DataProvider.getPaddleList(event);
+        processPaddleList(paddleList);
+    }
+    
+    @Override
+	public void processPaddleList(List<TOFPaddle> paddleList) {
 
-	}
+		for (TOFPaddle paddle : paddleList) {
 
-	public void processP2PPaddleList(List<TOFPaddle> ctofPaddleList, List<TOFPaddle> ftofPaddleList) {
+			if (paddle.goodTrackFound() && paddle.includeInCTOFTiming()) {   
 
-		for (TOFPaddle ctofPaddle : ctofPaddleList) {
+				int sector = paddle.getDescriptor().getSector();
+				int layer = paddle.getDescriptor().getLayer();
+				int component = paddle.getDescriptor().getComponent();
 
-			if (ctofPaddle.goodTrackFound() && ctofPaddle.includeInTiming()) {   
-
-				int sector = ctofPaddle.getDescriptor().getSector();
-				int layer = ctofPaddle.getDescriptor().getLayer();
-				int component = ctofPaddle.getDescriptor().getComponent();
-
-				for (TOFPaddle ftofPaddle : ftofPaddleList) {
-					
-					if (ftofPaddle.goodTrackFound()) {
-						dataGroups.getItem(sector,layer,component).getH1F("vertexDiffHist").fill(
-								ctofPaddle.startTimeP2PCorr() - ftofPaddle.reconStartTime());
-					}
-				}
+				dataGroups.getItem(sector,layer,component).getH1F("vertexDiffHist").fill(
+								paddle.startTimeP2PCorr() - paddle.ST_TIME);
 			}
 		}
 	}    

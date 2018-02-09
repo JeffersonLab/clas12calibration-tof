@@ -540,28 +540,34 @@ ChangeListener {
 	}
 	
 	private void writeFiles() {
-		// write current status of all files
-		// hv
-		engines[HV].writeFile("FTOF_CALIB_GAIN_BALANCE.txt");
-		// atten
-		engines[ATTEN].writeFile("FTOF_CALIB_ATTENUATION.txt");
-		// status
-		engines[HV].saveCounterStatus("FTOF_CALIB_STATUS.txt");
-		// effective velocity
-		engines[VEFF].writeFile("FTOF_CALIB_EFFECTIVE_VELOCITY.txt");
-		// time walk
-		engines[TW].writeFile("FTOF_CALIB_TIME_WALK.txt");
-		// tres
-		TofRFPadEventListener rfpadEng = (TofRFPadEventListener) engines[RFPAD];
-		rfpadEng.writeSigmaFile("FTOF_CALIB_TRES.txt");
-		// time offsets
-		writeTimeOffsets("FTOF_CALIB_TIME_OFFSETS.txt");
-		// TDC conv
-		engines[TDC_CONV].writeFile("FTOF_CALIB_TDC_CONV.txt");
-		//
+		
+    	TofTimingOptionsPanel panel = new TofTimingOptionsPanel();
+    	int result = JOptionPane.showConfirmDialog(null, panel, 
+				"Choose time offsets", JOptionPane.OK_CANCEL_OPTION);
+
+		if (result == JOptionPane.OK_OPTION) {
+
+			// write current status of all files
+			// hv
+			engines[HV].writeFile("FTOF_CALIB_GAIN_BALANCE.txt");
+			// atten
+			engines[ATTEN].writeFile("FTOF_CALIB_ATTENUATION.txt");
+			// status
+			engines[HV].saveCounterStatus("FTOF_CALIB_STATUS.txt");
+			// effective velocity
+			engines[VEFF].writeFile("FTOF_CALIB_EFFECTIVE_VELOCITY.txt");
+			// time walk
+			engines[TW].writeFile("FTOF_CALIB_TIME_WALK.txt");
+			// tres
+			TofRFPadEventListener rfpadEng = (TofRFPadEventListener) engines[RFPAD];
+			rfpadEng.writeSigmaFile("FTOF_CALIB_TRES.txt");
+			// time offsets
+			writeTimeOffsets("FTOF_CALIB_TIME_OFFSETS.txt", panel.stepOptions);
+			// TDC conv
+			engines[TDC_CONV].writeFile("FTOF_CALIB_TDC_CONV.txt");
+		}
 	}
-	
-	public void writeTimeOffsets(String filename) {
+	public void writeTimeOffsets(String filename, int[] stepOptions) {
 		
 		try { 
 			
@@ -579,11 +585,34 @@ ChangeListener {
 				for (int layer = 1; layer <= 3; layer++) {
 					int layer_index = layer - 1;
 					for (int paddle = 1; paddle <= TOFCalibrationEngine.NUM_PADDLES[layer_index]; paddle++) {
+						
+						double leftRight = 0.0;
+						if (stepOptions[0]==0) {
+							leftRight = lrEng.leftRightValues.getDoubleValue("left_right", sector,layer,paddle);
+						}
+						else {
+							leftRight = lrEng.getCentroid(sector,layer,paddle);
+						}
+						double rfpad = 0.0;
+						if (stepOptions[1]==0) {
+							rfpad = rfpadEng.rfpadValues.getDoubleValue("rfpad", sector,layer,paddle);
+						}
+						else {
+							rfpad = rfpadEng.getOffset(sector,layer,paddle);
+						}
+						double p2p = 0.0;
+						if (stepOptions[2]==0) {
+							p2p = p2pEng.p2pValues.getDoubleValue("paddle2paddle", sector,layer,paddle);
+						}
+						else {
+							p2p = p2pEng.getOffset(sector,layer,paddle);
+						}
+
 						String line = new String();
 						line = sector+" "+layer+" "+paddle
-								+" "+new DecimalFormat("0.000").format(lrEng.getCentroid(sector, layer, paddle))
-								+" "+new DecimalFormat("0.000").format(rfpadEng.getOffset(sector, layer, paddle))
-								+" "+new DecimalFormat("0.000").format(p2pEng.getOffset(sector, layer, paddle));
+								+" "+new DecimalFormat("0.000").format(leftRight)
+								+" "+new DecimalFormat("0.000").format(rfpad)
+								+" "+new DecimalFormat("0.000").format(p2p);
 						outputBw.write(line);
 						outputBw.newLine();
 					}

@@ -460,7 +460,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	}
 
 	public void showPlots(int sector, int layer) {
-
+		
 		int layer_index = layer - 1;
 		EmbeddedCanvas[] fitCanvases;
 		fitCanvases = new EmbeddedCanvas[3];
@@ -490,7 +490,6 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 			}
 
 		}
-
 		JFrame frame = new JFrame(stepName + " " + LAYER_NAME[layer - 1]
 				+ " Sector " + sector);
 		frame.setSize(1000, 800);

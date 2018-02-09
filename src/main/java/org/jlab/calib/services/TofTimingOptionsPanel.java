@@ -36,7 +36,8 @@ public class TofTimingOptionsPanel extends JPanel implements ActionListener {
 		c.gridx = 2;
 		add(new JLabel("New"),c);
 				
-        String[] stepNames = {"Up down","RF Paddle","P2P"};
+        String[] stepNames = {"Left Right","RF Paddle","P2P"};
+        if (TOFPaddle.tof == "CTOF") stepNames[0] = "Up Down";
         for (int i=0; i< 3; i++) {
             c.gridx = 0; c.gridy = i+1;
             c.anchor = c.WEST;

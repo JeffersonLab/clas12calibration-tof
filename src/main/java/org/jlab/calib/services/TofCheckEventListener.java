@@ -229,7 +229,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 		else if (showPlotType == "CHECK_ADCL") { 
 			hist = dataGroups.getItem(sector,layer,paddle).getH2F("adcLHist");
 		}
-		else if (showPlotType == "CHECK_ADCR") { 
+		else if (showPlotType == "CHECK_ADCR") {
 			hist = dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist");
 		}
 		

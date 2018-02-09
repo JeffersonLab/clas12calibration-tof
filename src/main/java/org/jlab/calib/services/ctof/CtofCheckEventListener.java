@@ -143,31 +143,31 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
 
-			if (pad.goodTrackFound() && pad.includeInTiming()) {
+			if (pad.goodTrackFound() && pad.includeInCTOFTiming()) {
 
 				dataGroups.getItem(sector,layer,component).getH2F("momHist").fill(
 						pad.P,
-						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 				dataGroups.getItem(sector,layer,component).getH2F("vzHist").fill(
 						pad.VERTEX_Z,
-						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 				dataGroups.getItem(sector,layer,component).getH2F("hitHist").fill(
 						pad.paddleY(),
-						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 				dataGroups.getItem(sector,layer,component).getH2F("pathHist").fill(
 						pad.PATH_LENGTH,
-						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 				dataGroups.getItem(sector,layer,component).getH2F("adcLHist").fill(
 						pad.ADCL,
-						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 				dataGroups.getItem(sector,layer,component).getH2F("adcRHist").fill(
 						pad.ADCR,
-						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 			}
 		}

@@ -149,13 +149,13 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			H1F fineHistRaw = 
 					new H1F("fineHistRaw","Fine offset Paddle "+paddle,
 							160, -2.0, 2.0);
-			fineHistRaw.setTitleX("RF time - vertex time modulo beam bucket (ns)");
+			fineHistRaw.setTitleX("ST time - vertex time modulo beam bucket (ns)");
 			dg.addDataSet(fineHistRaw, 0);
 
 			H1F fineHist = 
 					new H1F("fineHist","Fine offset Paddle "+paddle,
 							160, -2.0, 2.0);
-			fineHist.setTitleX("RF time - vertex time modulo beam bucket (ns)");
+			fineHist.setTitleX("ST time - vertex time modulo beam bucket (ns)");
 			dg.addDataSet(fineHist, 1);
 
 			// create a dummy function in case there's no data to fit 
@@ -193,10 +193,10 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			int component = pad.getDescriptor().getComponent();
 
 			// fill the fine hists
-			if (pad.goodTrackFound() && pad.includeInTiming()) {
+			if (pad.goodTrackFound() && pad.includeInCTOFTiming()) {
 				//pad.show();
 				dataGroups.getItem(sector,layer,component).getH1F("fineHistRaw").fill(
-						(pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refSTTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 			}
 		}
 	}    
