@@ -75,7 +75,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			// create all the histograms and functions
 			H2F momHist = 
 					new H2F("momHist","Paddle "+paddle,
-							100, 0.2, 2.0,
+							100, CTOFCalibration.minP, CTOFCalibration.maxP,
 							160, -2.0, 2.0);
 			momHist.setTitleX("p (GeV)");
 			momHist.setTitleY("delta T (ns)");

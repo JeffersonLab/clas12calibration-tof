@@ -148,16 +148,8 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
 			
-			//if (pad.TDCL==26050 && pad.TDCR==25447) {
-			//if (pad.paddleY()>100.0 && pad.getDescriptor().getLayer()==2) {
-				//System.out.println("Check process Paddle SLC "+sector+layer+component);
-				//pad.showTWCalc();
-				//double val = (pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET;
-				//System.out.println("Check plot value (delta T RF corrected modulo beam bucket) "+val);	
-			//}
-
 			if (pad.goodTrackFound()) {
-
+				
 				dataGroups.getItem(sector,layer,component).getH2F("momHist").fill(
 						 pad.P,
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);

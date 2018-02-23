@@ -207,12 +207,10 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			//System.out.println("RF Pad process Paddle SLC "+sector+layer+component);
 			//pad.show();
 
-			if (pad.goodTrackFound() && hitInSection(pad)) {
+			if (pad.goodTrackFound()) {
 				
 				dataGroups.getItem(sector,layer,component).getH1F("fineHistRaw").fill(
 						(pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
-				//double val = (pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET;
-				//System.out.println("Plotting RFPad "+val);
 			}
 		}
 	}    

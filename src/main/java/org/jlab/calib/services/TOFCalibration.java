@@ -97,6 +97,7 @@ ChangeListener {
 			new TofLeftRightEventListener(),
 			new TofVeffEventListener(),
 			new TofTimeWalkEventListener(),
+			new TofTWPosEventListener(),
 			new TofRFPadEventListener(),
 			new TofP2PEventListener(),
 			new TofCheckEventListener()};
@@ -108,9 +109,10 @@ ChangeListener {
 	public final int LEFT_RIGHT = 3;
 	public final int VEFF = 4;
 	public final int TW = 5;
-	public final int RFPAD = 6;
-	public final int P2P = 7;
-	public final int CHECK = 8;
+	public final int TWPOS = 6;
+	public final int RFPAD = 7;
+	public final int P2P = 8;
+	public final int CHECK = 9;
 
 	String[] dirs = {"/calibration/ftof/gain_balance",
 			"/calibration/ftof/attenuation",
@@ -118,9 +120,10 @@ ChangeListener {
 			"/calibration/ftof/timing_offset/left_right",
 			"/calibration/ftof/effective_velocity",
 			"/calibration/ftof/time_walk",
+			"/calibration/ftof/time_walk/position",
 			"/calibration/ftof/timing_offset/rfpad",
-	"/calibration/ftof/timing_offset/P2P",
-	"/calibration/ftof/timing_offset/check"};
+			"/calibration/ftof/timing_offset/P2P",
+			"/calibration/ftof/timing_offset/check"};
 
 	String selectedDir = "None";
 	int selectedSector = 1;
@@ -144,7 +147,7 @@ ChangeListener {
 
 	// configuration settings
 	JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(),
-			new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox()};    
+			new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(), new JCheckBox()};    
 	private JTextField rcsText = new JTextField(5);
 	public static double maxRcs = 0.0;
 	private JTextField minVText = new JTextField(5);
@@ -172,14 +175,6 @@ ChangeListener {
 	public final static int PID_PI = 2;
 	private JTextField triggerText = new JTextField(10);
 	public static int triggerBit = 0;    
-	JComboBox<String> counterSectionList = new JComboBox<String>();
-	private JTextField sectionWidthText = new JTextField(5);
-
-	// Time walk method
-	JComboBox<String> twMethodList = new JComboBox<String>();
-	public static int twMethod = 0;
-	public final static int TW_POS_INDEP = 0;
-	public final static int TW_POS_DEP = 1;
 
 	JComboBox<String> fitList = new JComboBox<String>();
 	JComboBox<String> fitModeList = new JComboBox<String>();
@@ -304,6 +299,8 @@ ChangeListener {
 			engine = engines[P2P];
         } else if (selectedDir == dirs[CHECK]) {
             engine = engines[CHECK];
+        } else if (selectedDir == dirs[TWPOS]) {
+            engine = engines[TWPOS];
 		}
 
 		return engine;
@@ -423,7 +420,6 @@ ChangeListener {
 			}
 			trackCharge = trackChargeList.getSelectedIndex();
 			trackPid = pidList.getSelectedIndex();
-			twMethod = twMethodList.getSelectedIndex();
 
 			if (triggerText.getText().compareTo("") != 0) {
 				triggerBit = Integer.parseInt(triggerText.getText());
@@ -440,13 +436,6 @@ ChangeListener {
 			if (minEventsText.getText().compareTo("") != 0) {
 				engines[TW].fitMinEvents = Integer.parseInt(minEventsText.getText());
 			}
-			engines[TW].counterSection = counterSectionList.getSelectedIndex();
-			engines[RFPAD].counterSection = counterSectionList.getSelectedIndex();
-			if (sectionWidthText.getText().compareTo("") != 0) {
-				engines[TW].sectionWidth = Double.parseDouble(sectionWidthText.getText());
-				engines[RFPAD].sectionWidth = Double.parseDouble(sectionWidthText.getText());
-			}
-
 
 			engines[VEFF].fitMethod = fitList.getSelectedIndex();
 			engines[VEFF].fitMode = (String) fitModeList.getSelectedItem();
@@ -478,9 +467,6 @@ ChangeListener {
 			System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
 			System.out.println("PID: "+pidList.getItemAt(trackPid));
 			System.out.println("Trigger: "+triggerBit);
-			System.out.println("Counter section: "+counterSectionList.getSelectedItem());
-			System.out.println("Position dependent TW correction?: "+twMethodList.getItemAt(twMethod));
-			System.out.println("Width of section (cm): "+engines[TW].sectionWidth);
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
 			System.out.println("Slicefitter mode: "+fitModeList.getSelectedItem());
 			System.out.println("Minimum events per slice: "+minEventsText.getText());
@@ -549,14 +535,15 @@ ChangeListener {
 
 			// write current status of all files
 			// hv
-			engines[HV].writeFile("FTOF_CALIB_GAIN_BALANCE.txt");
+			//engines[HV].writeFile("FTOF_CALIB_GAIN_BALANCE.txt");
 			// atten
-			engines[ATTEN].writeFile("FTOF_CALIB_ATTENUATION.txt");
+			//engines[ATTEN].writeFile("FTOF_CALIB_ATTENUATION.txt");
 			// status
-			engines[HV].saveCounterStatus("FTOF_CALIB_STATUS.txt");
+			//engines[HV].saveCounterStatus("FTOF_CALIB_STATUS.txt");
 			// effective velocity
-			engines[VEFF].writeFile("FTOF_CALIB_EFFECTIVE_VELOCITY.txt");
+			//engines[VEFF].writeFile("FTOF_CALIB_EFFECTIVE_VELOCITY.txt");
 			// time walk
+			// ** still to bring together TW and TWPOS
 			engines[TW].writeFile("FTOF_CALIB_TIME_WALK.txt");
 			// tres
 			TofRFPadEventListener rfpadEng = (TofRFPadEventListener) engines[RFPAD];
@@ -564,7 +551,7 @@ ChangeListener {
 			// time offsets
 			writeTimeOffsets("FTOF_CALIB_TIME_OFFSETS.txt", panel.stepOptions);
 			// TDC conv
-			engines[TDC_CONV].writeFile("FTOF_CALIB_TDC_CONV.txt");
+			//engines[TDC_CONV].writeFile("FTOF_CALIB_TDC_CONV.txt");
 		}
 	}
 	public void writeTimeOffsets(String filename, int[] stepOptions) {
@@ -831,6 +818,7 @@ ChangeListener {
 				new TofPrevConfigPanel(new TOFCalibrationEngine()), 
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
+				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine())};
 
 		for (int i=3; i< engines.length-1; i++) {  // skip HV, attenuation, TDC, check
@@ -947,35 +935,6 @@ ChangeListener {
 		c.gridx = 2;
 		c.gridy = y;
 		trPanel.add(new JLabel("Not currently used"),c);
-		// counter section
-		y++;
-		c.gridx = 0;
-		c.gridy = y;
-		trPanel.add(new JLabel("Counter section:"),c);
-		c.gridx = 1;
-		c.gridy = y;
-		counterSectionList.addItem("Full counter");
-		counterSectionList.addItem("Center section");
-		counterSectionList.addItem("Left end");
-		counterSectionList.addItem("Right end");
-		trPanel.add(counterSectionList,c);
-		counterSectionList.addActionListener(this);
-		c.gridx = 2;
-		c.gridy = y;
-		trPanel.add(new JLabel("Applied to Time walk and RF paddle"),c);
-		// position cut
-		y++;
-		c.gridx = 0;
-		c.gridy = y;
-		trPanel.add(new JLabel("Section width (cm):"),c);
-		sectionWidthText.addActionListener(this);
-		sectionWidthText.setText("20.0");
-		c.gridx = 1;
-		c.gridy = y;
-		trPanel.add(sectionWidthText,c);            
-		c.gridx = 2;
-		c.gridy = y;
-		trPanel.add(new JLabel("Applied to Time walk and RF paddle"),c);
 
 		// graph type
 		y++;
@@ -1010,23 +969,6 @@ ChangeListener {
 		c.gridx = 1;
 		c.gridy = y;
 		trPanel.add(minEventsText,c);
-
-		// Position dependent time walk
-		y++;
-		c.gridx = 0;
-		c.gridy = y;
-		trPanel.add(new JLabel("Position dependent TW correction?:"),c);
-		twMethodList.addItem("No");
-		twMethodList.addItem("Yes");
-		twMethodList.addActionListener(this);
-		c.gridx = 1;
-		c.gridy = y;
-		trPanel.add(twMethodList,c);
-		c.gridx = 2;
-		c.gridy = y;
-		//trPanel.add(new JLabel("Applied to subtracted nominal correction"),c);
-		//trPanel.add(new JLabel("<html>Applied to subtracted nominal correction<br/> in time walk plot</html>"),c);
-		trPanel.add(new JLabel(""),c);
 		
 		// Desired MIP peak position
 		y++;

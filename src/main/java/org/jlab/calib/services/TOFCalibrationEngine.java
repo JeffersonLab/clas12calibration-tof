@@ -78,13 +78,6 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public int fitMinEvents = 0;
 	public double maxGraphError = 0.1;
 	public double fitSliceMaxError = 0.3;
-	public static int FULL_COUNTER = 0;
-	public static int CENTRE_SECTION = 1;
-	public static int LEFT_SECTION = 2;
-	public static int RIGHT_SECTION = 3;
-	public int counterSection = FULL_COUNTER;
-	public double sectionWidth = 20.0;
-	//public double[] dummyPoint = {0.0}; // dummy point for graph to prevent canvas throwing error when drawing dataGroup
 
 	// Values from previous calibration
 	// Need to be static as used by all engines
@@ -94,6 +87,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public static CalibrationConstants veffValues;
 	public static CalibrationConstants timeWalkValues;
 	public static CalibrationConstants rfpadValues;
+	public static CalibrationConstants twposValues;
 
 	// Calculated counter status values
 	public static IndexedList<Integer> adcLeftStatus = new IndexedList<Integer>(3);
@@ -116,7 +110,9 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 				"paddle2paddle/F");
 		rfpadValues =	new CalibrationConstants(3,
 				"rfpad/F");
-
+		twposValues = new CalibrationConstants(3,
+				"tw1_left/F:tw2_left/F:tw3_left/F:tw1_right/F:tw2_right/F:tw3_right/F");
+		
 	}
 
 	public void populatePrevCalib() {
@@ -526,45 +522,4 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 		}
 	}
 
-	public boolean hitInSection(TOFPaddle paddle) {
-		// is the hit within the desired counter section?
-
-		//		System.out.println("hitInSection");
-		//		System.out.println("SLC "+paddle.getDescriptor().getSector()+" "+paddle.getDescriptor().getLayer()+" "+paddle.getDescriptor().getComponent());
-		//		System.out.println("paddleY "+paddle.paddleY());
-		//		System.out.println("sectionWidth "+sectionWidth);
-		//		System.out.println("counterSection "+counterSection);
-		//		System.out.println("paddleLength "+paddle.paddleLength());
-		//		System.out.println("old >= "+(paddle.paddleLength()/2.0 - 10.0 - sectionWidth));
-		//		System.out.println("old <= "+(paddle.paddleLength()/2.0 - 10.0));
-		//		System.out.println("left >= "+(-paddle.paddleLength()/2.0 + 10.0));
-		//		System.out.println("left <= "+(-paddle.paddleLength()/2.0 + 10.0 + sectionWidth));
-		//		System.out.println("right >= "+(paddle.paddleLength()/2.0 - 10.0 - sectionWidth));
-		//		System.out.println("right <= "+(paddle.paddleLength()/2.0 - 10.0));
-
-
-
-		boolean hitInSection = true;
-		if (counterSection==FULL_COUNTER) {
-			hitInSection = true;
-		}
-		else if (paddle.paddleY() <= -paddle.paddleLength()/2.0 + 10.0 ||
-				paddle.paddleY() >= paddle.paddleLength()/2.0 - 10.0) {
-			hitInSection = false;
-		}
-		else if ( 
-				(counterSection==CENTRE_SECTION && Math.abs(paddle.paddleY()) <= sectionWidth/2.0) ||
-				(counterSection==LEFT_SECTION && 
-				paddle.paddleY() <= -paddle.paddleLength()/2.0 + 10.0 + sectionWidth) || 
-				(counterSection==RIGHT_SECTION && 
-				paddle.paddleY() >= paddle.paddleLength()/2.0 - 10.0 - sectionWidth)) {
-			hitInSection = true;
-		}
-		else {
-			hitInSection = false;
-		}
-
-		//		System.out.println("hitInSection return "+hitInSection);
-		return hitInSection;
-	}
 }

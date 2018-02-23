@@ -4,6 +4,7 @@ import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -43,6 +44,9 @@ implements ActionListener, FocusListener {
 
 		this.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
+		c.weighty = 1;
+		c.anchor = c.NORTHWEST;
+		c.insets = new Insets(2,2,2,2);
 
 		defaultRad.setSelected(true);
 		ButtonGroup radGroup = new ButtonGroup();
@@ -53,46 +57,37 @@ implements ActionListener, FocusListener {
 		fileRad.addActionListener(this);
 		dbRad.addActionListener(this);
 
-		JPanel drPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		drPanel.add(defaultRad);
-		c.anchor = c.LINE_START;
 		c.gridx = 0;
 		c.gridy = 0;
-		this.add(drPanel,c);
-		c.gridx = 1;
-		c.gridy = 0;
-		this.add(new JPanel(),c);
-
-		JPanel frPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		frPanel.add(fileRad);
+		add(defaultRad,c);
 		c.gridx = 0;
 		c.gridy = 1;
-		this.add(frPanel,c);
-		JPanel filePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		add(fileRad,c);
+		c.gridx = 1;
+		c.gridy = 1;
 		fileDisp.setEditable(false);
 		fileDisp.setText("None selected");
-		filePanel.add(new JLabel("Selected file: "));
-		filePanel.add(fileDisp);
+		add(new JLabel("Selected file: "),c);
+		c.gridx = 2;
+		c.gridy = 1;
+		add(fileDisp,c);
+		c.gridx = 3;
+		c.gridy = 1;
 		JButton fileButton = new JButton("Select File");
 		fileButton.addActionListener(this);
-		filePanel.add(fileButton,c);
-		c.gridx = 1;
-		c.gridy = 1;
-		this.add(filePanel,c);
+		add(fileButton,c);
 
-		JPanel dbrPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		dbrPanel.add(dbRad);
 		c.gridx = 0;
 		c.gridy = 2;
-		this.add(dbrPanel,c);
-		JPanel runPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		add(dbRad,c);
 		JLabel runLabel = new JLabel("Run number:");
-		runPanel.add(runLabel);
-		runPanel.add(runText);
-		runText.addFocusListener(this);
 		c.gridx = 1;
 		c.gridy = 2;
-		this.add(runPanel,c);
+		add(runLabel,c);
+		c.gridx = 2;
+		c.gridy = 2;
+		add(runText,c);
+		runText.addFocusListener(this);
 
 		this.setBorder(BorderFactory.createTitledBorder(engine.stepName));
 

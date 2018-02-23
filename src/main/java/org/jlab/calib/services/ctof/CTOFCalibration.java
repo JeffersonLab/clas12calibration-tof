@@ -163,7 +163,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     
     private JTextField minPText = new JTextField(5);
     public static double minP = 0.0;
-
+    private JTextField maxPText = new JTextField(5);
+    public static double maxP = 0.0;
+        
     JComboBox<String> massAssList = new JComboBox<String>();
     public static int massAss = 2;
     public final static int MASS_PION = 0;
@@ -426,6 +428,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             if (minPText.getText().compareTo("") != 0) {
                 minP = Double.parseDouble(minPText.getText());
             }
+            if (maxPText.getText().compareTo("") != 0) {
+                maxP = Double.parseDouble(maxPText.getText());
+            }
             
             massAss = massAssList.getSelectedIndex();
             
@@ -461,6 +466,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("Maximum vertex z: "+maxV);
             //System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(TOFCalibration.vertexCorr));
 			System.out.println("Minimum momentum from tracking (GeV): "+minP);
+			System.out.println("Maximum momentum from tracking (GeV): "+maxP);
             System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(massAss));
             System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
             System.out.println("PID: "+pidList.getItemAt(trackPid));
@@ -538,21 +544,21 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 		if (result == JOptionPane.OK_OPTION) {
 			// write current status of all files
 			// hv
-			engines[HV].writeFile("CTOF_CALIB_GAIN_BALANCE.txt");
+			//engines[HV].writeFile("CTOF_CALIB_GAIN_BALANCE.txt");
 			// atten
-			engines[ATTEN].writeFile("CTOF_CALIB_ATTENUATION.txt");
+			//engines[ATTEN].writeFile("CTOF_CALIB_ATTENUATION.txt");
 			// status
-			CtofHVEventListener hvEng = (CtofHVEventListener) engines[HV];
-			hvEng.saveCounterStatus("CTOF_CALIB_STATUS.txt");
+			//CtofHVEventListener hvEng = (CtofHVEventListener) engines[HV];
+			//hvEng.saveCounterStatus("CTOF_CALIB_STATUS.txt");
 			// effective velocity
-			engines[VEFF].writeFile("CTOF_CALIB_EFFECTIVE_VELOCITY.txt");
+			//engines[VEFF].writeFile("CTOF_CALIB_EFFECTIVE_VELOCITY.txt");
 			// tres
-			CtofRFPadEventListener rfpadEng = (CtofRFPadEventListener) engines[RFPAD];
-			rfpadEng.writeSigmaFile("CTOF_CALIB_TRES.txt");
+			//CtofRFPadEventListener rfpadEng = (CtofRFPadEventListener) engines[RFPAD];
+			//rfpadEng.writeSigmaFile("CTOF_CALIB_TRES.txt");
 			// time offsets
 			writeTimeOffsets("CTOF_CALIB_TIME_OFFSETS.txt", panel.stepOptions);
 			// TDC conv
-			engines[TDC_CONV].writeFile("CTOF_CALIB_TDC_CONV.txt");
+			//engines[TDC_CONV].writeFile("CTOF_CALIB_TDC_CONV.txt");
 			//
 		}
 	}
@@ -895,10 +901,20 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridy = y;
         trPanel.add(new JLabel("Minimum momentum from tracking (GeV):"),c);
         minPText.addActionListener(this);
-        minPText.setText("0.6");
+        minPText.setText("0.2");
         c.gridx = 1;
         c.gridy = y;
         trPanel.add(minPText,c);
+        // p max
+        y++;
+        c.gridx = 0;
+        c.gridy = y;
+        trPanel.add(new JLabel("Maximum momentum from tracking (GeV):"),c);
+        maxPText.addActionListener(this);
+        maxPText.setText("1.0");
+        c.gridx = 1;
+        c.gridy = y;
+        trPanel.add(maxPText,c);
         // mass assumption
         y++;
         c.gridx = 0;

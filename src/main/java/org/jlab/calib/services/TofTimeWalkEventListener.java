@@ -329,7 +329,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			int component = paddle.getDescriptor().getComponent();
 
 			// fill timeResidual vs ADC
-			if (paddle.goodTrackFound() && hitInSection(paddle)) {
+			if (paddle.goodTrackFound()) {
 			
 				dataGroups.getItem(sector,layer,component).getH2F("trLeftHist").fill(paddle.ADCL, paddle.deltaTLeft(0.0));
 				dataGroups.getItem(sector,layer,component).getH2F("trRightHist").fill(paddle.ADCR, paddle.deltaTRight(0.0));
