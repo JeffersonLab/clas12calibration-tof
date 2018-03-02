@@ -266,10 +266,10 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 
 				dataGroups.getItem(sector,layer,component).getH2F("twposLHist").fill(
 						 paddle.paddleY(),
-						(paddle.deltaTLeftRFCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(paddle.deltaTLeft(0.0)+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				dataGroups.getItem(sector,layer,component).getH2F("twposRHist").fill(
 						 paddle.paddleY(),
-						(paddle.deltaTRightRFCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(paddle.deltaTRight(0.0)+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				
 			}
 		}

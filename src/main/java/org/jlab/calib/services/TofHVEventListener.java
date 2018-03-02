@@ -239,7 +239,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 		double endChannelForFit = 0.0;
 		if (minRange==UNDEFINED_OVERRIDE) {
 			// default value
-			startChannelForFit = EXPECTED_MIP_CHANNEL[layer-1] * 0.5;
+			startChannelForFit = EXPECTED_MIP_CHANNEL[layer-1] * 0.65;
 		}
 		else {
 			// custom value
@@ -271,11 +271,11 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 
 		// adjust the range now that the max has been found
 		// unless it's been set to custom value
-		//		if (minRange == 0.0) {
-		//			startChannelForFit = maxPos*0.5;
-		//		}
+		if (minRange == UNDEFINED_OVERRIDE) {
+			startChannelForFit = maxPos*0.7;
+		}
 		if (maxRange == UNDEFINED_OVERRIDE) {
-			endChannelForFit = maxPos+GM_HIST_MAX[layer_index]*0.4;
+			endChannelForFit = maxPos+GM_HIST_MAX[layer_index]*0.35;
 			if (endChannelForFit > 0.9*GM_HIST_MAX[layer_index]) {
 				endChannelForFit = 0.9*GM_HIST_MAX[layer_index];
 			}	

@@ -2,8 +2,11 @@ package org.jlab.calib.services.ctof;
 
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -451,6 +454,45 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
 				"veff_ud", sector, layer, paddle);
 
     }
+    
+	@Override
+	public void writeFile(String filename) {
+		
+		boolean[] writeCols = {true,true,true,
+							   true,true,true,true,false};
+
+		try { 
+
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+
+			for (int i=0; i<calib.getRowCount(); i++) {
+				String line = new String();
+				for (int j=0; j<calib.getColumnCount(); j++) {
+					if (writeCols[j]) {
+						line = line+calib.getValueAt(i, j);
+						if (j<calib.getColumnCount()-1) {
+							line = line+" ";
+						}
+					}
+				}
+				outputBw.write(line);
+				outputBw.newLine();
+			}
+
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error reading file '" 
+							+ filename + "'");                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}
+
+	}
 
     @Override
     public boolean isGoodPaddle(int sector, int layer, int paddle) {

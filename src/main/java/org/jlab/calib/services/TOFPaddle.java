@@ -355,13 +355,13 @@ public class TOFPaddle {
 		return dtR;
 	}
 
-	public double deltaTLeftRFCorr() {
-		return deltaTLeft(0.0) + rfpad();
-	}
-	
-	public double deltaTRightRFCorr() {
-		return deltaTRight(0.0) + rfpad();
-	}
+//	public double deltaTLeftRFCorr() {
+//		return deltaTLeft(0.0) + rfpad();
+//	}
+//	
+//	public double deltaTRightRFCorr() {
+//		return deltaTRight(0.0) + rfpad();
+//	}
 	
 	public double paddleLength() {
 
