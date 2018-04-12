@@ -79,7 +79,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F momHist = 
 							new H2F("momHist",histTitle(sector,layer,paddle),
 									100, 0.2, 5.0,
-									160, -2.0, 2.0);
+									88, -1.1, 1.1);
 					momHist.setTitleX("p (GeV)");
 					momHist.setTitleY("delta T (ns)");
 					dg.addDataSet(momHist, 0);
@@ -87,7 +87,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F vzHist = 
 							new H2F("vzHist",histTitle(sector,layer,paddle),
 									100, -20.0, 20.0,
-									160, -2.0, 2.0);
+									88, -1.1, 1.1);
 					vzHist.setTitleX("vz (cm)");
 					vzHist.setTitleY("delta T (ns)");
 					dg.addDataSet(vzHist, 1);
@@ -95,7 +95,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F hitHist = 
 							new H2F("hitHist",histTitle(sector,layer,paddle),
 									100, -paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
-									160, -2.0, 2.0);
+									88, -1.1, 1.1);
 					hitHist.setTitleX("hit position (cm)");
 					hitHist.setTitleY("delta T (ns)");
 					dg.addDataSet(hitHist, 2);
@@ -103,7 +103,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F pathHist = 
 							new H2F("pathHist",histTitle(sector,layer,paddle),
 									100, 630, 740,
-									160, -2.0, 2.0);
+									88, -1.1, 1.1);
 					pathHist.setTitleX("path (cm)");
 					pathHist.setTitleY("delta T (ns)");
 					dg.addDataSet(pathHist, 3);
@@ -111,7 +111,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F adcLHist = 
 							new H2F("adcLHist",histTitle(sector,layer,paddle),
 									100, ADC_MIN[layer], ADC_MAX[layer],
-									160, -2.0, 2.0);
+									88, -1.1, 1.1);
 					adcLHist.setTitleX("ADC Left");
 					adcLHist.setTitleY("delta T (ns)");
 					dg.addDataSet(adcLHist, 4);
@@ -119,7 +119,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F adcRHist = 
 							new H2F("adcRHist",histTitle(sector,layer,paddle),
 									100, ADC_MIN[layer], ADC_MAX[layer],
-									160, -2.0, 2.0);
+									88, -1.1, 1.1);
 					adcRHist.setTitleX("ADC Right");
 					adcRHist.setTitleY("delta T (ns)");
 					dg.addDataSet(adcRHist, 5);

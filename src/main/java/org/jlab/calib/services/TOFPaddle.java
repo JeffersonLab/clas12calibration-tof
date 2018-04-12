@@ -26,7 +26,6 @@ public class TOFPaddle {
 	public double YPOS = 0.0;
 	public double ZPOS = 0.0;
 	public double PATH_LENGTH = 0.0;
-	public double BETA = 0.0;
 	public double P = 0.0;
 	public int TRACK_ID = -1;
 	public double VERTEX_Z = 0.0;
@@ -37,10 +36,8 @@ public class TOFPaddle {
 	public long TRIGGER_BIT = 0;
 	// public double TOF_TIME = 0.0;
 	public double RECON_TIME = 0.0;
-	public int PARTICLE_ID = -1;
+	public int PARTICLE_ID = 0;
 
-	public static final int PID_ELECTRON = 11;
-	public static final int PID_PION = 211;
 	private final double C = 29.98;
 	public static final double NS_PER_CH = 0.02345;
 	// public static final double NS_PER_CH = 0.024;
@@ -53,7 +50,7 @@ public class TOFPaddle {
 		this.ADCL = adcL;
 		this.ADCR = adcR;
 		this.TDCL = tdcL;
-		this.TDCR = tdcR;
+		this.TDCR = tdcR; 
 	}
 
 	public void setPos(double xPos, double yPos, double zPos) {
@@ -204,13 +201,40 @@ public class TOFPaddle {
 		}
 		return p2p;
 	}
+	
+	private double mass() {
+		double mass = 0.0;
+		double[] massList = { 0.13957, 0.938272, 0.000511 };
+		if (TOFCalibration.massAss == TOFCalibration.USE_PID) {
+			if (PARTICLE_ID == 2212) {
+				mass = 0.938272;
+			}
+			else if (PARTICLE_ID == 11 || PARTICLE_ID == -11) {
+				mass = 0.000511;
+			}
+			else if (PARTICLE_ID == 13 || PARTICLE_ID == -13) {
+				mass = 0.105658;
+			}
+			else if (PARTICLE_ID == 211 || PARTICLE_ID == -211) {
+				mass = 0.13957;
+			}
+		}
+		else {
+			mass = massList[TOFCalibration.massAss];
+		}
+		return mass;
+	}
+	
+	private double beta() {
+		return P/Math.sqrt(P*P+mass()*mass());
+	}
 
 	public double startTime() {
 		double startTime = 0.0;
 
 		double beta = 1.0;
-		if (BETA != 0.0) {
-			beta = BETA;
+		if (beta() != 0.0) {
+			beta = beta();
 		}
 
 		startTime = averageHitTime() - (PATH_LENGTH / (beta * 29.98));
@@ -221,8 +245,8 @@ public class TOFPaddle {
 		double startTime = 0.0;
 
 		double beta = 1.0;
-		if (BETA != 0.0) {
-			beta = BETA;
+		if (beta() != 0.0) {
+			beta = beta();
 		}
 
 		startTime = RECON_TIME - (PATH_LENGTH / (beta * 29.98));
@@ -318,8 +342,8 @@ public class TOFPaddle {
 		double lr = leftRightAdjustment();
 
 		double beta = 1.0;
-		if (BETA != 0.0) {
-			beta = BETA;
+		if (beta() != 0.0) {
+			beta = beta();
 		}
 
 		double dtL = tdcToTime(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
@@ -333,14 +357,54 @@ public class TOFPaddle {
 
 		return dtL;
 	}
+	
+	public double deltaTLeftTest(double offset) {
+		
+		boolean show=false;
+		if (this.XPOS==280.42010498046875) show=true;
+
+		double lr = leftRightAdjustment();
+
+		double beta = 1.0;
+		if (beta() != 0.0) {
+			beta = beta();
+		}
+
+		double dtL = tdcToTime(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
+				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
+
+		if (show) {
+			System.out.println("tdcToTime(TDCL) "+tdcToTime(TDCL));
+			System.out.println("(lr / 2) "+(lr / 2));
+			System.out.println("rfpad() "+rfpad());
+			System.out.println("((0.5 * paddleLength() + paddleY()) / this.veff()) "+((0.5 * paddleLength() + paddleY()) / this.veff()));
+			System.out.println("(PATH_LENGTH / (beta * 29.98)) "+(PATH_LENGTH / (beta * 29.98)));
+			System.out.println("dtL "+dtL);
+			
+		}
+		
+		// subtract the correction based on previous calibration values
+		dtL = dtL - TWCorrL();
+		if (show) {
+			System.out.println("dtL2 "+dtL);
+		}
+		dtL = dtL + offset;
+		double bb = TOFCalibrationEngine.BEAM_BUCKET;
+		dtL = (dtL + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
+
+		if (show) {
+			System.out.println("dtL3 "+dtL);
+		}
+		return dtL;
+	}	
 
 	public double deltaTRight(double offset) {
 
 		double lr = leftRightAdjustment();
 
 		double beta = 1.0;
-		if (BETA != 0.0) {
-			beta = BETA;
+		if (beta() != 0.0) {
+			beta = beta();
 		}
 
 		double dtR = tdcToTime(TDCR) + (lr / 2) + rfpad() - ((0.5 * paddleLength() - paddleY()) / this.veff())
@@ -477,7 +541,25 @@ public class TOFPaddle {
 
 		return (trackFound() && TRACK_REDCHI2 < maxRcs && VERTEX_Z > minV && VERTEX_Z < maxV 
 				&& P > minP && P < maxP
-				&& chargeMatch());
+				&& chargeMatch()
+				&& pidMatch()
+				&& mass() != 0.0);
+	}
+	
+	public boolean pidMatch() {
+		boolean match = true;
+		
+		if (tof=="FTOF") {
+			match = (TOFCalibration.trackPid==TOFCalibration.PID_ALL) ||
+					(TOFCalibration.trackPid==TOFCalibration.PID_L && (PARTICLE_ID==13 || PARTICLE_ID==-13)) ||
+					(TOFCalibration.trackPid==TOFCalibration.PID_L && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
+					(TOFCalibration.trackPid==TOFCalibration.PID_PI && (PARTICLE_ID==211 || PARTICLE_ID==-211)) ||
+					(TOFCalibration.trackPid==TOFCalibration.PID_P && (PARTICLE_ID==2212));
+					
+		}
+		
+		return match;
+		
 	}
 
 	public boolean chargeMatch() {
@@ -513,7 +595,7 @@ public class TOFPaddle {
 				+ ADCR + " ADCL " + ADCL + " TDCR " + TDCR + " TDCL " + TDCL);
 		System.out.println("XPOS " + XPOS + " YPOS " + YPOS + " ZPOS " + ZPOS + " PATH_LENGTH " + PATH_LENGTH
 				+ " TRACK_ID " + TRACK_ID);
-		System.out.println("BETA " + BETA + " P " + P + " RF_TIME " + RF_TIME + "ST_TIME " + ST_TIME + " RECON_TIME "
+		System.out.println("PARTICLE_ID "+PARTICLE_ID+" mass "+mass()+" beta " + beta() + " P " + P + " RF_TIME " + RF_TIME + "ST_TIME " + ST_TIME + " RECON_TIME "
 				+ RECON_TIME);
 		System.out.println("VERTEX_Z " + VERTEX_Z + " TRACK_REDCHI2 " + TRACK_REDCHI2 + " CHARGE " + CHARGE
 				+ " TRIGGER_BIT " + TRIGGER_BIT);

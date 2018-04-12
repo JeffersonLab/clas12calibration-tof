@@ -50,6 +50,35 @@ public class DataProvider {
 
 	public static List<TOFPaddle> getPaddleList(DataEvent event) {
 
+		if (test) {
+			event.show();
+			if (event.hasBank("REC::Event")) {
+				event.getBank("REC::Event").show();
+			}
+			if (event.hasBank("CTOF::adc")) {
+				event.getBank("CTOF::adc").show();
+			}
+			if (event.hasBank("CTOF::tdc")) {
+				event.getBank("CTOF::tdc").show();
+			}
+			if (event.hasBank("CTOF::hits")) {
+				event.getBank("CTOF::hits").show();
+			}
+			if (event.hasBank("CVTRec::Tracks")) {
+				event.getBank("CVTRec::Tracks").show();
+			}
+			if (event.hasBank("RUN::rf")) {
+				event.getBank("RUN::rf").show();
+			}
+			if (event.hasBank("RUN::config")) {
+				event.getBank("RUN::config").show();
+			}
+			if (event.hasBank("MC::Particle")) {
+				event.getBank("MC::Particle").show();
+			}
+		}
+		
+		
 		List<TOFPaddle> paddleList = new ArrayList<TOFPaddle>();
 		paddleList = getPaddleListHipo(event);
 		return paddleList;
@@ -105,20 +134,19 @@ public class DataProvider {
 					CTOFCalibrationEngine.tdcRightStatus.add(0, 1, 1, component);
 				}
 			}
-			//// System.out.println("Louise 152");
 		}
-
-		// Only continue if we have adc and tdc banks
-		if (!event.hasBank("CTOF::adc") || !event.hasBank("CTOF::tdc")) {
-			return paddleList;
-		}
-
-		DataBank adcBank = event.getBank("CTOF::adc");
-		DataBank tdcBank = event.getBank("CTOF::tdc");
 
 		// iterate through hits bank getting corresponding adc and tdc
 		if (event.hasBank("CTOF::hits")) {
-			//// System.out.println("Louise 167");
+			
+			// Only continue if we have adc and tdc banks
+			if (!event.hasBank("CTOF::adc") || !event.hasBank("CTOF::tdc")) {
+				return paddleList;
+			}
+			
+			DataBank adcBank = event.getBank("CTOF::adc");
+			DataBank tdcBank = event.getBank("CTOF::tdc");
+			
 			DataBank hitsBank = event.getBank("CTOF::hits");
 
 			for (int hitIndex = 0; hitIndex < hitsBank.rows(); hitIndex++) {
@@ -198,22 +226,15 @@ public class DataProvider {
 						double mass = massList[CTOFCalibration.massAss];
 						// double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
 						double beta = mom / Math.sqrt(mom * mom + mass * mass);
-						// System.out.println("Louise 246");
-						paddle.BETA = beta;
-						// System.out.println("Louise 248");
+						//paddle.BETA = beta;
 						paddle.P = mom;
-						// System.out.println("Louise 250");
 						paddle.TRACK_ID = trkId;
-						// System.out.println("Louise 252");
 						// paddle.VERTEX_Z = trkBank.getFloat("z0", trkId-1);
 						// CTOF vertex z is in mm -> convert to cm
 						paddle.VERTEX_Z = trkBank.getFloat("z0", trkId - 1) / 10.0;
 
-						// System.out.println("Louise 254");
 						paddle.CHARGE = trkBank.getByte("q", trkId - 1);
-						// System.out.println("Louise 256");
 
-						// System.out.println("Louise 263");
 						if (CTOFCalibration.maxRcs != 0.0) {
 							// paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkId);
 							paddle.TRACK_REDCHI2 = trkBank.getFloat("chi2", trkId - 1)
@@ -221,10 +242,8 @@ public class DataProvider {
 						} else {
 							paddle.TRACK_REDCHI2 = -1.0;
 						}
-						// System.out.println("Louise 271");
 
 					}
-					// System.out.println("Louise 274");
 				}
 
 				if (test && paddle.TRACK_ID != -1) {
@@ -258,13 +277,10 @@ public class DataProvider {
 
 				// System.out.println("Adding paddle to list");
 				if (paddle.includeInCalib()) {
-					//// System.out.println("Louise 275");
 					paddleList.add(paddle);
-					//// System.out.println("Louise 277");
 				}
 			}
 		} else {
-			//// System.out.println("Louise 280");
 			// no hits bank, so just use adc and tdc
 
 			// based on cosmic data
@@ -272,87 +288,94 @@ public class DataProvider {
 			// ADC R two indices after ADC L (will assume right is always after left)
 			// TDC bank only has actual hits, so can just search the whole bank for matching
 			// SLC
-
-			for (int i = 0; i < adcBank.rows(); i++) {
-				int order = adcBank.getByte("order", i);
-				int adc = adcBank.getInt("ADC", i);
-				if (order == 0 && adc != 0) {
-
-					int component = adcBank.getShort("component", i);
-					int adcL = adc;
-					int adcR = 0;
-					float adcTimeL = adcBank.getFloat("time", i);
-					float adcTimeR = 0;
-					int tdcL = 0;
-					int tdcR = 0;
-
-					for (int j = 0; j < adcBank.rows(); j++) {
-						int c = adcBank.getShort("component", j);
-						int o = adcBank.getByte("order", j);
-						if (c == component && o == 1) {
-							// matching adc R
-							adcR = adcBank.getInt("ADC", j);
-							adcTimeR = adcBank.getFloat("time", j);
-							break;
+			
+			if (event.hasBank("CTOF::adc")) {
+				DataBank adcBank = event.getBank("CTOF::adc");
+		
+				for (int i = 0; i < adcBank.rows(); i++) {
+					int order = adcBank.getByte("order", i);
+					int adc = adcBank.getInt("ADC", i);
+					if (order == 0 && adc != 0) {
+	
+						int component = adcBank.getShort("component", i);
+						int adcL = adc;
+						int adcR = 0;
+						float adcTimeL = adcBank.getFloat("time", i);
+						float adcTimeR = 0;
+						int tdcL = 0;
+						int tdcR = 0;
+	
+						for (int j = 0; j < adcBank.rows(); j++) {
+							int c = adcBank.getShort("component", j);
+							int o = adcBank.getByte("order", j);
+							if (c == component && o == 1) {
+								// matching adc R
+								adcR = adcBank.getInt("ADC", j);
+								adcTimeR = adcBank.getFloat("time", j);
+								break;
+							}
 						}
-					}
-
-					// Now get matching TDCs
-					// can search whole bank as it has fewer rows (only hits)
-					// break when you find so always take the first one found
-					for (int tdci = 0; tdci < tdcBank.rows(); tdci++) {
-						int c = tdcBank.getShort("component", tdci);
-						int o = tdcBank.getByte("order", tdci);
-						if (c == component && o == 2) {
-							// matching tdc L
-							tdcL = tdcBank.getInt("TDC", tdci);
-							break;
+	
+						// Now get matching TDCs
+						// can search whole bank as it has fewer rows (only hits)
+						// break when you find so always take the first one found
+						if (event.hasBank("CTOF::tdc")) {
+							DataBank tdcBank = event.getBank("CTOF::tdc");
+							for (int tdci = 0; tdci < tdcBank.rows(); tdci++) {
+								int c = tdcBank.getShort("component", tdci);
+								int o = tdcBank.getByte("order", tdci);
+								if (c == component && o == 2) {
+									// matching tdc L
+									tdcL = tdcBank.getInt("TDC", tdci);
+									break;
+								}
+							}
+							for (int tdci = 0; tdci < tdcBank.rows(); tdci++) {
+								int c = tdcBank.getShort("component", tdci);
+								int o = tdcBank.getByte("order", tdci);
+								if (c == component && o == 3) {
+									// matching tdc R
+									tdcR = tdcBank.getInt("TDC", tdci);
+									break;
+								}
+							}
 						}
-					}
-					for (int tdci = 0; tdci < tdcBank.rows(); tdci++) {
-						int c = tdcBank.getShort("component", tdci);
-						int o = tdcBank.getByte("order", tdci);
-						if (c == component && o == 3) {
-							// matching tdc R
-							tdcR = tdcBank.getInt("TDC", tdci);
-							break;
+	
+						// set status to ok if at least one reading
+						if (adcL != 0) {
+							CTOFCalibrationEngine.adcLeftStatus.add(0, 1, 1, component);
 						}
-					}
-
-					// set status to ok if at least one reading
-					if (adcL != 0) {
-						CTOFCalibrationEngine.adcLeftStatus.add(0, 1, 1, component);
-					}
-					if (adcR != 0) {
-						CTOFCalibrationEngine.adcRightStatus.add(0, 1, 1, component);
-					}
-					if (tdcL != 0) {
-						CTOFCalibrationEngine.tdcLeftStatus.add(0, 1, 1, component);
-					}
-					if (tdcR != 0) {
-						CTOFCalibrationEngine.tdcRightStatus.add(0, 1, 1, component);
-					}
-
-					if (test) {
-						System.out.println("Values found " + component);
-						System.out.println(adcL + " " + adcR + " " + tdcL + " " + tdcR);
-					}
-
-					if (adcL > 100 && adcR > 100) {
-
-						TOFPaddle paddle = new TOFPaddle(1, 1, component);
-						paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
-						paddle.ADC_TIMEL = adcTimeL;
-						paddle.ADC_TIMER = adcTimeR;
-
-						// if (paddle.includeInCalib()) {
-
+						if (adcR != 0) {
+							CTOFCalibrationEngine.adcRightStatus.add(0, 1, 1, component);
+						}
+						if (tdcL != 0) {
+							CTOFCalibrationEngine.tdcLeftStatus.add(0, 1, 1, component);
+						}
+						if (tdcR != 0) {
+							CTOFCalibrationEngine.tdcRightStatus.add(0, 1, 1, component);
+						}
+	
 						if (test) {
-							System.out.println("Adding paddle " + component);
+							System.out.println("Values found " + component);
 							System.out.println(adcL + " " + adcR + " " + tdcL + " " + tdcR);
 						}
-						paddleList.add(paddle);
-						// }
+	
+						if (adcL > 100 && adcR > 100) {
+	
+							TOFPaddle paddle = new TOFPaddle(1, 1, component);
+							paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
+							paddle.ADC_TIMEL = adcTimeL;
+							paddle.ADC_TIMER = adcTimeR;
+	
+							// if (paddle.includeInCalib()) {
+	
+							if (test) {
+								System.out.println("Adding paddle " + component);
+								System.out.println(adcL + " " + adcR + " " + tdcL + " " + tdcR);
+							}
+							paddleList.add(paddle);
+							// }
+						}
 					}
 				}
 			}

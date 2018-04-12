@@ -38,7 +38,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 	private String fitOption = "RQ";
 	
-	private final double[] MIN_SIGMA = {0.0, 0.080, 0.040, 0.080};
+	private final double[] MIN_SIGMA = {0.0, 0.080, 0.020, 0.080};
 	private final double[] MAX_SIGMA = {0.0, 0.300, 0.150, 0.300};
 	
 
@@ -206,6 +206,15 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 			//System.out.println("RF Pad process Paddle SLC "+sector+layer+component);
 			//pad.show();
+			
+//			if (pad.goodTrackFound()) {
+//				System.out.println("Good track");
+//				pad.show();
+//			}
+//			else {
+//				System.out.println("Bad track");
+//				pad.show();
+//			}
 
 			if (pad.goodTrackFound()) {
 				
@@ -213,7 +222,25 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 						(pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 			}
 		}
-	}    
+	}  
+	
+	private double minSigma(int layer, int paddle) {
+		
+		double minSigma = 0.0;
+		
+		if (layer==1) {
+			minSigma = ((paddle*5.45) + 74.55)/1000.0;
+		}
+		else if (layer==2) {
+			minSigma = ((paddle*0.90) + 29.10)/1000.0;
+		}
+		else if (layer==3) {
+			minSigma = ((paddle*5.00) + 145.00)/1000.0;
+		}
+		
+		return minSigma;
+		
+	}
 
 	@Override
 	public void fit(int sector, int layer, int paddle, double minRange, double maxRange) {
@@ -277,7 +304,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		fineFunc.setParLimits(0, fineHist.getBinContent(maxBin)*0.7, fineHist.getBinContent(maxBin)*1.2);
 		fineFunc.setParameter(1, maxPos);
 		fineFunc.setParameter(2, 0.1);
-		fineFunc.setParLimits(2, MIN_SIGMA[layer], 1.0);
+		fineFunc.setParLimits(2, minSigma(layer,paddle), 1.0);
 
 		try {
 			DataFitter.fit(fineFunc, fineHist, fitOption);

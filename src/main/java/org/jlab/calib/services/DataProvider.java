@@ -27,6 +27,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.groot.fitter.DataFitter;
 import org.jlab.groot.group.DataGroup;
 import org.jlab.io.base.DataBank;
 //import org.jlab.calib.temp.DataGroup;
@@ -45,6 +46,20 @@ public class DataProvider {
 
 	private static	boolean test = false;
 
+	
+	public static void setOutput(boolean outputOn) {
+		if (outputOn) {
+			System.setOut(TOFCalibration.oldStdout);
+		}
+		else {
+			System.setOut(new java.io.PrintStream(
+					new java.io.OutputStream() {
+						public void write(int b){}
+					}
+					));
+		}
+	}
+	
 	public static List<TOFPaddle> getPaddleList(DataEvent event) {
 
 		List<TOFPaddle>  paddleList = new ArrayList<TOFPaddle>();
@@ -65,9 +80,6 @@ public class DataProvider {
 
 	public static List<TOFPaddle> getPaddleListHipo(DataEvent event){
 
-		boolean refPaddleFound = false;
-		boolean testPaddleFound = false;
-		
 		if (test) {
 
 			event.show();
@@ -80,15 +92,6 @@ public class DataProvider {
 			if (event.hasBank("FTOF::hits")) {
 				event.getBank("FTOF::hits").show();
 			}
-			if (event.hasBank("FTOF::clusters")) {
-				event.getBank("FTOF::clusters").show();
-			}
-			if (event.hasBank("FTOF::matchedclusters")) {
-				event.getBank("FTOF::matchedclusters").show();
-			}			
-			if (event.hasBank("HitBasedTrkg::HBTracks")) {
-				event.getBank("HitBasedTrkg::HBTracks").show();
-			}
 			if (event.hasBank("TimeBasedTrkg::TBTracks")) {
 				event.getBank("TimeBasedTrkg::TBTracks").show();
 			}			
@@ -98,9 +101,21 @@ public class DataProvider {
 			if (event.hasBank("RUN::config")) {
 				event.getBank("RUN::config").show();
 			}
-			if (event.hasBank("MC::Particle")) {
-				event.getBank("MC::Particle").show();
+			if (event.hasBank("REC::Particle")) {
+				event.getBank("REC::Particle").show();
 			}
+			if (event.hasBank("REC::Scintillator")) {
+				event.getBank("REC::Scintillator").show();
+			}
+			try {
+				if (event.hasBank("REC::Track")) {
+					event.getBank("REC::Track").show();
+				}	
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+					
 		}
 
 		ArrayList<TOFPaddle>  paddleList = new ArrayList<TOFPaddle>();
@@ -221,13 +236,14 @@ public class DataProvider {
 						paddle.PATH_LENGTH = path;
 						paddle.RF_TIME = trf;
 						
-						// Get the momentum and record the beta (assuming every hit is a pion!)
+						// Get the momentum and record the beta using the mass assumption
 						double px  = tbtBank.getFloat("p0_x",trkId-1);
 						double py  = tbtBank.getFloat("p0_y",trkId-1);
 						double pz  = tbtBank.getFloat("p0_z",trkId-1);
 						double mom = Math.sqrt(px*px + py*py + pz*pz);
-						double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
-						paddle.BETA = beta;
+//						double mass = massList[TOFCalibration.massAss];
+//						double beta = mom/Math.sqrt(mom*mom+mass*mass);
+//						paddle.BETA = beta;
 						paddle.P = mom;
 						paddle.TRACK_ID = trkId;
 						paddle.VERTEX_Z = tbtBank.getFloat("Vtx0_z", trkId-1);
@@ -269,52 +285,35 @@ public class DataProvider {
 //						else {
 //							paddle.PARTICLE_ID = TOFPaddle.PID_PION;
 //						}
+						
+						// Get the REC::Track and then the REC::Particle
+						setOutput(false);
+						if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")) {
+							
+							DataBank  recTrkBank = event.getBank("REC::Track");
+							int pIdx = -1;
+							for (int i = 0; i < recTrkBank.rows(); i++) {
+								if (recTrkBank.getShort("index",i)==trkId-1) {
+									pIdx = i;
+									break;
+								}
+							}
+							
+							DataBank  recPartBank = event.getBank("REC::Particle");
+							paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
+						}
+						setOutput(true);
+							
 					}
 				}
 				
-				
-				if (refPaddleFound && testPaddleFound) {
-
-					event.show();
-					if (event.hasBank("FTOF::adc")) {
-						event.getBank("FTOF::adc").show();
-					}
-					if (event.hasBank("FTOF::tdc")) {
-						event.getBank("FTOF::tdc").show();
-					}
-					if (event.hasBank("FTOF::hits")) {
-						event.getBank("FTOF::hits").show();
-					}
-					if (event.hasBank("HitBasedTrkg::HBTracks")) {
-						event.getBank("HitBasedTrkg::HBTracks").show();
-					}
-					if (event.hasBank("TimeBasedTrkg::TBTracks")) {
-						event.getBank("TimeBasedTrkg::TBTracks").show();
-					}
-					if (event.hasBank("RUN::rf")) {
-						event.getBank("RUN::rf").show();
-					}
-					if (event.hasBank("RUN::config")) {
-						event.getBank("RUN::config").show();
-					}					
-					if (event.hasBank("MC::Particle")) {
-						event.getBank("MC::Particle").show();
-					}
-					refPaddleFound = false;
-					testPaddleFound = false;
-				}				
-
-				//System.out.println("Adding paddle to list");
 				if (paddle.includeInCalib()) {
 					paddleList.add(paddle);
 					if (test) {
 						paddle.show();
 					}
-//					System.out.println("Paddle added to list SLC "+paddle.getDescriptor().getSector()+paddle.getDescriptor().getLayer()+paddle.getDescriptor().getComponent());
-//					System.out.println("Particle ID "+paddle.PARTICLE_ID);
-//					System.out.println("position "+paddle.XPOS+" "+paddle.YPOS);
-//					System.out.println("trackFound "+paddle.trackFound());
 				}
+
 			}
 		}
 		else {

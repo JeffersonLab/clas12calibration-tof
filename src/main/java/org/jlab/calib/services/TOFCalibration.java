@@ -161,6 +161,13 @@ ChangeListener {
 	public final static int VERTEX_CORR_YES = 0;
 	public final static int VERTEX_CORR_NO = 1;
 	
+    JComboBox<String> massAssList = new JComboBox<String>();
+    public static int massAss = 2;
+    public final static int MASS_PION = 0;
+    public final static int MASS_PROTON = 1;
+    public final static int MASS_ELECTRON = 2;
+    public final static int USE_PID = 3;
+    
 	private JTextField minPText = new JTextField(5);
 	public static double minP = 0.0;
 	JComboBox<String> trackChargeList = new JComboBox<String>();
@@ -170,9 +177,11 @@ ChangeListener {
 	public final static int TRACK_POS = 2;
 	JComboBox<String> pidList = new JComboBox<String>();
 	public static int trackPid = 0;
-	public final static int PID_BOTH = 0;
-	public final static int PID_E = 1;
+	public final static int PID_ALL = 0;
+	public final static int PID_L = 1;
 	public final static int PID_PI = 2;
+	public final static int PID_P = 3;
+
 	private JTextField triggerText = new JTextField(10);
 	public static int triggerBit = 0;    
 
@@ -418,6 +427,7 @@ ChangeListener {
 			if (minPText.getText().compareTo("") != 0) {
 				minP = Double.parseDouble(minPText.getText());
 			}
+			massAss = massAssList.getSelectedIndex();
 			trackCharge = trackChargeList.getSelectedIndex();
 			trackPid = pidList.getSelectedIndex();
 
@@ -464,6 +474,7 @@ ChangeListener {
 			System.out.println("Maximum vertex z: "+maxV);
 			System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(vertexCorr));
 			System.out.println("Minimum momentum from tracking (GeV): "+minP);
+			System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(massAss));
 			System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
 			System.out.println("PID: "+pidList.getItemAt(trackPid));
 			System.out.println("Trigger: "+triggerBit);
@@ -896,6 +907,20 @@ ChangeListener {
 		c.gridx = 1;
 		c.gridy = y;
 		trPanel.add(minPText,c);
+        // mass assumption
+        y++;
+        c.gridx = 0;
+        c.gridy = y;
+        trPanel.add(new JLabel("Mass assumption for beta calculation:"),c);
+        massAssList.addItem("Pion");
+        massAssList.addItem("Proton");
+        massAssList.addItem("Electron");
+        massAssList.addItem("Use PID");
+        massAssList.setSelectedIndex(MASS_ELECTRON);
+        massAssList.addActionListener(this);
+        c.gridx = 1;
+        c.gridy = y;
+        trPanel.add(massAssList,c);
 		// track charge
 		y++;
 		c.gridx = 0;
@@ -913,16 +938,17 @@ ChangeListener {
 		c.gridx = 0;
 		c.gridy = y;
 		trPanel.add(new JLabel("PID:"),c);
-		pidList.addItem("Both");
-		pidList.addItem("Electrons");
+		pidList.addItem("All");
+		pidList.addItem("Leptons");
 		pidList.addItem("Pions");
+		pidList.addItem("Protons");
 		pidList.addActionListener(this);
 		c.gridx = 1;
 		c.gridy = y;
 		trPanel.add(pidList,c);
 		c.gridx = 2;
 		c.gridy = y;
-		trPanel.add(new JLabel("Not currently used"),c);
+		trPanel.add(new JLabel(""),c);
 		// trigger
 		y++;
 		c.gridx = 0;
