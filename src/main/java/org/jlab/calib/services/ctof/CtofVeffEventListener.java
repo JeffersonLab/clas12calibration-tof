@@ -167,15 +167,13 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
             int numBins = (int) (paddleLength(1,1,paddle)*0.6);  // 1 bin per 2cm + 10% either side
 	        double min = paddleLength(1,1,paddle) * -0.6;
             double max = paddleLength(1,1,paddle) * 0.6;
-//            double min = paddleLength(1,1,paddle) * -0.1;
-//            double max = paddleLength(1,1,paddle) * 1.1;
-
+            
             H2F hist = 
                     new H2F("veff",
                             "veff",
                             numBins, min, max, 
                             //200, -15.0, 15.0);
-                            100, -15.0, 15.0);
+                            100, -28.0, 2.0);
 
             hist.setName("veff");
             hist.setTitle("Half Time Diff vs Position : Paddle "+paddle);

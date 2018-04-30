@@ -149,8 +149,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     // configuration settings
     JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(),
     						  new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox()};    
-    private JTextField ctofCenterText = new JTextField(5);
-    public static double ctofCenter = 0.0;
+//    private JTextField ctofCenterText = new JTextField(5);
+//    public static double ctofCenter = 0.0;
     private JTextField rcsText = new JTextField(5);
     public static double maxRcs = 0.0;
     private JTextField minVText = new JTextField(5);
@@ -167,20 +167,18 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     public static double maxP = 0.0;
         
     JComboBox<String> massAssList = new JComboBox<String>();
-    public static int massAss = 2;
-    public final static int MASS_PION = 0;
-    public final static int MASS_PROTON = 1;
-    
+//    public static int massAss = 3;
+//    public final static int MASS_PION = 0;
+//    public final static int MASS_PROTON = 1;
+//    public final static int MASS_ELECTRON = 2;
+//    public final static int USE_PID = 3;
+   
     JComboBox<String> trackChargeList = new JComboBox<String>();
     public static int trackCharge = 2;
     public final static int TRACK_BOTH = 0;
     public final static int TRACK_NEG = 1;
     public final static int TRACK_POS = 2;
     JComboBox<String> pidList = new JComboBox<String>();
-    public static int trackPid = 2;
-    public final static int PID_BOTH = 0;
-    public final static int PID_E = 1;
-    public final static int PID_PI = 2;
     private JTextField triggerText = new JTextField(10);
     public static int triggerBit = 0;    
     
@@ -411,9 +409,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             }
             
             // set the config values
-            if (ctofCenterText.getText().compareTo("") != 0) {
-                ctofCenter = Double.parseDouble(ctofCenterText.getText());
-            }
+//            if (ctofCenterText.getText().compareTo("") != 0) {
+//                ctofCenter = Double.parseDouble(ctofCenterText.getText());
+//            }
             if (rcsText.getText().compareTo("") != 0) {
                 maxRcs = Double.parseDouble(rcsText.getText());
             }
@@ -432,10 +430,10 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
                 maxP = Double.parseDouble(maxPText.getText());
             }
             
-            massAss = massAssList.getSelectedIndex();
+            TOFCalibration.massAss = massAssList.getSelectedIndex();
             
             trackCharge = trackChargeList.getSelectedIndex();
-            trackPid = pidList.getSelectedIndex();
+            TOFCalibration.trackPid = pidList.getSelectedIndex();
             if (triggerText.getText().compareTo("") != 0) {
                 triggerBit = Integer.parseInt(triggerText.getText());
             }
@@ -460,16 +458,16 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("");
             System.out.println("Configuration settings - Tracking/General");
             System.out.println("-----------------------------------------");
-            System.out.println("CTOF Center z (cm): "+ctofCenter);
+            //System.out.println("CTOF Center z (cm): "+ctofCenter);
             System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
             System.out.println("Minimum vertex z: "+minV);
             System.out.println("Maximum vertex z: "+maxV);
             //System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(TOFCalibration.vertexCorr));
 			System.out.println("Minimum momentum from tracking (GeV): "+minP);
 			System.out.println("Maximum momentum from tracking (GeV): "+maxP);
-            System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(massAss));
+            System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(TOFCalibration.massAss));
             System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
-            System.out.println("PID: "+pidList.getItemAt(trackPid));
+            System.out.println("PID: "+pidList.getItemAt(TOFCalibration.trackPid));
             System.out.println("Trigger: "+triggerBit);
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
 			System.out.println("Slicefitter mode: "+fitModeList.getSelectedItem());
@@ -840,14 +838,14 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.insets = new Insets(3,3,3,3);
         // CTOF z position
         int y=0;
-        c.gridx = 0;
-        c.gridy = y;
-        trPanel.add(new JLabel("CTOF Center z (cm):"),c);
-        ctofCenterText.addActionListener(this);
-        ctofCenterText.setText("-19.3");
-        c.gridx = 1;
-        c.gridy = y;
-        trPanel.add(ctofCenterText,c);
+//        c.gridx = 0;
+//        c.gridy = y;
+//        trPanel.add(new JLabel("CTOF Center z (cm):"),c);
+//        ctofCenterText.addActionListener(this);
+//        ctofCenterText.setText("-19.3");
+//        c.gridx = 1;
+//        c.gridy = y;
+//        trPanel.add(ctofCenterText,c);
         // Chi squared
         y++;
         c.gridx = 0;
@@ -922,6 +920,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         trPanel.add(new JLabel("Mass assumption for beta calculation:"),c);
         massAssList.addItem("Pion");
         massAssList.addItem("Proton");
+        massAssList.addItem("Electron");
+        massAssList.addItem("Use PID");
+        massAssList.setSelectedIndex(TOFCalibration.USE_PID);
         massAssList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
@@ -943,16 +944,14 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridx = 0;
         c.gridy = y;
         trPanel.add(new JLabel("PID:"),c);
-        pidList.addItem("Both");
-        pidList.addItem("Electrons");
-        pidList.addItem("Pions");
+		pidList.addItem("All");
+		pidList.addItem("Leptons");
+		pidList.addItem("Pions");
+		pidList.addItem("Protons");
         pidList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
         trPanel.add(pidList,c);
-        c.gridx = 2;
-        c.gridy = y;
-        trPanel.add(new JLabel("Not currently used"),c);
         // trigger
         y++;
         c.gridx = 0;

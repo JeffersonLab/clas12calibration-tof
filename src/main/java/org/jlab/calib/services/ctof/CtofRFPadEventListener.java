@@ -191,10 +191,12 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			int sector = pad.getDescriptor().getSector();
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
+			
+			//if (pad.TRACK_ID != -1)	pad.show();
 
 			// fill the fine hists
 			if (pad.goodTrackFound() && pad.includeInCTOFTiming()) {
-				//pad.show();
+				
 				dataGroups.getItem(sector,layer,component).getH1F("fineHistRaw").fill(
 						(pad.refSTTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 			}

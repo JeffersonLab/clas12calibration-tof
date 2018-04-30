@@ -204,17 +204,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
 
-			//System.out.println("RF Pad process Paddle SLC "+sector+layer+component);
-			//pad.show();
-			
-//			if (pad.goodTrackFound()) {
-//				System.out.println("Good track");
-//				pad.show();
-//			}
-//			else {
-//				System.out.println("Bad track");
-//				pad.show();
-//			}
+			//if (pad.TRACK_ID != -1)	pad.show();
 
 			if (pad.goodTrackFound()) {
 				

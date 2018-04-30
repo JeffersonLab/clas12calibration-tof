@@ -46,7 +46,6 @@ import org.jlab.utils.groups.IndexedTable;
 public class DataProvider {
 
 	private static boolean test = false;
-	private static double[] massList = { 0.139, 0.938 };
 
 	public static List<TOFPaddle> getPaddleList(DataEvent event) {
 
@@ -218,20 +217,20 @@ public class DataProvider {
 						paddle.PATH_LENGTH = hitsBank.getFloat("pathLength", hitIndex);
 						// System.out.println("Louise 237");
 						paddle.RF_TIME = trf;
-						// System.out.println("Louise 239");
-
+						
 						// Get the momentum and record the beta (assuming every hit is a pion!)
 						double mom = trkBank.getFloat("p", trkId - 1);
-						// System.out.println("Louise 243");
-						double mass = massList[CTOFCalibration.massAss];
-						// double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
-						double beta = mom / Math.sqrt(mom * mom + mass * mass);
+						//double mass = massList[CTOFCalibration.massAss];
+						//double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
+						//double beta = mom / Math.sqrt(mom * mom + mass * mass);
 						//paddle.BETA = beta;
 						paddle.P = mom;
 						paddle.TRACK_ID = trkId;
-						// paddle.VERTEX_Z = trkBank.getFloat("z0", trkId-1);
-						// CTOF vertex z is in mm -> convert to cm
-						paddle.VERTEX_Z = trkBank.getFloat("z0", trkId - 1) / 10.0;
+						
+						// For CTOF vertex z in cm:
+						paddle.VERTEX_Z = trkBank.getFloat("z0", trkId-1);
+						// For CTOF vertex z in mm -> convert to cm
+						//paddle.VERTEX_Z = trkBank.getFloat("z0", trkId - 1) / 10.0;
 
 						paddle.CHARGE = trkBank.getByte("q", trkId - 1);
 
@@ -242,6 +241,24 @@ public class DataProvider {
 						} else {
 							paddle.TRACK_REDCHI2 = -1.0;
 						}
+						
+						// Get the REC::Track and then the REC::Particle
+						//setOutput(false);
+						if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")) {
+							
+							DataBank  recTrkBank = event.getBank("REC::Track");
+							int pIdx = -1;
+							for (int i = 0; i < recTrkBank.rows(); i++) {
+								if (recTrkBank.getShort("index",i)==trkId-1) {
+									pIdx = i;
+									break;
+								}
+							}
+							
+							DataBank  recPartBank = event.getBank("REC::Particle");
+							paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
+						}
+						//setOutput(true);
 
 					}
 				}

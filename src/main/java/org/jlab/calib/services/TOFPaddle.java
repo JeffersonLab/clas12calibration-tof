@@ -427,14 +427,26 @@ public class TOFPaddle {
 //		return deltaTRight(0.0) + rfpad();
 //	}
 	
+	public double ctofCenter() {
+		double center = 0.0;
+		int paddle = this.getDescriptor().getComponent();
+		if (paddle%2==0) {
+			center = -8.5031;
+		}
+		else {
+			center = -8.9874;
+		}
+		return center;
+	}
+	
 	public double paddleLength() {
 
 		double len = 0.0;
+		int paddle = this.getDescriptor().getComponent();
 
 		if (tof == "FTOF") {
 			int layer = this.getDescriptor().getLayer();
-			int paddle = this.getDescriptor().getComponent();
-
+			
 			if (layer == 1 && paddle <= 5) {
 				len = (15.85 * paddle) + 16.43;
 			} else if (layer == 1 && paddle > 5) {
@@ -445,7 +457,12 @@ public class TOFPaddle {
 				len = (13.73 * paddle) + 357.55;
 			}
 		} else {
-			len = 88.05;
+			if (paddle%2==0) {
+				len = 88.0467;
+			}
+			else {
+				len = 88.9328;
+			}
 		}
 
 		return len;
@@ -547,19 +564,13 @@ public class TOFPaddle {
 	}
 	
 	public boolean pidMatch() {
-		boolean match = true;
-		
-		if (tof=="FTOF") {
-			match = (TOFCalibration.trackPid==TOFCalibration.PID_ALL) ||
+
+		return (TOFCalibration.trackPid==TOFCalibration.PID_ALL) ||
 					(TOFCalibration.trackPid==TOFCalibration.PID_L && (PARTICLE_ID==13 || PARTICLE_ID==-13)) ||
 					(TOFCalibration.trackPid==TOFCalibration.PID_L && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
 					(TOFCalibration.trackPid==TOFCalibration.PID_PI && (PARTICLE_ID==211 || PARTICLE_ID==-211)) ||
 					(TOFCalibration.trackPid==TOFCalibration.PID_P && (PARTICLE_ID==2212));
 					
-		}
-		
-		return match;
-		
 	}
 
 	public boolean chargeMatch() {
@@ -576,7 +587,7 @@ public class TOFPaddle {
 	}
 
 	public double zPosCTOF() {
-		return ZPOS - CTOFCalibration.ctofCenter;
+		return ZPOS - ctofCenter();
 	}
 
 	public DetectorDescriptor getDescriptor() {
@@ -599,7 +610,7 @@ public class TOFPaddle {
 				+ RECON_TIME);
 		System.out.println("VERTEX_Z " + VERTEX_Z + " TRACK_REDCHI2 " + TRACK_REDCHI2 + " CHARGE " + CHARGE
 				+ " TRIGGER_BIT " + TRIGGER_BIT);
-		System.out.println("goodTrackFound " + goodTrackFound() + " chargeMatch " + chargeMatch());
+		System.out.println("goodTrackFound " + goodTrackFound() + " chargeMatch " + chargeMatch() + " pidMatch "+pidMatch());
 		System.out.println("refTime " + refTime() + " startTime " + startTime() + " averageHitTime "
 				+ averageHitTime() + " vertexCorr " + vertexCorr());
 		System.out.println("tofTimeRFCorr " + tofTimeRFCorr() + " startTimeRFCorr " + startTimeRFCorr()
@@ -607,7 +618,7 @@ public class TOFPaddle {
 		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1L " + tw1L() + " tw2L "
 				+ tw2L() + " lamR " + lamR() + " tw1R " + tw1R() + " tw2R " + tw2R() + " LR " + leftRightAdjustment()
 				+ " veff " + veff());
-		System.out.println("paddleLength " + paddleLength() + " paddleY " + paddleY());
+		System.out.println("paddleLength " + paddleLength() + " paddleY " + paddleY() + "ctofCenter "+ctofCenter());
 		System.out.println("timeLeftAfterTW " + timeLeftAfterTW() + " timeRightAfterTW " + timeRightAfterTW());
 		System.out.println("deltaTLeft " + this.deltaTLeft(0.0) + " deltaTRight " + this.deltaTRight(0.0));
 

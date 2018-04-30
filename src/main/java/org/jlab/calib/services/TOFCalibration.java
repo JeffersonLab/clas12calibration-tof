@@ -162,7 +162,7 @@ ChangeListener {
 	public final static int VERTEX_CORR_NO = 1;
 	
     JComboBox<String> massAssList = new JComboBox<String>();
-    public static int massAss = 2;
+    public static int massAss = 3;
     public final static int MASS_PION = 0;
     public final static int MASS_PROTON = 1;
     public final static int MASS_ELECTRON = 2;
@@ -916,7 +916,7 @@ ChangeListener {
         massAssList.addItem("Proton");
         massAssList.addItem("Electron");
         massAssList.addItem("Use PID");
-        massAssList.setSelectedIndex(MASS_ELECTRON);
+        massAssList.setSelectedIndex(USE_PID);
         massAssList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
