@@ -134,6 +134,9 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 	}
 
 	public void createHists() {
+		
+		int bins = (int) ((2.004/BEAM_BUCKET)*100)-1;
+		double binLimit = (bins/2.0)*BEAM_BUCKET;
 
 		for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 
@@ -142,7 +145,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 			// create all the histograms and functions
 			H1F vertexDiffHist = 
 					new H1F("vertexDiffHist","Vertex time difference Paddle "+paddle, 
-							99,-49.5*BEAM_BUCKET,49.5*BEAM_BUCKET);
+							bins,-binLimit,binLimit);
 			vertexDiffHist.setTitleX("#Delta t (vertex) (ns)");
 			dg.addDataSet(vertexDiffHist, 0);
 

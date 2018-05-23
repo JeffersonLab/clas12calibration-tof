@@ -140,7 +140,9 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 	}
 
 	public void createHists() {
-
+		
+		double bb = CTOFCalibrationEngine.BEAM_BUCKET;
+		int bins = (int) (bb/2.004)*400;
 		for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 
 			DataGroup dg = new DataGroup(2,1);
@@ -148,13 +150,13 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			// create all the histograms and functions
 			H1F fineHistRaw = 
 					new H1F("fineHistRaw","Fine offset Paddle "+paddle,
-							160, -2.0, 2.0);
+							bins, -bb, bb);
 			fineHistRaw.setTitleX("ST time - vertex time modulo beam bucket (ns)");
 			dg.addDataSet(fineHistRaw, 0);
 
 			H1F fineHist = 
 					new H1F("fineHist","Fine offset Paddle "+paddle,
-							160, -2.0, 2.0);
+							bins, -bb, bb);
 			fineHist.setTitleX("ST time - vertex time modulo beam bucket (ns)");
 			dg.addDataSet(fineHist, 1);
 

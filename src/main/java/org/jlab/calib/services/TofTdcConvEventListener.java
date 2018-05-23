@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
+import org.jlab.calib.services.ctof.CTOFCalibrationEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.calib.tasks.CalibrationEngine;
 import org.jlab.detector.calib.utils.CalibrationConstants;
@@ -206,6 +207,9 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
     		TDC_MIN = REAL_TDC_MIN;
     		TDC_MAX = REAL_TDC_MAX;    		
     	}
+    	
+    	double bb = TOFCalibrationEngine.BEAM_BUCKET;
+		int bins = (int) (bb/2.004)*50;
 
         // perform init processing
         for (int sector = 1; sector <= 6; sector++) {
@@ -216,7 +220,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
                     // create all the histograms
                     H2F histL = new H2F("tdcConvLeft",histTitle(sector,layer,paddle),
                     		50, TDC_MIN[layer], TDC_MAX[layer], 
-                                    50, -1.0, 1.0);
+                    		bins, -bb*0.5, bb*0.5);
 
                     histL.setName("tdcConvLeft");
                     histL.setTitleX("TDC Left");
@@ -224,7 +228,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
 
                     H2F histR = new H2F("tdcConvRight",histTitle(sector,layer,paddle),
                     				50, TDC_MIN[layer], TDC_MAX[layer], 
-                                    50, -1.0, 1.0);
+                    				bins, -bb*0.5, bb*0.5);
 
                     histR.setName("tdcConvRight");
                     histR.setTitleX("TDC Right");
@@ -609,8 +613,8 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
     @Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
 		
-    	canvas.getPad(2).setAxisRange(TDC_MIN[layer], TDC_MAX[layer], -1.0, 1.0);
-    	canvas.getPad(3).setAxisRange(TDC_MIN[layer], TDC_MAX[layer], -1.0, 1.0);
+    	canvas.getPad(2).setAxisRange(TDC_MIN[layer], TDC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	canvas.getPad(3).setAxisRange(TDC_MIN[layer], TDC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	
 	}
 

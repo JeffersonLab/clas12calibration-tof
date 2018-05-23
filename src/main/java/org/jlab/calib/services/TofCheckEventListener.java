@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.jlab.calib.services.ctof.CTOFCalibrationEngine;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.groot.data.GraphErrors;
@@ -67,6 +68,8 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 	}
 
 	public void createHists() {
+		double bb = TOFCalibrationEngine.BEAM_BUCKET;
+		int bins = (int) (bb/2.004)*88;
 
 		for (int sector = 1; sector <= 6; sector++) {
 			for (int layer = 1; layer <= 3; layer++) {
@@ -79,7 +82,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F momHist = 
 							new H2F("momHist",histTitle(sector,layer,paddle),
 									100, 0.2, 5.0,
-									88, -1.1, 1.1);
+									bins, -bb*0.5, bb*0.5);
 					momHist.setTitleX("p (GeV)");
 					momHist.setTitleY("delta T (ns)");
 					dg.addDataSet(momHist, 0);
@@ -87,7 +90,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F vzHist = 
 							new H2F("vzHist",histTitle(sector,layer,paddle),
 									100, -20.0, 20.0,
-									88, -1.1, 1.1);
+									bins, -bb*0.5, bb*0.5);
 					vzHist.setTitleX("vz (cm)");
 					vzHist.setTitleY("delta T (ns)");
 					dg.addDataSet(vzHist, 1);
@@ -95,7 +98,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F hitHist = 
 							new H2F("hitHist",histTitle(sector,layer,paddle),
 									100, -paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
-									88, -1.1, 1.1);
+									bins, -bb*0.5, bb*0.5);
 					hitHist.setTitleX("hit position (cm)");
 					hitHist.setTitleY("delta T (ns)");
 					dg.addDataSet(hitHist, 2);
@@ -103,7 +106,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F pathHist = 
 							new H2F("pathHist",histTitle(sector,layer,paddle),
 									100, 630, 740,
-									88, -1.1, 1.1);
+									bins, -bb*0.5, bb*0.5);
 					pathHist.setTitleX("path (cm)");
 					pathHist.setTitleY("delta T (ns)");
 					dg.addDataSet(pathHist, 3);
@@ -111,7 +114,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F adcLHist = 
 							new H2F("adcLHist",histTitle(sector,layer,paddle),
 									100, ADC_MIN[layer], ADC_MAX[layer],
-									88, -1.1, 1.1);
+									bins, -bb*0.5, bb*0.5);
 					adcLHist.setTitleX("ADC Left");
 					adcLHist.setTitleY("delta T (ns)");
 					dg.addDataSet(adcLHist, 4);
@@ -119,7 +122,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					H2F adcRHist = 
 							new H2F("adcRHist",histTitle(sector,layer,paddle),
 									100, ADC_MIN[layer], ADC_MAX[layer],
-									88, -1.1, 1.1);
+									bins, -bb*0.5, bb*0.5);
 					adcRHist.setTitleX("ADC Right");
 					adcRHist.setTitleY("delta T (ns)");
 					dg.addDataSet(adcRHist, 5);
@@ -271,4 +274,14 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 	public void writeFile(String filename) {
 		// no file required for check step
 	}
+	
+    @Override
+	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
+    	
+    	canvas.getPad(2).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
+    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	canvas.getPad(3).setAxisRange(630, 740,
+    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	
+	}	
 }

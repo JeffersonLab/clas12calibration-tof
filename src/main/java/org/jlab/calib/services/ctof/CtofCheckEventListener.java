@@ -68,6 +68,8 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 
 	public void createHists() {
 
+		double bb = CTOFCalibrationEngine.BEAM_BUCKET;
+		int bins = (int) (bb/2.004)*88;
 		for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 
 			DataGroup dg = new DataGroup(3,2);
@@ -76,15 +78,15 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			H2F momHist = 
 					new H2F("momHist","Paddle "+paddle,
 							100, CTOFCalibration.minP, CTOFCalibration.maxP,
-							88, -1.1, 1.1);
+							bins, -bb*0.5, bb*0.5);
 			momHist.setTitleX("p (GeV)");
 			momHist.setTitleY("delta T (ns)");
 			dg.addDataSet(momHist, 0);
 
 			H2F vzHist = 
 					new H2F("vzHist","Paddle "+paddle,
-							100, -20.0, 20.0,
-							88, -1.1, 1.1);
+							100, -5.0, 5.0,
+							bins, -bb*0.5, bb*0.5);
 			vzHist.setTitleX("vz (cm)");
 			vzHist.setTitleY("delta T (ns)");
 			dg.addDataSet(vzHist, 1);
@@ -92,7 +94,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			H2F hitHist = 
 					new H2F("hitHist","Paddle "+paddle,
 							100, -60.0, 60.0,
-							88, -1.1, 1.1);
+							bins, -bb*0.5, bb*0.5);
 			hitHist.setTitleX("hit position (cm)");
 			hitHist.setTitleY("delta T (ns)");
 			dg.addDataSet(hitHist, 2);
@@ -100,7 +102,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			H2F pathHist = 
 					new H2F("pathHist","Paddle "+paddle,
 							100, 20, 80,
-							88, -1.1, 1.1);
+							bins, -bb*0.5, bb*0.5);
 			pathHist.setTitleX("path (cm)");
 			pathHist.setTitleY("delta T (ns)");
 			dg.addDataSet(pathHist, 3);
@@ -108,7 +110,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			H2F adcLHist = 
 					new H2F("adcLHist","Paddle "+paddle,
 							100, ADC_MIN, ADC_MAX,
-							88, -1.1, 1.1);
+							bins, -bb*0.5, bb*0.5);
 			adcLHist.setTitleX("ADC Left");
 			adcLHist.setTitleY("delta T (ns)");
 			dg.addDataSet(adcLHist, 4);
@@ -116,7 +118,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			H2F adcRHist = 
 					new H2F("adcRHist","Paddle "+paddle,
 							100, ADC_MIN, ADC_MAX,
-							88, -1.1, 1.1);
+							bins, -bb*0.5, bb*0.5);
 			adcRHist.setTitleX("ADC Right");
 			adcRHist.setTitleY("delta T (ns)");
 			dg.addDataSet(adcRHist, 5);

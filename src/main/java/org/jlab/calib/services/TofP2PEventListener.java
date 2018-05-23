@@ -140,6 +140,9 @@ public class TofP2PEventListener extends TOFCalibrationEngine {
 
 	public void createHists() {
 
+		int bins = (int) ((2.004/BEAM_BUCKET)*100)-1;
+		double binLimit = (bins/2.0)*BEAM_BUCKET;
+		
 		for (int sector = 1; sector <= 6; sector++) {
 			for (int layer = 1; layer <= 3; layer++) {
 				int layer_index = layer - 1;
@@ -150,7 +153,7 @@ public class TofP2PEventListener extends TOFCalibrationEngine {
 					// create all the histograms and functions
 					H1F vertexDiffHist = 
 							new H1F("vertexDiffHist",histTitle(sector,layer,paddle), 
-									99,-49.5*BEAM_BUCKET,49.5*BEAM_BUCKET);
+									bins,-binLimit,binLimit);
 					vertexDiffHist.setTitleX("#Delta t (vertex) (ns)");
 					dg.addDataSet(vertexDiffHist, 0);
 

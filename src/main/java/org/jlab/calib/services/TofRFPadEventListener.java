@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.jlab.calib.services.ctof.CTOFCalibrationEngine;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.groot.data.GraphErrors;
@@ -148,6 +149,9 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 	}
 
 	public void createHists() {
+		
+		double bb = BEAM_BUCKET;
+		int bins = (int) (bb/2.004)*400;
 
 		for (int sector = 1; sector <= 6; sector++) {
 			for (int layer = 1; layer <= 3; layer++) {
@@ -159,13 +163,13 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 					// create all the histograms and functions
 					H1F fineHistRaw = 
 							new H1F("fineHistRaw",histTitle(sector, layer, paddle),
-									160, -2.0, 2.0);
+									bins, -bb, bb);
 					fineHistRaw.setTitleX("RF time - vertex time modulo beam bucket (ns)");
 					dg.addDataSet(fineHistRaw, 0);
 
 					H1F fineHist = 
 							new H1F("fineHist",histTitle(sector, layer, paddle),
-									160, -2.0, 2.0);
+									bins, -bb, bb);
 					fineHist.setTitleX("RF time - vertex time modulo beam bucket (ns)");
 					dg.addDataSet(fineHist, 1);
 

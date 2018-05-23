@@ -56,14 +56,14 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	
 	// Preferred bins
 	private int[] xbins = {0, 166, 87, 166};
-	private int ybins = 60;
+	private int ybins = 40;
 
 	final double[] fitLambda = {40.0,40.0};  // default values for the constants
 
 	private String showPlotType = "TW_LEFT";
 	
 	private IndexedList<H2F[]> offsetHists = new IndexedList<H2F[]>(4);  // indexed by s,l,c, offset (in beam bucket multiples), H2F has {left, right}
-	private final int NUM_OFFSET_HISTS = 20;
+	private int NUM_OFFSET_HISTS = 20;
 	
 	private String fitOption = "RQ";
 	int backgroundSF = 2;
@@ -197,6 +197,9 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		
 		// perform init processing
 		
+		double bb = BEAM_BUCKET;
+		ybins = (int) (bb/2.004)*ybins;
+		
 		// create the histograms
 		for (int sector = 1; sector <= 6; sector++) {
 			for (int layer = 1; layer <= 3; layer++) {
@@ -210,11 +213,11 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					H2F leftHist = new H2F("trLeftHist",
 							"",
 							xbins[layer], ADC_MIN[layer], ADC_MAX[layer],
-							ybins, -1.5, 1.5);
+							ybins, -bb*0.5, bb*0.5);
 					H2F rightHist = new H2F("trRightHist",
 							"",
 							xbins[layer], ADC_MIN[layer], ADC_MAX[layer],
-							ybins, -1.5, 1.5);
+							ybins, -bb*0.5, bb*0.5);
 
 //					leftHist.setTitleX("ADC LEFT");
 					leftHist.setTitleY("#Delta t");
@@ -275,6 +278,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					setPlotTitle(sector,layer,paddle);
 
 					// now create the offset hists
+					//NUM_OFFSET_HISTS = (int) (bb/2.004)*NUM_OFFSET_HISTS;
 					for (int i=0; i<NUM_OFFSET_HISTS; i++) {
 
 						double n = NUM_OFFSET_HISTS;
@@ -282,14 +286,14 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 						H2F offLeftHist = new H2F("offsetLeft",
 								histTitle(sector,layer,paddle),
 								xbins[layer], ADC_MIN[layer], ADC_MAX[layer],
-								ybins, -1.5, 1.5);
+								ybins, -bb*0.5, bb*0.5);
 						offLeftHist.setTitleY("#Delta t");
 						offLeftHist.setTitleX("ADC LEFT");
 
 						H2F offRightHist = new H2F("offsetRight",
 								histTitle(sector,layer,paddle),
 								xbins[layer], ADC_MIN[layer], ADC_MAX[layer],
-								ybins, -1.5, 1.5);
+								ybins, -bb*0.5, bb*0.5);
 						offRightHist.setTitleY("#Delta t");
 						offRightHist.setTitleX("ADC RIGHT");
 
@@ -1013,9 +1017,11 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
     @Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
-		
-    	canvas.getPad(4).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -1.5, 1.5);
-    	canvas.getPad(5).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -1.5, 1.5);
+    	
+    	canvas.getPad(2).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	canvas.getPad(3).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+		canvas.getPad(4).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	canvas.getPad(5).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	
 	}
 }

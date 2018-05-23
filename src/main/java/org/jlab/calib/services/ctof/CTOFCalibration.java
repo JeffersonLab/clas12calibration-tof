@@ -178,6 +178,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     public final static int TRACK_BOTH = 0;
     public final static int TRACK_NEG = 1;
     public final static int TRACK_POS = 2;
+    JComboBox<Double> trfList = new JComboBox<Double>();
     JComboBox<String> pidList = new JComboBox<String>();
     private JTextField triggerText = new JTextField(10);
     public static int triggerBit = 0;    
@@ -433,6 +434,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             TOFCalibration.massAss = massAssList.getSelectedIndex();
             
             trackCharge = trackChargeList.getSelectedIndex();
+            CTOFCalibrationEngine.BEAM_BUCKET = (Double) trfList.getSelectedItem();
             TOFCalibration.trackPid = pidList.getSelectedIndex();
             if (triggerText.getText().compareTo("") != 0) {
                 triggerBit = Integer.parseInt(triggerText.getText());
@@ -467,6 +469,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 			System.out.println("Maximum momentum from tracking (GeV): "+maxP);
             System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(TOFCalibration.massAss));
             System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
+            System.out.println("RF period: "+CTOFCalibrationEngine.BEAM_BUCKET);
             System.out.println("PID: "+pidList.getItemAt(TOFCalibration.trackPid));
             System.out.println("Trigger: "+triggerBit);
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
@@ -939,6 +942,17 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridx = 1;
         c.gridy = y;
         trPanel.add(trackChargeList,c);
+        // RF period
+        y++;
+        c.gridx = 0;
+        c.gridy = y;
+        trPanel.add(new JLabel("RF Period:"),c);
+		trfList.addItem(2.004);
+		trfList.addItem(4.008);
+        trfList.addActionListener(this);
+        c.gridx = 1;
+        c.gridy = y;
+        trPanel.add(trfList,c);        
         // PID
         y++;
         c.gridx = 0;

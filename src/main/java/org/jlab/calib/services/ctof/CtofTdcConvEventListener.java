@@ -157,12 +157,15 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
     		TDC_MAX_R = REAL_TDC_MAX_R;
     	}	
 
+		double bb = CTOFCalibrationEngine.BEAM_BUCKET;
+		int bins = (int) (bb/2.004)*50;
+    	
 		// perform init processing
 		for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 
 			// create all the histograms
 			H2F histL = new H2F("tdcConvLeft","tdcConvLeft",50, TDC_MIN_L, TDC_MAX_L, 
-					50, -1.0, 1.0);
+					bins, -bb*0.5, bb*0.5);
 
 			histL.setName("tdcConvLeft");
 			histL.setTitle("RF offset vs TDC Up : Paddle "+paddle);
@@ -170,7 +173,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			histL.setTitleY("RF offset (ns)");
 
 			H2F histR = new H2F("tdcConvRight","tdcConvRight",50, TDC_MIN_R, TDC_MAX_R, 
-					50, -1.0, 1.0);
+					bins, -bb*0.5, bb*0.5);
 
 			histR.setName("tdcConvRight");
 			histR.setTitle("RF offset vs TDC Down : Paddle "+paddle);
@@ -548,8 +551,8 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 	@Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
 
-		canvas.getPad(2).setAxisRange(TDC_MIN_L, TDC_MAX_L, -1.0, 1.0);
-		canvas.getPad(3).setAxisRange(TDC_MIN_R, TDC_MAX_R, -1.0, 1.0);
+		canvas.getPad(2).setAxisRange(TDC_MIN_L, TDC_MAX_L, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+		canvas.getPad(3).setAxisRange(TDC_MIN_R, TDC_MAX_R, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
 
 	}
 

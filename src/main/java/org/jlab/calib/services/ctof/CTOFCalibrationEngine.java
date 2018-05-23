@@ -48,7 +48,7 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
     public final static int        MARKER_LINE_WIDTH = 1;
 
     // Run constants
-    public final static double BEAM_BUCKET = 2.004; // 2.0 for simulations, 2.004 for real data
+    public static Double BEAM_BUCKET = 2.004; // 2.0 for simulations, 2.004 for real data
 
     public IndexedList<Double[]> constants = new IndexedList<Double[]>(3);
 

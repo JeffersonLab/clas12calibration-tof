@@ -171,6 +171,8 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 	public void resetEventListener() {
 
 		// perform init processing
+    	double bb = BEAM_BUCKET;
+		int bins = (int) (bb/2.004)*160;
 		
 		// LC perform init processing
 		for (int sector = 1; sector <= 6; sector++) {
@@ -182,14 +184,14 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 					H2F twposLHist = 
 							new H2F("twposLHist",histTitle(sector,layer,paddle),
 									100, -paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
-									160, -2.0, 2.0);
+									bins, -bb*0.5, bb*0.5);
 					twposLHist.setTitleX("hit position (cm)");
 					twposLHist.setTitleY("delta T (ns)");
 
 					H2F twposRHist = 
 							new H2F("twposRHist",histTitle(sector,layer,paddle),
 									100, -paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
-									160, -2.0, 2.0);
+									bins, -bb*0.5, bb*0.5);
 					twposRHist.setTitleX("hit position (cm)");
 					twposRHist.setTitleY("delta T (ns)");
 
@@ -563,5 +565,15 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 		return dg;
 
 	}
+	
+    @Override
+	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
+    	
+    	canvas.getPad(2).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
+    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	canvas.getPad(3).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
+    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	
+	}	
 	
 }

@@ -175,6 +175,7 @@ ChangeListener {
 	public final static int TRACK_BOTH = 0;
 	public final static int TRACK_NEG = 1;
 	public final static int TRACK_POS = 2;
+    JComboBox<Double> trfList = new JComboBox<Double>();
 	JComboBox<String> pidList = new JComboBox<String>();
 	public static int trackPid = 0;
 	public final static int PID_ALL = 0;
@@ -429,6 +430,7 @@ ChangeListener {
 			}
 			massAss = massAssList.getSelectedIndex();
 			trackCharge = trackChargeList.getSelectedIndex();
+			TOFCalibrationEngine.BEAM_BUCKET = (Double) trfList.getSelectedItem();
 			trackPid = pidList.getSelectedIndex();
 
 			if (triggerText.getText().compareTo("") != 0) {
@@ -476,6 +478,7 @@ ChangeListener {
 			System.out.println("Minimum momentum from tracking (GeV): "+minP);
 			System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(massAss));
 			System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
+			System.out.println("RF period: "+TOFCalibrationEngine.BEAM_BUCKET);
 			System.out.println("PID: "+pidList.getItemAt(trackPid));
 			System.out.println("Trigger: "+triggerBit);
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
@@ -933,6 +936,17 @@ ChangeListener {
 		c.gridx = 1;
 		c.gridy = y;
 		trPanel.add(trackChargeList,c);
+        // RF period
+        y++;
+        c.gridx = 0;
+        c.gridy = y;
+        trPanel.add(new JLabel("RF Period:"),c);
+		trfList.addItem(2.004);
+		trfList.addItem(4.008);
+        trfList.addActionListener(this);
+        c.gridx = 1;
+        c.gridy = y;
+        trPanel.add(trfList,c);     
 		// PID
 		y++;
 		c.gridx = 0;
