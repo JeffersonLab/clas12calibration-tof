@@ -825,6 +825,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             engPanels[i-3] = new CtofPrevConfigPanel(engines[i]);
             confPanel.add(engPanels[i-3]);
         }
+        // add TDC Conv at the end
+ 		engPanels[engPanels.length-1] = new CtofPrevConfigPanel(engines[TDC_CONV]);
+ 		confPanel.add(engPanels[engPanels.length-1]);
         
         JPanel butPage2 = new configButtonPanel(this, false, "Next");
         confOuterPanel.add(confPanel, BorderLayout.NORTH);

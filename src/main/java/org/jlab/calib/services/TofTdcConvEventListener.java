@@ -87,7 +87,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
         filename = nextFileName();
 
         calib = new CalibrationConstants(3,
-                "tdc_conv_left/F:tdc_conv_right/F");
+                "left/F:right/F");
         calib.setName("/calibration/ftof/tdc_conv");
         calib.setPrecision(5);
 
@@ -99,15 +99,18 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
 
     }
     
-	@Override
-	public void populatePrevCalib() {
+	
+	public void populatePrevCalib2() {
 		prevCalRead = true;
 	}    
-    
-    public void populatePrevCalib2() {
+	
+	@Override
+    public void populatePrevCalib() {
 
+		System.out.println("Populating "+stepName+" previous calibration values");
         if (calDBSource==CAL_FILE) {
 
+        	System.out.println("File: "+prevCalFilename);
             // read in the values from the text file            
             String line = null;
             try { 
@@ -135,9 +138,9 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
 
                     convValues.addEntry(sector, layer, paddle);
                     convValues.setDoubleValue(convLeft,
-                            "tdc_conv_left", sector, layer, paddle);
-                    convValues.setDoubleValue(convLeft,
-                            "tdc_conv_right", sector, layer, paddle);
+                            "left", sector, layer, paddle);
+                    convValues.setDoubleValue(convRight,
+                            "right", sector, layer, paddle);
                     
                     line = bufferedReader.readLine();
                 }
@@ -158,25 +161,29 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
             }            
         }
         else if (calDBSource==CAL_DEFAULT) {
+        	System.out.println("Default");
             for (int sector = 1; sector <= 6; sector++) {
                 for (int layer = 1; layer <= 3; layer++) {
                     int layer_index = layer - 1;
                     for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
                         convValues.addEntry(sector, layer, paddle);
                         convValues.setDoubleValue(EXPECTED_CONV,
-                                "tdc_conv_left", sector, layer, paddle);
+                                "left", sector, layer, paddle);
                         convValues.setDoubleValue(EXPECTED_CONV,
-                                "tdc_conv_right", sector, layer, paddle);                        
+                                "right", sector, layer, paddle);
                         
                     }
                 }
             }            
         }
         else if (calDBSource==CAL_DB) {
+        	System.out.println("Database Run No: "+prevCalRunNo);
             DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
             convValues = dcp.readConstants("/calibration/ftof/tdc_conv");
             dcp.disconnect();
         }
+        prevCalRead = true;
+		System.out.println(stepName+" previous calibration values populated successfully");
     }
 
     @Override
@@ -416,7 +423,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
 
         String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
-                "Override TDC_conv_left:", "Override TDC_conv_right"};
+                "Override tdc_conv left:", "Override tdc_conv right"};
 
         TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
@@ -506,9 +513,9 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
     @Override
     public void saveRow(int sector, int layer, int paddle) {
         calib.setDoubleValue(getConvLeft(sector,layer,paddle),
-                "tdc_conv_left", sector, layer, paddle);
+                "left", sector, layer, paddle);
         calib.setDoubleValue(getConvRight(sector,layer,paddle),
-                "tdc_conv_right", sector, layer, paddle);
+                "right", sector, layer, paddle);
     }
 
     @Override

@@ -123,6 +123,32 @@ public class TOFPaddle {
 
 		return veff;
 	}
+	
+	public double tdcConvL() {
+		double tdcConv = NS_PER_CH;
+		if (tof == "FTOF") {
+			tdcConv = TOFCalibrationEngine.convValues.getDoubleValue("left", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		} else {
+			tdcConv = CTOFCalibrationEngine.convValues.getDoubleValue("upstream", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+
+		return tdcConv;
+	}	
+	
+	public double tdcConvR() {
+		double tdcConv = NS_PER_CH;
+		if (tof == "FTOF") {
+			tdcConv = TOFCalibrationEngine.convValues.getDoubleValue("right", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		} else {
+			tdcConv = CTOFCalibrationEngine.convValues.getDoubleValue("downstream", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+
+		return tdcConv;
+	}
 
 	public double rfpad() {
 		double rfpad = 0.0;
@@ -322,18 +348,18 @@ public class TOFPaddle {
 	public double timeLeftAfterTW() {
 		if (tof == "FTOF") {
 			// return tdcToTime(TDCL) - (lamL() / Math.pow(ADCL, 0.5));
-			return tdcToTime(TDCL) - TWCorrL();
+			return tdcToTimeL(TDCL) - TWCorrL();
 		} else {
-			return tdcToTime(TDCL);
+			return tdcToTimeL(TDCL);
 		}
 	}
 
 	public double timeRightAfterTW() {
 		if (tof == "FTOF") {
 			// return tdcToTime(TDCR) - (lamR() / Math.pow(ADCR, 0.5));
-			return tdcToTime(TDCR) - TWCorrR();
+			return tdcToTimeR(TDCR) - TWCorrR();
 		} else {
-			return tdcToTime(TDCR);
+			return tdcToTimeR(TDCR);
 		}
 	}	
 
@@ -346,7 +372,7 @@ public class TOFPaddle {
 			beta = beta();
 		}
 
-		double dtL = tdcToTime(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
+		double dtL = tdcToTimeL(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
 				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
 
 		// subtract the correction based on previous calibration values
@@ -370,11 +396,11 @@ public class TOFPaddle {
 			beta = beta();
 		}
 
-		double dtL = tdcToTime(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
+		double dtL = tdcToTimeL(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
 				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
 
 		if (show) {
-			System.out.println("tdcToTime(TDCL) "+tdcToTime(TDCL));
+			System.out.println("tdcToTime(TDCL) "+tdcToTimeL(TDCL));
 			System.out.println("(lr / 2) "+(lr / 2));
 			System.out.println("rfpad() "+rfpad());
 			System.out.println("((0.5 * paddleLength() + paddleY()) / this.veff()) "+((0.5 * paddleLength() + paddleY()) / this.veff()));
@@ -407,7 +433,7 @@ public class TOFPaddle {
 			beta = beta();
 		}
 
-		double dtR = tdcToTime(TDCR) + (lr / 2) + rfpad() - ((0.5 * paddleLength() - paddleY()) / this.veff())
+		double dtR = tdcToTimeR(TDCR) + (lr / 2) + rfpad() - ((0.5 * paddleLength() - paddleY()) / this.veff())
 				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
 
 		// subtract the correction based on previous calibration values
@@ -474,11 +500,15 @@ public class TOFPaddle {
 	}
 
 	public boolean isValidLeftRight() {
-		return (tdcToTime(TDCL) != tdcToTime(TDCR));
+		return (tdcToTimeL(TDCL) != tdcToTimeR(TDCR));
 	}
 
-	double tdcToTime(double value) {
-		return NS_PER_CH * value;
+	double tdcToTimeL(double value) {
+		return tdcConvL() * value;
+	}
+
+	double tdcToTimeR(double value) {
+		return tdcConvR() * value;
 	}
 
 	public double veffHalfTimeDiff() {
@@ -617,7 +647,7 @@ public class TOFPaddle {
 				+ " startTimeP2PCorr " + startTimeP2PCorr());
 		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1L " + tw1L() + " tw2L "
 				+ tw2L() + " lamR " + lamR() + " tw1R " + tw1R() + " tw2R " + tw2R() + " LR " + leftRightAdjustment()
-				+ " veff " + veff());
+				+ " veff " + veff() + " tdcConvL "+ tdcConvL() + " tdcConvR "+ tdcConvR());
 		System.out.println("paddleLength " + paddleLength() + " paddleY " + paddleY() + "ctofCenter "+ctofCenter());
 		System.out.println("timeLeftAfterTW " + timeLeftAfterTW() + " timeRightAfterTW " + timeRightAfterTW());
 		System.out.println("deltaTLeft " + this.deltaTLeft(0.0) + " deltaTRight " + this.deltaTRight(0.0));

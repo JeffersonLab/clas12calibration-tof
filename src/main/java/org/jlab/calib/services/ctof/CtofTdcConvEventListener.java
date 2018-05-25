@@ -103,7 +103,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 		filename = nextFileName();
 
 		calib = new CalibrationConstants(3,
-				"tdc_conv_left/F:tdc_conv_right/F");
+				"upstream/F:downstream/F");
 		calib.setName("/calibration/ctof/tdc_conv");
 		calib.setPrecision(5);
 
@@ -116,9 +116,81 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 	}
 
 	@Override
-	public void populatePrevCalib() {
-		prevCalRead = true;
-	} 
+    public void populatePrevCalib() {
+
+		System.out.println("Populating "+stepName+" previous calibration values");
+        if (calDBSource==CAL_FILE) {
+
+        	System.out.println("File: "+prevCalFilename);
+            // read in the values from the text file            
+            String line = null;
+            try { 
+
+                // Open the file
+                FileReader fileReader = 
+                        new FileReader(prevCalFilename);
+
+                // Always wrap FileReader in BufferedReader
+                BufferedReader bufferedReader = 
+                        new BufferedReader(fileReader);            
+
+                line = bufferedReader.readLine();
+
+                while (line != null) {
+
+                    String[] lineValues;
+                    lineValues = line.split(" ");
+
+                    int sector = Integer.parseInt(lineValues[0]);
+                    int layer = Integer.parseInt(lineValues[1]);
+                    int paddle = Integer.parseInt(lineValues[2]);
+                    double convLeft = Double.parseDouble(lineValues[3]);
+                    double convRight = Double.parseDouble(lineValues[4]);
+
+                    convValues.addEntry(sector, layer, paddle);
+                    convValues.setDoubleValue(convLeft,
+                            "upstream", sector, layer, paddle);
+                    convValues.setDoubleValue(convRight,
+                            "downstream", sector, layer, paddle);
+                    
+                    line = bufferedReader.readLine();
+                }
+
+                bufferedReader.close();            
+            }
+            catch(FileNotFoundException ex) {
+                ex.printStackTrace();
+                System.out.println(
+                        "Unable to open file '" + 
+                                prevCalFilename + "'");                
+            }
+            catch(IOException ex) {
+                System.out.println(
+                        "Error reading file '" 
+                                + prevCalFilename + "'");                   
+                ex.printStackTrace();
+            }            
+        }
+        else if (calDBSource==CAL_DEFAULT) {
+        	System.out.println("Default");
+        	for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
+                convValues.addEntry(1, 1, paddle);
+                convValues.setDoubleValue(EXPECTED_CONV,
+                        "upstream", 1, 1, paddle);
+                convValues.setDoubleValue(EXPECTED_CONV,
+                        "downstream", 1, 1, paddle);
+                   
+            }            
+        }
+        else if (calDBSource==CAL_DB) {
+        	System.out.println("Database Run No: "+prevCalRunNo);
+            DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
+            convValues = dcp.readConstants("/calibration/ctof/tdc_conv");
+            dcp.disconnect();
+        }
+        prevCalRead = true;
+		System.out.println(stepName+" previous calibration values populated successfully");
+    }
 	
     @Override
     public void resetEventListener() {
@@ -363,7 +435,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 
 		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
-				"Override TDC_conv_left:", "Override TDC_conv_right"};
+				"Override tdc_conv upstream:", "Override tdc_conv downstream"};
 
 		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
@@ -446,9 +518,9 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 	@Override
 	public void saveRow(int sector, int layer, int paddle) {
 		calib.setDoubleValue(getConvLeft(sector,layer,paddle),
-				"tdc_conv_left", sector, layer, paddle);
+				"upstream", sector, layer, paddle);
 		calib.setDoubleValue(getConvRight(sector,layer,paddle),
-				"tdc_conv_right", sector, layer, paddle);
+				"downstream", sector, layer, paddle);
 	}
 
 	@Override

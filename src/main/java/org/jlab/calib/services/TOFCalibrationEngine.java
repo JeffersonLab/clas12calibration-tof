@@ -99,7 +99,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 		// controlled by calibration step class
 		TOFPaddle.tof = "FTOF";
 		convValues = new CalibrationConstants(3,
-				"tdc_conv/F");
+				"left/F:right/F");
 		leftRightValues = new CalibrationConstants(3,
 				"left_right/F");
 		veffValues = new CalibrationConstants(3,

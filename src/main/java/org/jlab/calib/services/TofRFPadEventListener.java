@@ -151,7 +151,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 	public void createHists() {
 		
 		double bb = BEAM_BUCKET;
-		int bins = (int) (bb/2.004)*400;
+		int bins = (int) (bb/2.004)*160;
 
 		for (int sector = 1; sector <= 6; sector++) {
 			for (int layer = 1; layer <= 3; layer++) {

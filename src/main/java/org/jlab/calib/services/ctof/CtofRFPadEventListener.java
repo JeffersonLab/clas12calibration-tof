@@ -142,7 +142,7 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 	public void createHists() {
 		
 		double bb = CTOFCalibrationEngine.BEAM_BUCKET;
-		int bins = (int) (bb/2.004)*400;
+		int bins = (int) (bb/2.004)*160;
 		for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 
 			DataGroup dg = new DataGroup(2,1);

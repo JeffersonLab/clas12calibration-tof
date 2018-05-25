@@ -800,7 +800,7 @@ ChangeListener {
 
 	public void configure() {
 
-		configFrame.setSize(900, 730);
+		configFrame.setSize(900, 830);
 		//configFrame.setSize(1000, 600);
 		configFrame.setLocationRelativeTo(pane);
 		configFrame.setDefaultCloseOperation(configFrame.DO_NOTHING_ON_CLOSE);
@@ -833,12 +833,16 @@ ChangeListener {
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
+				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine())};
 
 		for (int i=3; i< engines.length-1; i++) {  // skip HV, attenuation, TDC, check
 			engPanels[i-3] = new TofPrevConfigPanel(engines[i]);
 			confPanel.add(engPanels[i-3]);
 		}
+		// add TDC Conv at the end
+		engPanels[engPanels.length-1] = new TofPrevConfigPanel(engines[TDC_CONV]);
+		confPanel.add(engPanels[engPanels.length-1]);
 
 		JPanel butPage2 = new configButtonPanel(this, false, "Next");
 		confOuterPanel.add(confPanel, BorderLayout.NORTH);
