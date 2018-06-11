@@ -75,6 +75,13 @@ public class DataProvider {
 			if (event.hasBank("MC::Particle")) {
 				event.getBank("MC::Particle").show();
 			}
+			if (event.hasBank("REC::Particle")) {
+				event.getBank("REC::Particle").show();
+			}
+			if (event.hasBank("REC::Scintillator")) {
+				event.getBank("REC::Scintillator").show();
+			}
+
 		}
 		
 		
@@ -192,9 +199,16 @@ public class DataProvider {
 						paddle.TRIGGER_BIT = configBank.getLong("trigger", 0);
 					}
 					
-					if (event.hasBank("REC::Event")) {
+					// Get the start time, requiring that first particle in the event is an electron
+					if (event.hasBank("REC::Event") && event.hasBank("REC::Particle")) {
 						DataBank eventBank = event.getBank("REC::Event");
-						paddle.ST_TIME = eventBank.getFloat("STTime", 0);
+						DataBank  recPartBank = event.getBank("REC::Particle");
+						if (recPartBank.getInt("pid", 0) == 11) {
+							paddle.ST_TIME = eventBank.getFloat("STTime", 0);
+						}
+						else {
+							paddle.ST_TIME = -1000.0;
+						}
 					}
 
 					// get the RF time with id=1
@@ -210,16 +224,24 @@ public class DataProvider {
 					double energy = hitsBank.getFloat("energy", hitIndex);
 
 					// only use hit with associated track and a minimum energy
-					if (trkId != -1 && energy > 1.5) {
-						// System.out.println("Louise 233");
-
+					if (trkId != -1 && energy > 0.5) {
+						
+						// Find the matching CVTRec::Tracks bank
+						int trkIdx = -1;
+						for (int i = 0; i < trkBank.rows(); i++) {
+							if (trkBank.getShort("ID",i)==trkId) {
+								trkIdx = i;
+								break;
+							}
+						}
+						
 						// path length from bank
 						paddle.PATH_LENGTH = hitsBank.getFloat("pathLength", hitIndex);
 						// System.out.println("Louise 237");
 						paddle.RF_TIME = trf;
 						
 						// Get the momentum and record the beta (assuming every hit is a pion!)
-						double mom = trkBank.getFloat("p", trkId - 1);
+						double mom = trkBank.getFloat("p", trkIdx);
 						//double mass = massList[CTOFCalibration.massAss];
 						//double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
 						//double beta = mom / Math.sqrt(mom * mom + mass * mass);
@@ -228,33 +250,34 @@ public class DataProvider {
 						paddle.TRACK_ID = trkId;
 						
 						// For CTOF vertex z in cm:
-						paddle.VERTEX_Z = trkBank.getFloat("z0", trkId-1);
+						paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx);
 						// For CTOF vertex z in mm -> convert to cm
-						//paddle.VERTEX_Z = trkBank.getFloat("z0", trkId - 1) / 10.0;
+						//paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx) / 10.0;
 
-						paddle.CHARGE = trkBank.getByte("q", trkId - 1);
+						paddle.CHARGE = trkBank.getByte("q", trkIdx);
 
 						if (CTOFCalibration.maxRcs != 0.0) {
-							// paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkId);
-							paddle.TRACK_REDCHI2 = trkBank.getFloat("chi2", trkId - 1)
-									/ trkBank.getShort("ndf", trkId - 1);
+							// paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkIdx);
+							paddle.TRACK_REDCHI2 = trkBank.getFloat("chi2", trkIdx)
+									/ trkBank.getShort("ndf", trkIdx);
 						} else {
 							paddle.TRACK_REDCHI2 = -1.0;
 						}
 						
 						// Get the REC::Track and then the REC::Particle
 						//setOutput(false);
-						if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")) {
+						if (event.hasBank("REC::Particle") && event.hasBank("REC::Scintillator")) {
 							
-							DataBank  recTrkBank = event.getBank("REC::Track");
+							DataBank  recScinBank = event.getBank("REC::Scintillator");
 							int pIdx = -1;
-							for (int i = 0; i < recTrkBank.rows(); i++) {
-								if (recTrkBank.getShort("index",i)==trkId-1) {
-									pIdx = i;
+							for (int i = 0; i < recScinBank.rows(); i++) {
+								if (recScinBank.getShort("index",i)==hitIndex &&
+										recScinBank.getByte("detector",i)==DetectorType.CTOF.getDetectorId()) {
+									pIdx = recScinBank.getShort("pindex", i);
 									break;
 								}
 							}
-							
+
 							DataBank  recPartBank = event.getBank("REC::Particle");
 							paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
 						}
@@ -263,38 +286,11 @@ public class DataProvider {
 					}
 				}
 
-				if (test && paddle.TRACK_ID != -1) {
-					paddle.show();
-					event.show();
-					if (event.hasBank("REC::Event")) {
-						event.getBank("REC::Event").show();
-					}
-					if (event.hasBank("CTOF::adc")) {
-						event.getBank("CTOF::adc").show();
-					}
-					if (event.hasBank("CTOF::tdc")) {
-						event.getBank("CTOF::tdc").show();
-					}
-					if (event.hasBank("CTOF::hits")) {
-						event.getBank("CTOF::hits").show();
-					}
-					if (event.hasBank("CVTRec::Tracks")) {
-						event.getBank("CVTRec::Tracks").show();
-					}
-					if (event.hasBank("RUN::rf")) {
-						event.getBank("RUN::rf").show();
-					}
-					if (event.hasBank("RUN::config")) {
-						event.getBank("RUN::config").show();
-					}
-					if (event.hasBank("MC::Particle")) {
-						event.getBank("MC::Particle").show();
-					}
-				}
-
 				// System.out.println("Adding paddle to list");
 				if (paddle.includeInCalib()) {
+					
 					paddleList.add(paddle);
+					if (test) paddle.show();
 				}
 			}
 		} else {

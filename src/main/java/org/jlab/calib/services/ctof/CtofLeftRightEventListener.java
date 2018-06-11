@@ -66,7 +66,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
 
         calib = new CalibrationConstants(3,
                 "upstream_downstream/F");
-        calib.setName("/calibration/ctof/timing_offset/upstream_downstream");
+        calib.setName("/calibration/ctof/time_offsets/upstream_downstream");
         calib.setPrecision(3);
 
         calib.addConstraint(3, -MAX_LEFTRIGHT, MAX_LEFTRIGHT);
@@ -142,7 +142,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         else if (calDBSource==CAL_DB) {
             System.out.println("Database Run No: "+prevCalRunNo);
             DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-            leftRightValues = dcp.readConstants("/calibration/ctof/timing_offset");
+            leftRightValues = dcp.readConstants("/calibration/ctof/time_offsets");
             dcp.disconnect();
         }
         prevCalRead = true;

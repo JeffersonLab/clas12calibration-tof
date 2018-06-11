@@ -46,7 +46,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 				new CalibrationConstants(3,
 						"paddle2paddle/F");
 
-		calib.setName("/calibration/ctof/timing_offset/P2P");
+		calib.setName("/calibration/ctof/time_offsets/P2P");
 		calib.setPrecision(3);
 
 		// assign constraints
@@ -117,7 +117,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			p2pValues = dcp.readConstants("/calibration/ftof/timing_offset");
+			p2pValues = dcp.readConstants("/calibration/ftof/time_offsets");
 			dcp.disconnect();
 		}
 		prevCalRead = true;

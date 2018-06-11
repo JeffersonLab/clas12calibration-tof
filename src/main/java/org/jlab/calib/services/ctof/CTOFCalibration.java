@@ -120,11 +120,11 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     String[] dirs = {"/calibration/ctof/gain_balance",
                      "/calibration/ctof/attenuation",
                      "/calibration/ctof/tdc_conv",                     
-                     "/calibration/ctof/timing_offset/upstream_downstream",
+                     "/calibration/ctof/time_offsets/upstream_downstream",
                      "/calibration/ctof/effective_velocity",
-                     "/calibration/ctof/timing_offset/rfpad",
-                     "/calibration/ctof/timing_offset/P2P",
-					 "/calibration/ctof/timing_offset/check"};
+                     "/calibration/ctof/time_offsets/rfpad",
+                     "/calibration/ctof/time_offsets/P2P",
+					 "/calibration/ctof/time_offsets/check"};
     
     String selectedDir = "None";
     int selectedSector = 1;

@@ -599,7 +599,10 @@ public class TOFPaddle {
 					(TOFCalibration.trackPid==TOFCalibration.PID_L && (PARTICLE_ID==13 || PARTICLE_ID==-13)) ||
 					(TOFCalibration.trackPid==TOFCalibration.PID_L && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
 					(TOFCalibration.trackPid==TOFCalibration.PID_PI && (PARTICLE_ID==211 || PARTICLE_ID==-211)) ||
-					(TOFCalibration.trackPid==TOFCalibration.PID_P && (PARTICLE_ID==2212));
+					(TOFCalibration.trackPid==TOFCalibration.PID_P && (PARTICLE_ID==2212)) ||
+					(TOFCalibration.trackPid==TOFCalibration.PID_LPI && (PARTICLE_ID==13 || PARTICLE_ID==-13)) ||
+					(TOFCalibration.trackPid==TOFCalibration.PID_LPI && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
+					(TOFCalibration.trackPid==TOFCalibration.PID_LPI && (PARTICLE_ID==211 || PARTICLE_ID==-211));
 					
 	}
 

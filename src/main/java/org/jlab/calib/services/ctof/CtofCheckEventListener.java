@@ -47,7 +47,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 				new CalibrationConstants(3,
 						"rfpad/F");
 
-		calib.setName("/calibration/ctof/timing_offset/check");
+		calib.setName("/calibration/ctof/time_offsets/check");
 		calib.setPrecision(3);	
 
 	}

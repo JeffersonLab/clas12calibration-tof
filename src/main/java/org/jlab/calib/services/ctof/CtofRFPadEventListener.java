@@ -53,7 +53,7 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 				new CalibrationConstants(3,
 						"rfpad/F:rfpad_sigma/F");
 
-		calib.setName("/calibration/ctof/timing_offset/rfpad");
+		calib.setName("/calibration/ctof/time_offsets/rfpad");
 		calib.setPrecision(3);
 
 		// assign constraints
@@ -123,7 +123,7 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			rfpadValues = dcp.readConstants("/calibration/ctof/timing_offset");
+			rfpadValues = dcp.readConstants("/calibration/ctof/time_offsets");
 			dcp.disconnect();
 		}
 		prevCalRead = true;

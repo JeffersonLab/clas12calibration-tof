@@ -182,6 +182,7 @@ ChangeListener {
 	public final static int PID_L = 1;
 	public final static int PID_PI = 2;
 	public final static int PID_P = 3;
+	public final static int PID_LPI = 4;
 
 	private JTextField triggerText = new JTextField(10);
 	public static int triggerBit = 0;    
@@ -960,6 +961,7 @@ ChangeListener {
 		pidList.addItem("Leptons");
 		pidList.addItem("Pions");
 		pidList.addItem("Protons");
+		pidList.addItem("Leptons and pions");
 		pidList.addActionListener(this);
 		c.gridx = 1;
 		c.gridy = y;
