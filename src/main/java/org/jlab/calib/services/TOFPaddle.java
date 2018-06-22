@@ -316,7 +316,7 @@ public class TOFPaddle {
 
 	// ref time for CTOF - use STTime from REC::Event
 	public double refSTTime() {
-		return ST_TIME - startTime();
+		return ST_TIME - (startTime() - vertexCorr());
 	}
 
 	public double refTimeCorr() {
@@ -646,6 +646,7 @@ public class TOFPaddle {
 		System.out.println("goodTrackFound " + goodTrackFound() + " chargeMatch " + chargeMatch() + " pidMatch "+pidMatch());
 		System.out.println("refTime " + refTime() + " startTime " + startTime() + " averageHitTime "
 				+ averageHitTime() + " vertexCorr " + vertexCorr());
+		System.out.println("refSTTime " + refSTTime());
 		System.out.println("tofTimeRFCorr " + tofTimeRFCorr() + " startTimeRFCorr " + startTimeRFCorr()
 				+ " startTimeP2PCorr " + startTimeP2PCorr());
 		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1L " + tw1L() + " tw2L "

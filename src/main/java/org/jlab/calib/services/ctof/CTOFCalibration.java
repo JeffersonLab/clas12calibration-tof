@@ -422,7 +422,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             if (maxVText.getText().compareTo("") != 0) {
                 maxV = Double.parseDouble(maxVText.getText());
             }   
-            //TOFCalibration.vertexCorr = vertexCorrList.getSelectedIndex();
+            TOFCalibration.vertexCorr = vertexCorrList.getSelectedIndex();
 			
             if (minPText.getText().compareTo("") != 0) {
                 minP = Double.parseDouble(minPText.getText());
@@ -464,7 +464,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
             System.out.println("Minimum vertex z: "+minV);
             System.out.println("Maximum vertex z: "+maxV);
-            //System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(TOFCalibration.vertexCorr));
+            System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(TOFCalibration.vertexCorr));
 			System.out.println("Minimum momentum from tracking (GeV): "+minP);
 			System.out.println("Maximum momentum from tracking (GeV): "+maxP);
             System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(TOFCalibration.massAss));
@@ -886,19 +886,19 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridy = y;
         trPanel.add(maxVText,c);
 		// Vertex time correction
-//		y++;
-//		c.gridx = 0;
-//		c.gridy = y;
-//		trPanel.add(new JLabel("Vertex time correction?:"),c);
-//		vertexCorrList.addItem("Yes");
-//		vertexCorrList.addItem("No");
-//		vertexCorrList.addActionListener(this);
-//		c.gridx = 1;
-//		c.gridy = y;
-//		trPanel.add(vertexCorrList,c);
-//		c.gridx = 2;
-//		c.gridy = y;
-//		trPanel.add(new JLabel(""),c);
+		y++;
+		c.gridx = 0;
+		c.gridy = y;
+		trPanel.add(new JLabel("Vertex time correction?:"),c);
+		vertexCorrList.addItem("Yes");
+		vertexCorrList.addItem("No");
+		vertexCorrList.addActionListener(this);
+		c.gridx = 1;
+		c.gridy = y;
+		trPanel.add(vertexCorrList,c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""),c);
         // p min
         y++;
         c.gridx = 0;

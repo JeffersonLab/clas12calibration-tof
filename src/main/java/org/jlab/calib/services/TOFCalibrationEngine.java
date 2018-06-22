@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.jlab.detector.calib.tasks.CalibrationEngine;
@@ -112,7 +113,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 				"rfpad/F");
 		twposValues = new CalibrationConstants(3,
 				"tw1_left/F:tw2_left/F:tw3_left/F:tw1_right/F:tw2_right/F:tw3_right/F");
-		
+
 	}
 
 	public void populatePrevCalib() {
@@ -180,51 +181,51 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public void saveCounterStatus(String filename) {
 		// overridden in HV engine
 	}
-//	public void saveCounterStatus() {
-//
-//		System.out.println("sector layer component stat_left stat_right");
-//		for (int sector = 1; sector <= 6; sector++) {
-//			for (int layer = 1; layer <= 3; layer++) {
-//				int layer_index = layer - 1;
-//				for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
-//
-//					int adcLStat = adcLeftStatus.getItem(sector,layer,paddle);
-//					int adcRStat = adcRightStatus.getItem(sector,layer,paddle);
-//					int tdcLStat = tdcLeftStatus.getItem(sector,layer,paddle);
-//					int tdcRStat = tdcRightStatus.getItem(sector,layer,paddle);					
-//					int counterStatusLeft = 0;
-//					int counterStatusRight = 0;
-//
-//					if (adcLStat==1 && tdcLStat==1) {
-//						counterStatusLeft = 3;
-//					}
-//					else if (adcLStat==1) {
-//						counterStatusLeft = 1;
-//					}
-//					else if (tdcLStat==1) {
-//						counterStatusLeft = 2;
-//					}
-//
-//					if (adcRStat==1 && tdcRStat==1) {
-//						counterStatusRight = 3;
-//					}
-//					else if (adcRStat==1) {
-//						counterStatusRight = 1;
-//					}
-//					else if (tdcRStat==1) {
-//						counterStatusRight = 2;
-//					}
-//
-//					System.out.println(
-//							sector+" "+
-//									layer+" "+
-//									paddle+" "+
-//									counterStatusLeft+" "+
-//									counterStatusRight+" ");
-//				}
-//			}
-//		}
-//	}
+	//	public void saveCounterStatus() {
+	//
+	//		System.out.println("sector layer component stat_left stat_right");
+	//		for (int sector = 1; sector <= 6; sector++) {
+	//			for (int layer = 1; layer <= 3; layer++) {
+	//				int layer_index = layer - 1;
+	//				for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
+	//
+	//					int adcLStat = adcLeftStatus.getItem(sector,layer,paddle);
+	//					int adcRStat = adcRightStatus.getItem(sector,layer,paddle);
+	//					int tdcLStat = tdcLeftStatus.getItem(sector,layer,paddle);
+	//					int tdcRStat = tdcRightStatus.getItem(sector,layer,paddle);					
+	//					int counterStatusLeft = 0;
+	//					int counterStatusRight = 0;
+	//
+	//					if (adcLStat==1 && tdcLStat==1) {
+	//						counterStatusLeft = 3;
+	//					}
+	//					else if (adcLStat==1) {
+	//						counterStatusLeft = 1;
+	//					}
+	//					else if (tdcLStat==1) {
+	//						counterStatusLeft = 2;
+	//					}
+	//
+	//					if (adcRStat==1 && tdcRStat==1) {
+	//						counterStatusRight = 3;
+	//					}
+	//					else if (adcRStat==1) {
+	//						counterStatusRight = 1;
+	//					}
+	//					else if (tdcRStat==1) {
+	//						counterStatusRight = 2;
+	//					}
+	//
+	//					System.out.println(
+	//							sector+" "+
+	//									layer+" "+
+	//									paddle+" "+
+	//									counterStatusLeft+" "+
+	//									counterStatusRight+" ");
+	//				}
+	//			}
+	//		}
+	//	}
 
 	public void save() {
 
@@ -445,7 +446,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public void setPlotTitle(int sector, int layer, int paddle) {
 		// Overridden in calibration step classes
 	}
-	
+
 	public String histTitle(int sector, int layer, int paddle) {
 		return "S"+sector+" "+histTitle+" "+LAYER_PREFIX[layer]+paddle;
 	}
@@ -455,53 +456,62 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 		// Overridden in calibration step classes
 	}
 
-	public void showPlots(int sector, int layer) {
+	public void showPlots(int a, int b) {
+
+		JFrame frame = new JFrame(stepName);
+		frame.setSize(1000, 800);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);	
+		JTabbedPane pane = new JTabbedPane();
 		
-		int layer_index = layer - 1;
-		EmbeddedCanvas[] fitCanvases;
-		fitCanvases = new EmbeddedCanvas[3];
-		fitCanvases[0] = new EmbeddedCanvas();
-		fitCanvases[0].divide(6, 4);
+		for (int layer=1; layer<=3; layer++) {
+			int layer_index = layer - 1;
 
-		int canvasNum = 0;
-		int padNum = 0;
+			for (int sector=1; sector<=6; sector++) {
 
-		for (int paddleNum = 1; paddleNum <= NUM_PADDLES[layer_index]; paddleNum++) {
+				EmbeddedCanvas[] fitCanvases;
+				fitCanvases = new EmbeddedCanvas[3];
+				fitCanvases[0] = new EmbeddedCanvas();
+				fitCanvases[0].divide(6, 4);
 
-			fitCanvases[canvasNum].cd(padNum);
-			fitCanvases[canvasNum].getPad(padNum).setTitle("Paddle "+paddleNum);
-			fitCanvases[canvasNum].getPad(padNum).setOptStat(0);
-			drawPlots(sector, layer, paddleNum, fitCanvases[canvasNum]);
+				int canvasNum = 0;
+				int padNum = 0;
 
-			padNum = padNum + 1;
+				for (int paddleNum = 1; paddleNum <= NUM_PADDLES[layer_index]; paddleNum++) {
 
-			if ((paddleNum) % 24 == 0) {
-				// new canvas
-				canvasNum = canvasNum + 1;
-				padNum = 0;
+					fitCanvases[canvasNum].cd(padNum);
+					fitCanvases[canvasNum].getPad(padNum).setTitle("Paddle "+paddleNum);
+					fitCanvases[canvasNum].getPad(padNum).setOptStat(0);
+					drawPlots(sector, layer, paddleNum, fitCanvases[canvasNum]);
 
-				fitCanvases[canvasNum] = new EmbeddedCanvas();
-				fitCanvases[canvasNum].divide(6, 4);
+					padNum = padNum + 1;
+
+					if ((paddleNum) % 24 == 0) {
+						// new canvas
+						canvasNum = canvasNum + 1;
+						padNum = 0;
+
+						fitCanvases[canvasNum] = new EmbeddedCanvas();
+						fitCanvases[canvasNum].divide(6, 4);
+
+					}
+
+				}
+
+				for (int i = 0; i <= canvasNum; i++) {
+					String padStr = "";
+					if (layer==2) {
+						padStr=" P" + ((i * 24) + 1) + " to "
+								+ Math.min(((i + 1) * 24), NUM_PADDLES[layer - 1]);
+					}
+					pane.add(LAYER_PREFIX[layer]+"S"+sector+padStr,
+									fitCanvases[i]);
+				}
+
+				frame.add(pane);
 
 			}
-
 		}
-		JFrame frame = new JFrame(stepName + " " + LAYER_NAME[layer - 1]
-				+ " Sector " + sector);
-		frame.setSize(1000, 800);
-
-		JTabbedPane pane = new JTabbedPane();
-		for (int i = 0; i <= canvasNum; i++) {
-			pane.add(
-					"Paddles " + ((i * 24) + 1) + " to "
-							+ Math.min(((i + 1) * 24), NUM_PADDLES[layer - 1]),
-							fitCanvases[i]);
-		}
-
-		frame.add(pane);
-		// frame.pack();
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
 	}
 
