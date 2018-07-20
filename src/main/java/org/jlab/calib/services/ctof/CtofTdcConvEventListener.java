@@ -62,35 +62,11 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 	int backgroundSF = 2;
 	boolean showSlices = false;
 	
-	// Real data
-	private final double        REAL_FIT_MIN_L = 25500.0;
-	private final double        REAL_FIT_MAX_L = 27500.0;
-	private final double        REAL_TDC_MIN_L = 25000.0; 
-	private final double        REAL_TDC_MAX_L = 28000.0; 	
-	private final double        REAL_FIT_MIN_R = 25500.0;
-	private final double        REAL_FIT_MAX_R = 27500.0;
-	private final double        REAL_TDC_MIN_R = 25000.0; 
-	private final double        REAL_TDC_MAX_R = 28000.0; 	
-	// GEMC
-	private final double        GEMC_FIT_MIN_L = 5400.0;
-	private final double        GEMC_FIT_MAX_L = 5480.0;
-	private final double        GEMC_TDC_MIN_L = 5350.0; 
-	private final double        GEMC_TDC_MAX_L = 5550.0; 	
-	private final double        GEMC_FIT_MIN_R = 5230.0;
-	private final double        GEMC_FIT_MAX_R = 5280.0;
-	private final double        GEMC_TDC_MIN_R = 5200.0; 
-	private final double        GEMC_TDC_MAX_R = 5400.0; 	
-	// This run
-	private double        FIT_MIN_L = 0.0;
-	private double        FIT_MAX_L = 0.0;
-	private double        TDC_MIN_L = 0.0; 
-	private double        TDC_MAX_L = 0.0; 	
-	private double        FIT_MIN_R = 0.0;
-	private double        FIT_MAX_R = 0.0;
-	private double        TDC_MIN_R = 0.0; 
-	private double        TDC_MAX_R = 0.0;
-	
-	boolean initDone = false;	
+	// TDC ranges
+	double        TDC_MIN = 0.0;
+	double        TDC_MAX = 0.0;
+	double        FIT_MIN = 0.0;
+	double        FIT_MAX = 0.0;
 
 	public CtofTdcConvEventListener() {
 		
@@ -194,49 +170,19 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 	
     @Override
     public void resetEventListener() {
-    	// need to do this later after we know if GEMC or REAL
+    	init();
     }
     
     public void init() {
-    	
-    	if (CTOFCalibration.dataTypeKnown) {
-    		initDone = true;
-    	}
-    	else {
-    		return;
-    	}
-    	
-    	// Set the TDC ranges depending on data type
-    	
-    	if (CTOFCalibration.DATA_TYPE == CTOFCalibration.GEMC_DATA) {
-    		FIT_MIN_L = GEMC_FIT_MIN_L;
-    		FIT_MAX_L = GEMC_FIT_MAX_L;
-    		TDC_MIN_L = GEMC_TDC_MIN_L;
-    		TDC_MAX_L = GEMC_TDC_MAX_L;
-    		FIT_MIN_R = GEMC_FIT_MIN_R;
-    		FIT_MAX_R = GEMC_FIT_MAX_R;
-    		TDC_MIN_R = GEMC_TDC_MIN_R;
-    		TDC_MAX_R = GEMC_TDC_MAX_R;
-    	}
-    	else {
-    		FIT_MIN_L = REAL_FIT_MIN_L;
-    		FIT_MAX_L = REAL_FIT_MAX_L;
-    		TDC_MIN_L = REAL_TDC_MIN_L;
-    		TDC_MAX_L = REAL_TDC_MAX_L;
-    		FIT_MIN_R = REAL_FIT_MIN_R;
-    		FIT_MAX_R = REAL_FIT_MAX_R;
-    		TDC_MIN_R = REAL_TDC_MIN_R;
-    		TDC_MAX_R = REAL_TDC_MAX_R;
-    	}	
 
 		double bb = CTOFCalibrationEngine.BEAM_BUCKET;
 		int bins = (int) (bb/2.004)*50;
     	
 		// perform init processing
 		for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
-
+			
 			// create all the histograms
-			H2F histL = new H2F("tdcConvLeft","tdcConvLeft",50, TDC_MIN_L, TDC_MAX_L, 
+			H2F histL = new H2F("tdcConvLeft","tdcConvLeft",50, TDC_MIN, TDC_MAX, 
 					bins, -bb*0.5, bb*0.5);
 
 			histL.setName("tdcConvLeft");
@@ -244,7 +190,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			histL.setTitleX("TDC Up");
 			histL.setTitleY("RF offset (ns)");
 
-			H2F histR = new H2F("tdcConvRight","tdcConvRight",50, TDC_MIN_R, TDC_MAX_R, 
+			H2F histR = new H2F("tdcConvRight","tdcConvRight",50, TDC_MIN, TDC_MAX, 
 					bins, -bb*0.5, bb*0.5);
 
 			histR.setName("tdcConvRight");
@@ -253,7 +199,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			histR.setTitleY("RF offset (ns)");
 
 			// create all the functions and graphs
-			F1D convFuncLeft = new F1D("convFuncLeft", "[a]+[b]*x", FIT_MIN_L, FIT_MAX_L);
+			F1D convFuncLeft = new F1D("convFuncLeft", "[a]+[b]*x", FIT_MIN, FIT_MAX);
 			GraphErrors convGraphLeft = new GraphErrors("convGraphLeft");
 			convGraphLeft.setName("convGraphLeft");
 			convFuncLeft.setLineColor(FUNC_COLOUR);
@@ -261,7 +207,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			convGraphLeft.setMarkerSize(MARKER_SIZE);
 			convGraphLeft.setLineThickness(MARKER_LINE_WIDTH);
 
-			F1D convFuncRight = new F1D("convFuncRight", "[a]+[b]*x", FIT_MIN_R, FIT_MAX_R);
+			F1D convFuncRight = new F1D("convFuncRight", "[a]+[b]*x", FIT_MIN, FIT_MAX);
 			GraphErrors convGraphRight = new GraphErrors("convGraphRight");
 			convGraphRight.setName("convGraphRight");
 			convFuncRight.setLineColor(FUNC_COLOUR);
@@ -285,7 +231,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			Double[] consts = {UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE};
 			// override values
 			constants.add(consts, 1, 1, paddle);
-
+			
 		}
 
 	}
@@ -301,9 +247,6 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 	@Override
 	public void processPaddleList(List<TOFPaddle> paddleList) {
 		
-    	if (!initDone) init();
-    	if (!initDone) return;
-
 		for (TOFPaddle paddle : paddleList) {
 
 			int sector = paddle.getDescriptor().getSector();
@@ -391,8 +334,8 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			lowLimitR = minRange;
 		}
 		else {
-			lowLimitL = FIT_MIN_L;
-			lowLimitR = FIT_MIN_R;
+			lowLimitL = FIT_MIN;
+			lowLimitR = FIT_MIN;
 		}
 
 		if (maxRange != UNDEFINED_OVERRIDE) {
@@ -401,8 +344,8 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			highLimitR = maxRange;
 		}
 		else {
-			highLimitL = FIT_MAX_L;
-			highLimitR = FIT_MAX_R;
+			highLimitL = FIT_MAX;
+			highLimitR = FIT_MAX;
 		}
 
 		F1D convFuncLeft = dataGroups.getItem(sector,layer,paddle).getF1D("convFuncLeft");
@@ -623,8 +566,8 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 	@Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
 
-		canvas.getPad(2).setAxisRange(TDC_MIN_L, TDC_MAX_L, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-		canvas.getPad(3).setAxisRange(TDC_MIN_R, TDC_MAX_R, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+		canvas.getPad(2).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+		canvas.getPad(3).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
 
 	}
 

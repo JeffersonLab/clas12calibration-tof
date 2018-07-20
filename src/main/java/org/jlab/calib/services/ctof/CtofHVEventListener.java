@@ -555,6 +555,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			System.out.println("paddle "+paddle);
 			System.out.println("pmt "+pmt);
 			System.out.println("origVoltage = "+origVoltage);
+			System.out.println("Expected MIP channel "+EXPECTED_MIP_CHANNEL);
 			System.out.println("gainIn = "+gainIn);
 			System.out.println("centroid = "+centroid);
 			System.out.println("gainLR = "+gainLR);

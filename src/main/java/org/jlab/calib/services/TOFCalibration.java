@@ -170,6 +170,9 @@ ChangeListener {
     
 	private JTextField minPText = new JTextField(5);
 	public static double minP = 0.0;
+	private JTextField maxPText = new JTextField(5);
+	public static double maxP = 0.0;
+	
 	JComboBox<String> trackChargeList = new JComboBox<String>();
 	public static int trackCharge = 0;
 	public final static int TRACK_BOTH = 0;
@@ -190,14 +193,10 @@ ChangeListener {
 	JComboBox<String> fitList = new JComboBox<String>();
 	JComboBox<String> fitModeList = new JComboBox<String>();
 	private JTextField minEventsText = new JTextField(5);
-	private JTextField mipPeakText[] = {new JTextField(5),new JTextField(5),new JTextField(5)};
+	private JTextField minTDCText = new JTextField(6);
+	private JTextField maxTDCText = new JTextField(6);
 	
 	public final static PrintStream oldStdout = System.out;
-
-	public static int DATA_TYPE = 0;
-	public static final int REAL_DATA = 0;
-	public static final int GEMC_DATA = 1;
-	public static boolean dataTypeKnown = false;
 
 	public TOFCalibration() {
 		
@@ -426,9 +425,15 @@ ChangeListener {
 				maxV = Double.parseDouble(maxVText.getText());
 			}    
 			vertexCorr = vertexCorrList.getSelectedIndex();
+			
+			// momentum range
 			if (minPText.getText().compareTo("") != 0) {
 				minP = Double.parseDouble(minPText.getText());
 			}
+			if (maxPText.getText().compareTo("") != 0) {
+				maxP = Double.parseDouble(maxPText.getText());
+			}
+			
 			massAss = massAssList.getSelectedIndex();
 			trackCharge = trackChargeList.getSelectedIndex();
 			TOFCalibrationEngine.BEAM_BUCKET = (Double) trfList.getSelectedItem();
@@ -462,13 +467,13 @@ ChangeListener {
 				engines[TDC_CONV].fitMinEvents = Integer.parseInt(minEventsText.getText());
 			}
 			
-			// Desired MIP peak
-			TofHVEventListener hvEngine = (TofHVEventListener) engines[HV];
-			for (int i=0; i<3; i++) {
-				hvEngine.EXPECTED_MIP_CHANNEL[i] = Integer.parseInt(mipPeakText[i].getText());
-			}
-			hvEngine.setConstraints();
-
+			// min and max TDC
+			TofTdcConvEventListener tdcEngine = (TofTdcConvEventListener) engines[TDC_CONV];
+			tdcEngine.TDC_MIN = Integer.parseInt(minTDCText.getText());
+			tdcEngine.TDC_MAX = Integer.parseInt(maxTDCText.getText());
+			tdcEngine.FIT_MIN = tdcEngine.TDC_MIN +100;
+			tdcEngine.FIT_MAX = tdcEngine.TDC_MAX -100;
+			
 			System.out.println("");
 			System.out.println("Configuration settings - Tracking/General");
 			System.out.println("-----------------------------------------");
@@ -476,7 +481,7 @@ ChangeListener {
 			System.out.println("Minimum vertex z: "+minV);
 			System.out.println("Maximum vertex z: "+maxV);
 			System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(vertexCorr));
-			System.out.println("Minimum momentum from tracking (GeV): "+minP);
+			System.out.println("Momentum range (GeV): "+minP+"-"+maxP);
 			System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(massAss));
 			System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
 			System.out.println("RF period: "+TOFCalibrationEngine.BEAM_BUCKET);
@@ -485,26 +490,12 @@ ChangeListener {
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
 			System.out.println("Slicefitter mode: "+fitModeList.getSelectedItem());
 			System.out.println("Minimum events per slice: "+minEventsText.getText());
-			System.out.println("Minimum events per slice: "+minEventsText.getText());
-			System.out.println("Desired MIP peak position 1a/1b/2: "+mipPeakText[0].getText()+"/"+mipPeakText[1].getText()+"/"+mipPeakText[2].getText());
+			System.out.println("TDC range: "+minTDCText.getText()+"-"+maxTDCText.getText());
 			System.out.println("");
 		}
 	}
 
 	public void dataEventAction(DataEvent event) {
-
-		// Set the data type
-		if (!dataTypeKnown) {
-			if (event.hasBank("FTOF::adc")) { // not just a run config bank
-				if (event.hasBank("MC::Particle")) {
-					DATA_TYPE = GEMC_DATA;
-				}
-				else {
-					DATA_TYPE = REAL_DATA;
-				}
-				dataTypeKnown = true;
-			}
-		}
 
 		List<TOFPaddle> paddleList = DataProvider.getPaddleList(event);
 
@@ -909,12 +900,19 @@ ChangeListener {
 		y++;
 		c.gridx = 0;
 		c.gridy = y;
-		trPanel.add(new JLabel("Minimum momentum from tracking (GeV):"),c);
+		trPanel.add(new JLabel("Momentum range (GeV):"),c);
+
+		JPanel pPanel = new JPanel();
 		minPText.addActionListener(this);
 		minPText.setText("1.0");
+		maxPText.addActionListener(this);
+		maxPText.setText("9.0");
+		pPanel.add(minPText);
+		pPanel.add(new JLabel(" - "));
+		pPanel.add(maxPText);
 		c.gridx = 1;
 		c.gridy = y;
-		trPanel.add(minPText,c);
+		trPanel.add(pPanel,c);
         // mass assumption
         y++;
         c.gridx = 0;
@@ -1016,24 +1014,22 @@ ChangeListener {
 		c.gridy = y;
 		trPanel.add(minEventsText,c);
 		
-		// Desired MIP peak position
+		// TDC range
 		y++;
 		c.gridx = 0;
 		c.gridy = y;
-		trPanel.add(new JLabel("Desired MIP peak position 1a/1b/2:"),c);
+		trPanel.add(new JLabel("TDC range:"),c);
 		c.gridx = 1;
 		c.gridy = y;
-		JPanel mipPeakPanel = new JPanel();
-		mipPeakText[0].addActionListener(this);
-		mipPeakText[0].setText("800");
-		mipPeakPanel.add(mipPeakText[0]);
-		mipPeakText[1].addActionListener(this);
-		mipPeakText[1].setText("2000");
-		mipPeakPanel.add(mipPeakText[1]);
-		mipPeakText[2].addActionListener(this);
-		mipPeakText[2].setText("800");
-		mipPeakPanel.add(mipPeakText[2]);
-		trPanel.add(mipPeakPanel,c);
+		JPanel tdcPanel = new JPanel();
+		minTDCText.addActionListener(this);
+		minTDCText.setText("8500");
+		tdcPanel.add(minTDCText);
+		tdcPanel.add(new JLabel(" - "));
+		maxTDCText.addActionListener(this);
+		maxTDCText.setText("15000");
+		tdcPanel.add(maxTDCText);
+		trPanel.add(tdcPanel,c);
 		c.gridx = 2;
 		c.gridy = y;
 		trPanel.add(new JLabel(""),c);

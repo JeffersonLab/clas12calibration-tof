@@ -60,23 +60,11 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
 	int backgroundSF = 2;
 	boolean showSlices = false;
 	
-	// Real data
-	private final double[]        REAL_FIT_MIN = {0.0, 25500.0, 24800.0, 25500.0};
-	private final double[]        REAL_FIT_MAX = {0.0, 26800.0, 26200.0, 26800.0};
-	private final double[]        REAL_TDC_MIN = {0.0, 25000.0,  24000.0, 25000.0};
-	private final double[]        REAL_TDC_MAX = {0.0, 28000.0, 27000.0, 28000.0};	
-	// GEMC
-	private final double[]        GEMC_FIT_MIN = {0.0, 6400.0, 6400.0, 6500.0};
-	private final double[]        GEMC_FIT_MAX = {0.0, 6800.0, 6800.0, 7250.0};
-	private final double[]        GEMC_TDC_MIN = {0.0, 6300.0,  6300.0, 6300.0};
-	private final double[]        GEMC_TDC_MAX = {0.0, 7500.0, 7500.0, 7500.0};
-	// This run
-	double[]        FIT_MIN = {0.0, 0.0, 0.0, 0.0};
-	double[]        FIT_MAX = {0.0, 0.0, 0.0, 0.0};
-	double[]        TDC_MIN = {0.0, 0.0,  0.0, 0.0};
-	double[]        TDC_MAX = {0.0, 0.0, 0.0, 0.0};
-
-	boolean initDone = false;
+	// TDC ranges
+	double        TDC_MIN = 0.0;
+	double        TDC_MAX = 0.0;
+	double        FIT_MIN = 0.0;
+	double        FIT_MAX = 0.0;
 
     public TofTdcConvEventListener() {
 
@@ -188,32 +176,10 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
 
     @Override
     public void resetEventListener() {
-    	// need to do this later after we know if GEMC or REAL
+    	init();
     }
     
     public void init() {
-    	
-    	if (TOFCalibration.dataTypeKnown) {
-    		initDone = true;
-    	}
-    	else {
-    		return;
-    	}
-    	
-    	// Set the TDC ranges depending on data type
-    	
-    	if (TOFCalibration.DATA_TYPE == TOFCalibration.GEMC_DATA) {
-    		FIT_MIN = GEMC_FIT_MIN;
-    		FIT_MAX = GEMC_FIT_MAX;
-    		TDC_MIN = GEMC_TDC_MIN;
-    		TDC_MAX = GEMC_TDC_MAX;
-    	}
-    	else {
-    		FIT_MIN = REAL_FIT_MIN;
-    		FIT_MAX = REAL_FIT_MAX;
-    		TDC_MIN = REAL_TDC_MIN;
-    		TDC_MAX = REAL_TDC_MAX;    		
-    	}
     	
     	double bb = TOFCalibrationEngine.BEAM_BUCKET;
 		int bins = (int) (bb/2.004)*50;
@@ -226,7 +192,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
 
                     // create all the histograms
                     H2F histL = new H2F("tdcConvLeft",histTitle(sector,layer,paddle),
-                    		50, TDC_MIN[layer], TDC_MAX[layer], 
+                    		50, TDC_MIN, TDC_MAX, 
                     		bins, -bb*0.5, bb*0.5);
 
                     histL.setName("tdcConvLeft");
@@ -234,7 +200,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
                     histL.setTitleY("RF offset (ns)");
 
                     H2F histR = new H2F("tdcConvRight",histTitle(sector,layer,paddle),
-                    				50, TDC_MIN[layer], TDC_MAX[layer], 
+                    				50, TDC_MIN, TDC_MAX, 
                     				bins, -bb*0.5, bb*0.5);
 
                     histR.setName("tdcConvRight");
@@ -242,7 +208,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
                     histR.setTitleY("RF offset (ns)");
                     
                     // create all the functions and graphs
-                    F1D convFuncLeft = new F1D("convFuncLeft", "[a]+[b]*x", FIT_MIN[layer], FIT_MAX[layer]);
+                    F1D convFuncLeft = new F1D("convFuncLeft", "[a]+[b]*x", FIT_MIN, FIT_MAX);
                     GraphErrors convGraphLeft = new GraphErrors("convGraphLeft");
                     convGraphLeft.setName("convGraphLeft");
                     convGraphLeft.setTitle(histTitle(sector,layer,paddle));
@@ -251,7 +217,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
                     convGraphLeft.setMarkerSize(MARKER_SIZE);
                     convGraphLeft.setLineThickness(MARKER_LINE_WIDTH);
 
-                    F1D convFuncRight = new F1D("convFuncRight", "[a]+[b]*x", FIT_MIN[layer], FIT_MAX[layer]);
+                    F1D convFuncRight = new F1D("convFuncRight", "[a]+[b]*x", FIT_MIN, FIT_MAX);
                     GraphErrors convGraphRight = new GraphErrors("convGraphRight");
                     convGraphRight.setName("convGraphRight");
                     convGraphRight.setTitle(histTitle(sector,layer,paddle));
@@ -293,10 +259,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
     @Override
     public void processPaddleList(List<TOFPaddle> paddleList) {
     	
-    	if (!initDone) init();
-    	if (!initDone) return;
-
-        for (TOFPaddle paddle : paddleList) {
+         for (TOFPaddle paddle : paddleList) {
 
             int sector = paddle.getDescriptor().getSector();
             int layer = paddle.getDescriptor().getLayer();
@@ -382,7 +345,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
             lowLimit = minRange;
         }
         else {
-            lowLimit = FIT_MIN[layer];
+            lowLimit = FIT_MIN;
         }
 
         if (maxRange != UNDEFINED_OVERRIDE) {
@@ -390,7 +353,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
             highLimit = maxRange;
         }
         else {
-            highLimit = FIT_MAX[layer];
+            highLimit = FIT_MAX;
         }
 
         F1D convFuncLeft = dataGroups.getItem(sector,layer,paddle).getF1D("convFuncLeft");
@@ -620,8 +583,8 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
     @Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
 		
-    	canvas.getPad(2).setAxisRange(TDC_MIN[layer], TDC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	canvas.getPad(3).setAxisRange(TDC_MIN[layer], TDC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	canvas.getPad(2).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+    	canvas.getPad(3).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	
 	}
 

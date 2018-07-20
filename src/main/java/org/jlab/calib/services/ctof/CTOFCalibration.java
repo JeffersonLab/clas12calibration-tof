@@ -50,6 +50,7 @@ import javax.swing.event.TableModelEvent;
 import org.jlab.calib.services.TOFCalibration;
 import org.jlab.calib.services.TOFCustomFitPanel;
 import org.jlab.calib.services.TOFPaddle;
+import org.jlab.calib.services.TofCheckEventListener;
 import org.jlab.calib.services.TofPrevConfigPanel;
 import org.jlab.calib.services.TofTimingOptionsPanel;
 import org.jlab.calib.services.configButtonPanel;
@@ -186,15 +187,11 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     JComboBox<String> fitList = new JComboBox<String>();
     JComboBox<String> fitModeList = new JComboBox<String>();
     private JTextField minEventsText = new JTextField(5);
-    private JTextField mipPeakText = new JTextField(5);
+	private JTextField minTDCText = new JTextField(6);
+	private JTextField maxTDCText = new JTextField(6);
     
     public final static PrintStream oldStdout = System.out;
-    
-	public static int DATA_TYPE = 0;
-	public static final int REAL_DATA = 0;
-	public static final int GEMC_DATA = 1;
-	public static boolean dataTypeKnown = false;    
-    
+     
     public CTOFCalibration() {
     	
 
@@ -452,11 +449,13 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
                 engines[VEFF].fitMinEvents = Integer.parseInt(minEventsText.getText());
             }
             
-			// Desired MIP peak
-			CtofHVEventListener hvEngine = (CtofHVEventListener) engines[HV];
-			hvEngine.EXPECTED_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
-			hvEngine.setConstraints();            
-
+			// min and max TDC
+			CtofTdcConvEventListener tdcEngine = (CtofTdcConvEventListener) engines[TDC_CONV];
+			tdcEngine.TDC_MIN = Integer.parseInt(minTDCText.getText());
+			tdcEngine.TDC_MAX = Integer.parseInt(maxTDCText.getText());
+			tdcEngine.FIT_MIN = tdcEngine.TDC_MIN +100;
+			tdcEngine.FIT_MAX = tdcEngine.TDC_MAX -100;
+            
             System.out.println("");
             System.out.println("Configuration settings - Tracking/General");
             System.out.println("-----------------------------------------");
@@ -474,28 +473,15 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("Trigger: "+triggerBit);
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
 			System.out.println("Slicefitter mode: "+fitModeList.getSelectedItem());
-			System.out.println("Minimum events per slice: "+minEventsText.getText());  
-			System.out.println("Desired MIP peak position: "+mipPeakText.getText());
-            System.out.println("");
+			System.out.println("Minimum events per slice: "+minEventsText.getText()); 
+			System.out.println("TDC range: "+minTDCText.getText()+"-"+maxTDCText.getText());
+			System.out.println("");
         }
         
     }
 
     public void dataEventAction(DataEvent event) {
 
-		// Set the data type
-		if (!dataTypeKnown) {
-			if (event.hasBank("CTOF::adc")) { // not just a run config bank
-				if (event.hasBank("MC::Particle")) {
-					DATA_TYPE = GEMC_DATA;
-				}
-				else {
-					DATA_TYPE = REAL_DATA;
-				}
-				dataTypeKnown = true;
-			}
-		}
-    	
 		List<TOFPaddle> paddleList = DataProvider.getPaddleList(event);
         
         for (int i=0; i< engines.length; i++) {
@@ -915,7 +901,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridy = y;
         trPanel.add(new JLabel("Maximum momentum from tracking (GeV):"),c);
         maxPText.addActionListener(this);
-        maxPText.setText("1.0");
+        maxPText.setText("3.0");
         c.gridx = 1;
         c.gridy = y;
         trPanel.add(maxPText,c);
@@ -1016,16 +1002,25 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridy = y;
         trPanel.add(minEventsText,c);
         
-		// Desired MIP peak position
-        y++;
+		// TDC range
+		y++;
 		c.gridx = 0;
 		c.gridy = y;
-		trPanel.add(new JLabel("Desired MIP peak position:"),c);
+		trPanel.add(new JLabel("TDC range:"),c);
 		c.gridx = 1;
 		c.gridy = y;
-		mipPeakText.addActionListener(this);
-		mipPeakText.setText("1500");
-		trPanel.add(mipPeakText,c);    
+		JPanel tdcPanel = new JPanel();
+		minTDCText.addActionListener(this);
+		minTDCText.setText("8500");
+		tdcPanel.add(minTDCText);
+		tdcPanel.add(new JLabel(" - "));
+		maxTDCText.addActionListener(this);
+		maxTDCText.setText("15000");
+		tdcPanel.add(maxTDCText);
+		trPanel.add(tdcPanel,c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""),c);
         
         JPanel butPage3 = new configButtonPanel(this, true, "Finish");
         trOuterPanel.add(butPage3, BorderLayout.SOUTH);

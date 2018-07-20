@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import org.jlab.detector.calib.tasks.CalibrationEngine;
@@ -39,6 +40,7 @@ public class CtofHVAdjustPanel 	extends JPanel
 	JFileChooser fc;
 	CalibrationConstants calib;
 	CtofHVEventListener hv;
+    private JTextField mipPeakText = new JTextField(5);
 
 	public CtofHVAdjustPanel(CtofHVEventListener hvIn) {
 		
@@ -65,6 +67,12 @@ public class CtofHVAdjustPanel 	extends JPanel
 			calib.setDoubleValue(0.0,"new_HV_down", 1, 1, paddle);
 		}
 		
+		// Desired MIP peak position
+		buttonPanel.add(new JLabel("Desired MIP peak position:"));
+		mipPeakText.addActionListener(this);
+		mipPeakText.setText("1500");
+		buttonPanel.add(mipPeakText); 
+		
 		// Create field for file selection
 		buttonPanel.add(new JLabel("Select EPICS snapshot file to calculate new HV values:"));
 		fc = new JFileChooser();
@@ -84,6 +92,10 @@ public class CtofHVAdjustPanel 	extends JPanel
 			
 			int returnValue = fc.showOpenDialog(null);
 			if (returnValue == JFileChooser.APPROVE_OPTION) {
+				
+				// Desired MIP peak
+				hv.EXPECTED_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
+				hv.setConstraints();  				
 				
 				String outputFileName = processFile();
 				JOptionPane.showMessageDialog(new JPanel(),"High voltage values written to "+outputFileName);

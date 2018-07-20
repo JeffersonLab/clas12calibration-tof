@@ -62,8 +62,6 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 	public void resetEventListener() {
 
 		// perform init processing
-
-		// create the histograms for the first iteration
 		createHists();
 	}
 
@@ -81,7 +79,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					// create all the histograms and functions
 					H2F momHist = 
 							new H2F("momHist",histTitle(sector,layer,paddle),
-									100, 0.2, 5.0,
+									100, TOFCalibration.minP, TOFCalibration.maxP,
 									bins, -bb*0.5, bb*0.5);
 					momHist.setTitleX("p (GeV)");
 					momHist.setTitleY("delta T (ns)");

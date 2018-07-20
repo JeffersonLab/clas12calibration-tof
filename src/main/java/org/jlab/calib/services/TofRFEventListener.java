@@ -45,7 +45,6 @@ public class TofRFEventListener extends TOFCalibrationEngine {
 	@Override
 	public void resetEventListener() {
 
-		// create the histograms for the first iteration
 		createHists();
 	}
 

@@ -76,6 +76,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 				"mipa_left/F:mipa_right/F:mipa_left_err/F:mipa_right_err/F:logratio/F:logratio_err/F");
 		calib.setName("/calibration/ftof/gain_balance");
 		calib.setPrecision(3); // record calibration constants to 3 dp
+		//setConstraints();
 
 		// initialize the counter status
 		for (int sector=1; sector<=6; sector++) {
@@ -591,6 +592,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 			System.out.println("paddle "+paddle);
 			System.out.println("pmt "+pmt);
 			System.out.println("origVoltage = "+origVoltage);
+			System.out.println("Expected MIP channel "+EXPECTED_MIP_CHANNEL[layer_index]);
 			System.out.println("gainIn = "+gainIn);
 			System.out.println("centroid = "+centroid);
 			System.out.println("gainLR = "+gainLR);

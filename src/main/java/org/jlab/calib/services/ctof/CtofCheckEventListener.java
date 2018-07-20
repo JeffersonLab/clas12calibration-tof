@@ -60,10 +60,8 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 	@Override
 	public void resetEventListener() {
 
-		// perform init processing
-
-		// create the histograms for the first iteration
 		createHists();
+
 	}
 
 	public void createHists() {

@@ -572,12 +572,13 @@ public class TOFPaddle {
 		double minV = -10.0;
 		double maxV = 10.0;
 		double minP = 0.0;
-		double maxP = 5.0;
+		double maxP = 9.0;
 		if (tof == "FTOF") {
 			maxRcs = TOFCalibration.maxRcs;
 			minV = TOFCalibration.minV;
 			maxV = TOFCalibration.maxV;
 			minP = TOFCalibration.minP;
+			maxP = TOFCalibration.maxP;
 		} else {
 			maxRcs = CTOFCalibration.maxRcs;
 			minV = CTOFCalibration.minV;
