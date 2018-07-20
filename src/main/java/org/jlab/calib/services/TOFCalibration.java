@@ -147,7 +147,13 @@ ChangeListener {
 
 	// configuration settings
 	JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(),
-			new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(), new JCheckBox()};    
+			new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(), new JCheckBox()}; 
+	// Path length normalisation setting
+	JComboBox<String> pathNormList = new JComboBox<String>();
+	public static int pathNorm = 0;
+	public final static int PATH_NORM_YES = 0;
+	public final static int PATH_NORM_NO = 1;
+	
 	private JTextField rcsText = new JTextField(5);
 	public static double maxRcs = 0.0;
 	private JTextField minVText = new JTextField(5);
@@ -415,6 +421,7 @@ ChangeListener {
 			}
 
 			// set the config values
+			pathNorm = pathNormList.getSelectedIndex();
 			if (rcsText.getText().compareTo("") != 0) {
 				maxRcs = Double.parseDouble(rcsText.getText());
 			}
@@ -477,6 +484,7 @@ ChangeListener {
 			System.out.println("");
 			System.out.println("Configuration settings - Tracking/General");
 			System.out.println("-----------------------------------------");
+			System.out.println("Path length normalisation for gmean?: "+pathNormList.getItemAt(pathNorm));
 			System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
 			System.out.println("Minimum vertex z: "+minV);
 			System.out.println("Maximum vertex z: "+maxV);
@@ -850,7 +858,21 @@ ChangeListener {
 		c.weighty = 1;
 		c.anchor = c.NORTHWEST;
 		c.insets = new Insets(3,3,3,3);
+		// Path length normalisation
+		c.gridx = 0;
+		c.gridy = y;
+		trPanel.add(new JLabel("Path length normalisation for gmean?:"),c);
+		pathNormList.addItem("Yes");
+		pathNormList.addItem("No");
+		pathNormList.addActionListener(this);
+		c.gridx = 1;
+		c.gridy = y;
+		trPanel.add(pathNormList,c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""),c);	
 		// Chi squared
+		y++;
 		c.gridx = 0;
 		c.gridy = y;
 		trPanel.add(new JLabel("Maximum reduced chi squared for track:"),c);

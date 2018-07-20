@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
+import org.jlab.calib.services.TOFCalibration;
 import org.jlab.calib.services.TOFCustomFitPanel;
 import org.jlab.calib.services.TOFH1F;
 import org.jlab.calib.services.TOFPaddle;
@@ -86,7 +87,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			tdcRightStatus.add(1, 1, 1, paddle);
 		}
 	}
-	
+
 	public void setConstraints() {
 
 		calib.addConstraint(3, EXPECTED_MIP_CHANNEL-ALLOWED_MIP_DIFF, 
@@ -167,12 +168,21 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			int layer = paddle.getDescriptor().getLayer();
 			int component = paddle.getDescriptor().getComponent();
 
-			//System.out.println("HV paddle "+sector+layer+component+" geoMean "+paddle.geometricMean());
-
 			if (paddle.isValidGeoMean() && paddle.geometricMean() > EXPECTED_MIP_CHANNEL * 0.25) {
-				///&& paddle.trackFound()) {
-				dataGroups.getItem(sector,layer,component).getH1F("geomean").fill(paddle.geometricMean());
-				hvStatHist.fill(((layer-1)*10)+sector);
+
+				if (TOFCalibration.pathNorm == TOFCalibration.PATH_NORM_NO) {
+					dataGroups.getItem(sector,layer,component).getH1F("geomean").fill(paddle.geometricMean());
+					hvStatHist.fill(((layer-1)*10)+sector);
+					//System.out.println("Filling with geometricMean "+paddle.geometricMean());
+					//paddle.show();
+				}
+				else {
+					if (paddle.goodTrackFound()) {
+						dataGroups.getItem(sector,layer,component).getH1F("geomean").fill(paddle.geometricMeanNorm());
+						//System.out.println("Filling with geometricMeanNorm "+paddle.geometricMeanNorm());
+						//paddle.show();
+					}
+				}	
 			}
 
 			if (paddle.isValidLogRatio()) {
@@ -181,28 +191,28 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 
 		}
 	}   
-	
-    @Override
-    public void analyze() {
-    
-        saveCounterStatus(statusFileName);
-        super.analyze();
-    
-    }		
+
+	@Override
+	public void analyze() {
+
+		saveCounterStatus(statusFileName);
+		super.analyze();
+
+	}		
 
 	@Override
 	public void fit(int sector, int layer, int paddle,
 			double minRange, double maxRange){
 		fitGeoMean(sector, layer, paddle, minRange, maxRange);
 		fitLogRatio(sector, layer, paddle, minRange, maxRange);
-		
+
 	}
 
 	public void fitGeoMean(int sector, int layer, int paddle,
 			double minRange, double maxRange){
 
 		TOFH1F h = (TOFH1F) dataGroups.getItem(sector,layer,paddle).getH1F("geomean");
-		
+
 		// First rebin depending on number of entries
 		//        int nEntries = h.getEntries(); 
 		//        if ((nEntries != 0) && (h.getAxis().getNBins() == GM_HIST_BINS[layer_index])) {
@@ -482,10 +492,10 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 
 		// Don''t bother recalculating if MIP peak is already acceptable
 		// LC Nov 2017 - removing this for now as MIP peak may be acceptable, but log ratio may be non zero
-//		if (isGoodPaddle(sector,layer,paddle)) {
-//			System.out.println("Paddle "+paddle+": MIP peak already acceptable, no change to voltage");
-//			return origVoltage;
-//		}
+		//		if (isGoodPaddle(sector,layer,paddle)) {
+		//			System.out.println("Paddle "+paddle+": MIP peak already acceptable, no change to voltage");
+		//			return origVoltage;
+		//		}
 
 		int layer_index = layer-1;
 		//DetectorDescriptor desc = new DetectorDescriptor();
@@ -526,11 +536,11 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		}
 
 		// Don''t change voltage if stats are low
-//		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() < MIN_STATS) {
-//			System.out.println("SLC "+sector+layer+paddle+": Low stats, deltaV set to zero");
-//			deltaV = 0.0;
-//		};
-		
+		//		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() < MIN_STATS) {
+		//			System.out.println("SLC "+sector+layer+paddle+": Low stats, deltaV set to zero");
+		//			deltaV = 0.0;
+		//		};
+
 		// Don't change voltage if stats are zero
 		if (dataGroups.getItem(sector,layer,paddle).getH1F("geomean").getEntries() == 0) {
 			System.out.println("SLC "+sector+layer+paddle+": Zero stats, deltaV set to zero");

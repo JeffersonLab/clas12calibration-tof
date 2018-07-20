@@ -234,6 +234,7 @@ public class DataProvider {
 						double c3z  = tbtBank.getFloat("c3_z",trkId-1);
 						double path = tbtBank.getFloat("pathlength",trkId-1) + Math.sqrt((tx-c3x)*(tx-c3x)+(ty-c3y)*(ty-c3y)+(tz-c3z)*(tz-c3z));
 						paddle.PATH_LENGTH = path;
+						paddle.PATH_LENGTH_BAR = hitsBank.getFloat("pathLengthThruBar", hitIndex);
 						paddle.RF_TIME = trf;
 						
 						// Get the momentum and record the beta using the mass assumption

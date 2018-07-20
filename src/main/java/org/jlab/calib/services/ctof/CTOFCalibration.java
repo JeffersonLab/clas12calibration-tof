@@ -152,6 +152,10 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     						  new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox()};    
 //    private JTextField ctofCenterText = new JTextField(5);
 //    public static double ctofCenter = 0.0;
+    
+	// Path length normalisation setting
+	JComboBox<String> pathNormList = new JComboBox<String>();
+	
     private JTextField rcsText = new JTextField(5);
     public static double maxRcs = 0.0;
     private JTextField minVText = new JTextField(5);
@@ -410,6 +414,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 //            if (ctofCenterText.getText().compareTo("") != 0) {
 //                ctofCenter = Double.parseDouble(ctofCenterText.getText());
 //            }
+			TOFCalibration.pathNorm = pathNormList.getSelectedIndex();
+
             if (rcsText.getText().compareTo("") != 0) {
                 maxRcs = Double.parseDouble(rcsText.getText());
             }
@@ -460,6 +466,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("Configuration settings - Tracking/General");
             System.out.println("-----------------------------------------");
             //System.out.println("CTOF Center z (cm): "+ctofCenter);
+			System.out.println("Path length normalisation for gmean?: "+pathNormList.getItemAt(TOFCalibration.pathNorm));            
             System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
             System.out.println("Minimum vertex z: "+minV);
             System.out.println("Maximum vertex z: "+maxV);
@@ -838,6 +845,21 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 //        c.gridx = 1;
 //        c.gridy = y;
 //        trPanel.add(ctofCenterText,c);
+        
+		// Path length normalisation
+		c.gridx = 0;
+		c.gridy = y;
+		trPanel.add(new JLabel("Path length normalisation for gmean?:"),c);
+		pathNormList.addItem("Yes");
+		pathNormList.addItem("No");
+		pathNormList.addActionListener(this);
+		c.gridx = 1;
+		c.gridy = y;
+		trPanel.add(pathNormList,c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""),c);	
+        
         // Chi squared
         y++;
         c.gridx = 0;

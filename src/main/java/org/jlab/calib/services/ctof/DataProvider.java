@@ -237,6 +237,7 @@ public class DataProvider {
 						
 						// path length from bank
 						paddle.PATH_LENGTH = hitsBank.getFloat("pathLength", hitIndex);
+						paddle.PATH_LENGTH_BAR = hitsBank.getFloat("pathLengthThruBar", hitIndex);
 						// System.out.println("Louise 237");
 						paddle.RF_TIME = trf;
 						

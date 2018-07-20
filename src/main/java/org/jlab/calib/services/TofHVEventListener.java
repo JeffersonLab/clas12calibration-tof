@@ -187,9 +187,20 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 			//System.out.println("HV paddle "+sector+layer+component+" geoMean "+paddle.geometricMean());
 
 			if (paddle.isValidGeoMean() && paddle.geometricMean() > EXPECTED_MIP_CHANNEL[layer-1] * 0.25) {
-				///&& paddle.trackFound()) {
-				dataGroups.getItem(sector,layer,component).getH1F("geomean").fill(paddle.geometricMean());
-				hvStatHist.fill(((layer-1)*10)+sector);
+
+				if (TOFCalibration.pathNorm == TOFCalibration.PATH_NORM_NO) {
+					dataGroups.getItem(sector,layer,component).getH1F("geomean").fill(paddle.geometricMean());
+					hvStatHist.fill(((layer-1)*10)+sector);
+					//System.out.println("Filling with geometricMean "+paddle.geometricMean());
+					//paddle.show();
+				}
+				else {
+					if (paddle.goodTrackFound()) {
+						dataGroups.getItem(sector,layer,component).getH1F("geomean").fill(paddle.geometricMeanNorm());
+						//System.out.println("Filling with geometricMeanNorm "+paddle.geometricMeanNorm());
+						//paddle.show();
+					}
+				}
 			}
 
 			if (paddle.isValidLogRatio()) {

@@ -26,6 +26,7 @@ public class TOFPaddle {
 	public double YPOS = 0.0;
 	public double ZPOS = 0.0;
 	public double PATH_LENGTH = 0.0;
+	public double PATH_LENGTH_BAR = 0.0;
 	public double P = 0.0;
 	public int TRACK_ID = -1;
 	public double VERTEX_Z = 0.0;
@@ -72,7 +73,25 @@ public class TOFPaddle {
 	}
 
 	public double geometricMean() {
-		return Math.sqrt(ADCL * ADCR);
+		return Math.sqrt(ADCL * ADCR);			
+	}
+	
+	public double geometricMeanNorm() {
+		return geometricMean() * (thickness()/PATH_LENGTH_BAR); 
+	}
+	
+	public double thickness() {
+		double t = 0.0;
+		if (tof=="FTOF") {
+			t = 5.0;
+			if (this.getDescriptor().getLayer() == 2) {
+				t = 6.0;
+			}
+		}
+		else {
+			t = 3.0;
+		}
+		return t;
 	}
 
 	public double logRatio() {
@@ -638,7 +657,8 @@ public class TOFPaddle {
 		System.out.println("");
 		System.out.println("S " + desc.getSector() + " L " + desc.getLayer() + " C " + desc.getComponent() + " ADCR "
 				+ ADCR + " ADCL " + ADCL + " TDCR " + TDCR + " TDCL " + TDCL);
-		System.out.println("XPOS " + XPOS + " YPOS " + YPOS + " ZPOS " + ZPOS + " PATH_LENGTH " + PATH_LENGTH
+		System.out.println("geometricMean "+geometricMean()+ " PATH_LENGTH_BAR " + PATH_LENGTH_BAR);
+		System.out.println("XPOS " + XPOS + " YPOS " + YPOS + " ZPOS " + ZPOS + " PATH_LENGTH " + PATH_LENGTH 
 				+ " TRACK_ID " + TRACK_ID);
 		System.out.println("PARTICLE_ID "+PARTICLE_ID+" mass "+mass()+" beta " + beta() + " P " + P + " RF_TIME " + RF_TIME + "ST_TIME " + ST_TIME + " RECON_TIME "
 				+ RECON_TIME);
