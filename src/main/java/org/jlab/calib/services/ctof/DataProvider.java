@@ -197,6 +197,8 @@ public class DataProvider {
 					if (event.hasBank("RUN::config")) {
 						DataBank configBank = event.getBank("RUN::config");
 						paddle.TRIGGER_BIT = configBank.getLong("trigger", 0);
+						paddle.RUN = configBank.getInt("run", 0);
+						paddle.TIMESTAMP = configBank.getLong("timestamp", 0);
 					}
 					
 					// Get the start time, requiring that first particle in the event is an electron

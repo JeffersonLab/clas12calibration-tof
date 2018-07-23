@@ -3,6 +3,8 @@ package org.jlab.calib.services;
 import org.jlab.calib.services.ctof.CTOFCalibration;
 import org.jlab.calib.services.ctof.CTOFCalibrationEngine;
 import org.jlab.detector.base.DetectorDescriptor;
+import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 
 /**
  *
@@ -13,6 +15,8 @@ public class TOFPaddle {
 	private static final int LEFT = 0;
 	private static final int RIGHT = 1;
 	public static String tof = "FTOF";
+	public static CalibrationConstants jitConsts;   
+	public static int currentRun = 0;
 
 	private DetectorDescriptor desc = new DetectorDescriptor();
 
@@ -38,6 +42,8 @@ public class TOFPaddle {
 	// public double TOF_TIME = 0.0;
 	public double RECON_TIME = 0.0;
 	public int PARTICLE_ID = 0;
+	public int RUN = 0;
+	public long TIMESTAMP = 0;
 
 	private final double C = 29.98;
 	public static final double NS_PER_CH = 0.02345;
@@ -246,6 +252,26 @@ public class TOFPaddle {
 		}
 		return p2p;
 	}
+
+	public double getCTOFJitter() {
+		
+		// Get the TDC jitter parameters when runNo changes
+		if (RUN != currentRun) {
+		    DatabaseConstantProvider dcp = new DatabaseConstantProvider(RUN, "default");
+		    jitConsts = dcp.readConstants("/calibration/ctof/time_jitter");
+		    dcp.disconnect();
+		    currentRun = RUN;
+		}
+	    double period = jitConsts.getDoubleValue("period", 0,0,0);
+	    int    phase  = jitConsts.getIntValue("phase", 0,0,0);
+	    int cycles = jitConsts.getIntValue("cycles", 0,0,0);
+	    double triggerphase=0;
+	    if(cycles > 0) triggerphase=period*((TIMESTAMP+phase)%cycles);
+	    //System.out.println(period + " " + phase + " " + cycles + " " + TIMESTAMP + " " + triggerphase);
+		return triggerphase;
+		
+	}
+
 	
 	private double mass() {
 		double mass = 0.0;
