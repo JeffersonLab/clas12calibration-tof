@@ -3,8 +3,11 @@ package org.jlab.calib.services.ctof;
 
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +59,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
     final double MIN_DIST = -35.0;
     final double MAX_DIST = -15.0;
     final double MAX_LEFTRIGHT = 10.0;
+    private String fitOption = "RQ";
 
     public CtofLeftRightEventListener() {
 
@@ -65,7 +69,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         filename = nextFileName();
 
         calib = new CalibrationConstants(3,
-                "upstream_downstream/F");
+                "upstream_downstream/F:tdc_upstream_downstream/F");
         calib.setName("/calibration/ctof/time_offsets/upstream_downstream");
         calib.setPrecision(3);
 
@@ -167,7 +171,9 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 
             // create all the histograms
-            H1F hist = new H1F("left_right","Up Down: Paddle "+paddle, 
+			H1F hist = new H1F("left_right","Up Down: Paddle "+paddle,
+					1001, -25.05, 25.05);
+            H1F tdcHist = new H1F("tdc_left_right","Up Down: Paddle "+paddle, 
                     2001, -50.05, 50.05);
 
             hist.setTitle("Up Down  : Paddle "+paddle);
@@ -177,10 +183,18 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
                     -100.0, 100.0);
             edgeToEdgeFunc.setLineColor(FUNC_COLOUR);
             edgeToEdgeFunc.setLineWidth(FUNC_LINE_WIDTH);
+            
+            F1D lrFunc = new F1D("lrFunc","[amp]*gaus(x,[mean],[sigma])", -1.0, 1.0);
+			
+			lrFunc.setLineColor(FUNC_COLOUR);
+			lrFunc.setLineWidth(FUNC_LINE_WIDTH);
+			lrFunc.setOptStat(1110);	
 
-            DataGroup dg = new DataGroup(1,1);
+            DataGroup dg = new DataGroup(2,1);
             dg.addDataSet(hist, 0);
-            dg.addDataSet(edgeToEdgeFunc, 0);
+            dg.addDataSet(lrFunc, 0);
+            dg.addDataSet(tdcHist, 1);
+            dg.addDataSet(edgeToEdgeFunc, 1);
             dataGroups.add(dg, 1,1,paddle);
 
             setPlotTitle(1,1,paddle);
@@ -211,47 +225,68 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
             int component = paddle.getDescriptor().getComponent();
             
             if (paddle.includeInTiming()) {
-            	dataGroups.getItem(sector,layer,component).getH1F("left_right").fill(
+            	dataGroups.getItem(sector,layer,component).getH1F("tdc_left_right").fill(
                     paddle.leftRight());
             }
+            
+			if (paddle.goodTrackFound()) {
+				dataGroups.getItem(sector,layer,component).getH1F("left_right").fill(
+						2.0*(paddle.veffHalfTimeDiff() - paddle.paddleY()/paddle.veff()));
+			}
         }
     }
 
     @Override
     public void fit(int sector, int layer, int paddle,
             double minRange, double maxRange) {
-
-    	H1F leftRightHist = dataGroups.getItem(sector,layer,paddle).getH1F("left_right");
+    	
+    	// centroid of tdc time - time from position method
+    	H1F lrHist = dataGroups.getItem(sector,layer,paddle).getH1F("left_right");
+		int maxBin = lrHist.getMaximumBin();
+		double maxPos = lrHist.getXaxis().getBinCenter(maxBin);
+		
+		// fit gaussian 
+		F1D lrFunc = dataGroups.getItem(sector,layer,paddle).getF1D("lrFunc");
+		// find the range for the fit
+		double lowLimit;
+		double highLimit;
+		if (minRange != UNDEFINED_OVERRIDE) {
+			// use custom values for fit
+			lowLimit = minRange;
+		}
+		else {
+			//lowLimit = maxPos-0.65;
+			lowLimit = maxPos-10.0;
+		}
+		if (maxRange != UNDEFINED_OVERRIDE) {
+			// use custom values for fit
+			highLimit = maxRange;
+		}
+		else {
+			highLimit = maxPos+10.0;
+		}
+		lrFunc.setRange(lowLimit, highLimit);
+		lrFunc.setParameter(0, lrHist.getBinContent(maxBin));
+		lrFunc.setParLimits(0, lrHist.getBinContent(maxBin)*0.7, lrHist.getBinContent(maxBin)*1.2);
+		lrFunc.setParameter(1, maxPos);
+		lrFunc.setParameter(2, 1.0);
+		//lrFunc.setParLimits(2, 0.5, 5.0);
+		if (lrHist.getEntries() > 50) {
+			try {
+				DataFitter.fit(lrFunc, lrHist, fitOption);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+		lrHist.setFunction(null);
+    	
+    	
+    	// centroid of time difference distribution method
+    	H1F leftRightHist = dataGroups.getItem(sector,layer,paddle).getH1F("tdc_left_right");
         int nBin = leftRightHist.getXaxis().getNBins();
 
         // calculate the average of all bins
-//        double averageAllBins=0;
-//        for(int i=1;i<=nBin;i++)
-//            averageAllBins+=leftRightHist.getBinContent(i);
-//        averageAllBins/=nBin;
-//
-//        // find the first points left and right of max bin with bin content < average
-//        int lowRangeFirstCut=0,highRangeFirstCut=0;
-//        int maxBin = leftRightHist.getMaximumBin();
-//        for(int i=maxBin;i>=1;i--){
-//            if(leftRightHist.getBinContent(i)<averageAllBins){
-//                lowRangeFirstCut=i;
-//                break;
-//            }
-//        }
-//        for(int i=maxBin;i<=nBin;i++){
-//            if(leftRightHist.getBinContent(i)<averageAllBins){
-//                highRangeFirstCut=i;
-//                break;
-//            }
-//        }
-//
-//        // now calculate the 'average' in this range
-//        double averageCentralRange=0;
-//        for(int i=lowRangeFirstCut;i<=highRangeFirstCut;i++)
-//            averageCentralRange+=leftRightHist.getBinContent(i);
-//        averageCentralRange/=(highRangeFirstCut-lowRangeFirstCut+1);
-        
         // calculate the mean bin content for non-zero bins
         int nonZeroBins = 0;
         double meanBinContent=0;
@@ -288,13 +323,6 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
 
         edgeToEdgeFunc.setParameter(0, meanBinContent*LEFT_RIGHT_RATIO); // height to draw line at
         
-        // test code - show range over which average is calculated
-//        F1D edgeToEdgeFunc = dataGroups.getItem(sector,layer,paddle).getF1D("edgeToEdgeFunc");
-//        edgeToEdgeFunc.setRange(leftRightHist.getAxis().getBinCenter(lowRangeFirstCut), 
-//        		leftRightHist.getAxis().getBinCenter(highRangeFirstCut));
-//
-//        edgeToEdgeFunc.setParameter(0, averageCentralRange); // height to draw line at
-
     }
 
     @Override
@@ -346,21 +374,36 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         }
         else {
 
-            double min = dataGroups.getItem(sector,layer,paddle).getF1D("edgeToEdgeFunc").getMin(); 
-            double max = dataGroups.getItem(sector,layer,paddle).getF1D("edgeToEdgeFunc").getMax();
-            leftRight = (min+max)/2.0;
-
-            //leftRight = dataGroups.getItem(sector,layer,paddle).getH1F("left_right").getMean();
+			F1D lrFunc = dataGroups.getItem(sector,layer,paddle).getF1D("lrFunc");
+			H1F lrHist = dataGroups.getItem(sector,layer,paddle).getH1F("left_right");
+			if (lrHist.getEntries() != 0){
+				leftRight = lrFunc.getParameter(1);
+			}
 
         }
 
         return leftRight;
     }
+    
+    public Double getTdcCentroid(int sector, int layer, int paddle) {
+
+        double leftRight = 0.0;
+
+        double min = dataGroups.getItem(sector,layer,paddle).getF1D("edgeToEdgeFunc").getMin(); 
+        double max = dataGroups.getItem(sector,layer,paddle).getF1D("edgeToEdgeFunc").getMax();
+        leftRight = (min+max)/2.0;
+
+        //leftRight = dataGroups.getItem(sector,layer,paddle).getH1F("left_right").getMean();
+
+        return leftRight;
+    }    
 
     @Override
     public void saveRow(int sector, int layer, int paddle) {
         calib.setDoubleValue(getCentroid(sector,layer,paddle),
                 "upstream_downstream", sector, layer, paddle);
+        calib.setDoubleValue(getTdcCentroid(sector,layer,paddle),
+                "tdc_upstream_downstream", sector, layer, paddle);
     }
 
     @Override
@@ -374,7 +417,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
     @Override
     public void setPlotTitle(int sector, int layer, int paddle) {
         // reset hist title as may have been set to null by show all 
-        dataGroups.getItem(sector,layer,paddle).getH1F("left_right").setTitleX("(Time Up - Time Down) (ns)");
+        dataGroups.getItem(sector,layer,paddle).getH1F("left_right").setTitleX("Upstream downstream offset (ns)");
     }
 
     @Override
@@ -383,8 +426,43 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         H1F hist = dataGroups.getItem(sector,layer,paddle).getH1F("left_right");
         hist.setTitleX("");
         canvas.draw(hist);
-        canvas.draw(dataGroups.getItem(sector,layer,paddle).getF1D("edgeToEdgeFunc"), "same");
+        //canvas.draw(dataGroups.getItem(sector,layer,paddle).getF1D("edgeToEdgeFunc"), "same");
+        canvas.draw(dataGroups.getItem(sector,layer,paddle).getF1D("lrFunc"), "same");
 
+    }
+    
+    @Override
+	public void writeFile(String filename) {
+		
+		boolean[] writeCols = {true,true,true,
+							   true,false};
+		try { 
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+			for (int i=0; i<calib.getRowCount(); i++) {
+				String line = new String();
+				for (int j=0; j<calib.getColumnCount(); j++) {
+					if (writeCols[j]) {
+						line = line+calib.getValueAt(i, j);
+						if (j<calib.getColumnCount()-1) {
+							line = line+" ";
+						}
+					}
+				}
+				outputBw.write(line);
+				outputBw.newLine();
+			}
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error reading file '" 
+							+ filename + "'");                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}
     }
 
     @Override
