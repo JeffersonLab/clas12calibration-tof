@@ -354,16 +354,17 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 	@Override
 	public void customFit(int sector, int layer, int paddle){
 
-		//System.out.println("Left right value from file is "+leftRightAdjustment(sector,layer,paddle));
-
-		String[] fields = { "Override centroid:" , "SPACE"};
+		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
+		"Override centroid:"};
 		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
 		int result = JOptionPane.showConfirmDialog(null, panel, 
 				"Adjust Fit / Override for paddle "+paddle, JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
 
-			double overrideValue = toDouble(panel.textFields[0].getText());
+			double minRange = toDouble(panel.textFields[0].getText());
+			double maxRange = toDouble(panel.textFields[1].getText());
+			double overrideValue = toDouble(panel.textFields[2].getText());
 			
 			int minP = paddle;
 			int maxP = paddle;
@@ -387,7 +388,7 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 					Double[] consts = constants.getItem(s, layer, p);
 					consts[LEFTRIGHT_OVERRIDE] = overrideValue;
 
-					fit(s, layer, p);
+					fit(s, layer, p, minRange, maxRange);
 
 					// update the table
 					saveRow(s,layer,p);

@@ -172,7 +172,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
 
             // create all the histograms
 			H1F hist = new H1F("left_right","Up Down: Paddle "+paddle,
-					1001, -25.05, 25.05);
+					1001, -40.05, 0.05);
             H1F tdcHist = new H1F("tdc_left_right","Up Down: Paddle "+paddle, 
                     2001, -50.05, 50.05);
 
@@ -330,14 +330,17 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
 
         //System.out.println("Left right value from file is "+leftRightAdjustment(sector,layer,paddle));
 
-        String[] fields = { "Override centroid:" , "SPACE"};
-        TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
+    	String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
+		"Override centroid:"};
+		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
         int result = JOptionPane.showConfirmDialog(null, panel, 
                 "Adjust Fit / Override for paddle "+paddle, JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
 
-            double overrideValue = toDouble(panel.textFields[0].getText());
+        	double minRange = toDouble(panel.textFields[0].getText());
+			double maxRange = toDouble(panel.textFields[1].getText());
+			double overrideValue = toDouble(panel.textFields[2].getText());
             
 			int minP = paddle;
 			int maxP = paddle;
@@ -354,7 +357,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
 				Double[] consts = constants.getItem(sector, layer, p);
 				consts[LEFTRIGHT_OVERRIDE] = overrideValue;
 
-				fit(sector, layer, p);
+				fit(sector, layer, p, minRange, maxRange);
 
 				// update the table
 				saveRow(sector,layer,p);
