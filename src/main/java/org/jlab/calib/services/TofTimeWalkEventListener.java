@@ -1018,6 +1018,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
     @Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
     	
+    	canvas.getPad(1).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	canvas.getPad(2).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	canvas.getPad(3).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
 		canvas.getPad(4).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);

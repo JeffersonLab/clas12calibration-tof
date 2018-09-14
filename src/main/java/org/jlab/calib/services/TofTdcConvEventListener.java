@@ -583,6 +583,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
     @Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
 		
+    	canvas.getPad(1).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	canvas.getPad(2).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	canvas.getPad(3).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	

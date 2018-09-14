@@ -213,7 +213,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			if (pad.goodTrackFound()) {
 				
 				dataGroups.getItem(sector,layer,component).getH1F("fineHistRaw").fill(
-						(pad.refTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refTimeTWPosCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 			}
 		}
 	}  
@@ -521,4 +521,11 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		return dg;
 
 	}
+	
+    @Override
+	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
+    	
+    	canvas.getPad().setAutoScale();
+    	
+	}	
 }

@@ -48,15 +48,12 @@ import org.jlab.utils.groups.IndexedList;
 
 public class TofTWPosEventListener extends TOFCalibrationEngine {
 
-	public final int TW1L_OVERRIDE = 0;
-	public final int TW2L_OVERRIDE = 1;
-	public final int TW1R_OVERRIDE = 2;
-	public final int TW2R_OVERRIDE = 3;
+	public final int TW1_OVERRIDE = 0;
+	public final int TW2_OVERRIDE = 1;
 	
 	private String fitOption = "RQ";
 	int backgroundSF = -1;
 	boolean showSlices = false;
-	private String showPlotType = "TWPOS_LEFT";
 
 	public TofTWPosEventListener() {
 
@@ -181,63 +178,39 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 				for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 
 					// create all the histograms
-					H2F twposLHist = 
-							new H2F("twposLHist",histTitle(sector,layer,paddle),
+					H2F twposHist = 
+							new H2F("twposHist",histTitle(sector,layer,paddle),
 									100, -paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
 									bins, -bb*0.5, bb*0.5);
-					twposLHist.setTitleX("hit position (cm)");
-					twposLHist.setTitleY("delta T (ns)");
-
-					H2F twposRHist = 
-							new H2F("twposRHist",histTitle(sector,layer,paddle),
-									100, -paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
-									bins, -bb*0.5, bb*0.5);
-					twposRHist.setTitleX("hit position (cm)");
-					twposRHist.setTitleY("delta T (ns)");
+					twposHist.setTitleX("hit position (cm)");
+					twposHist.setTitleY("delta T (ns)");
 
 					// create all the functions and graphs
-					double tw1L = TOFCalibrationEngine.twposValues.getDoubleValue("tw1_left", sector, layer, paddle);
-					double tw2L = TOFCalibrationEngine.twposValues.getDoubleValue("tw2_left", sector, layer, paddle);
-					String funcTextL = "[a]*x*x+[b]*x-("+tw1L+"*x*x+"+tw2L+"*x+[c])";
+					double tw1 = TOFCalibrationEngine.twposValues.getDoubleValue("tw1_left", sector, layer, paddle);
+					double tw2 = TOFCalibrationEngine.twposValues.getDoubleValue("tw2_left", sector, layer, paddle);
+					//String funcText = "[a]*x*x+[b]*x-("+tw1+"*x*x+"+tw2+"*x+[c])";
+					String funcText = "[a]*x*x+[b]*x+[c]";
 					//System.out.println("funcTextL "+funcTextL);
-					F1D twposLFunc = new F1D("twposLFunc", funcTextL, -250.0, 250.0);
+					F1D twposFunc = new F1D("twposFunc", funcText, -250.0, 250.0);
 					
-					GraphErrors twposLGraph = new GraphErrors("twposLGraph");
-					twposLGraph.setName("twposLGraph");
-					twposLGraph.setTitle(histTitle(sector,layer,paddle));
-					twposLFunc.setLineColor(FUNC_COLOUR);
-					twposLFunc.setLineWidth(FUNC_LINE_WIDTH);
-					twposLGraph.setMarkerSize(MARKER_SIZE);
-					twposLGraph.setLineThickness(MARKER_LINE_WIDTH);
+					GraphErrors twposGraph = new GraphErrors("twposGraph");
+					twposGraph.setName("twposGraph");
+					twposGraph.setTitle(histTitle(sector,layer,paddle));
+					twposFunc.setLineColor(FUNC_COLOUR);
+					twposFunc.setLineWidth(FUNC_LINE_WIDTH);
+					twposGraph.setMarkerSize(MARKER_SIZE);
+					twposGraph.setLineThickness(MARKER_LINE_WIDTH);
 
-					double tw1R = TOFCalibrationEngine.twposValues.getDoubleValue("tw1_right", sector, layer, paddle);
-					double tw2R = TOFCalibrationEngine.twposValues.getDoubleValue("tw2_right", sector, layer, paddle);
-					String funcTextR = "[a]*x*x+[b]*x-("+tw1R+"*x*x+"+tw2R+"*x+[c])";
-					//System.out.println("funcTextR "+funcTextR);
-					F1D twposRFunc = new F1D("twposRFunc", funcTextR, -250.0, 250.0);
-					
-					GraphErrors twposRGraph = new GraphErrors("twposRGraph");
-					twposRGraph.setName("twposRGraph");
-					twposRGraph.setTitle(histTitle(sector,layer,paddle));
-					twposRFunc.setLineColor(FUNC_COLOUR);
-					twposRFunc.setLineWidth(FUNC_LINE_WIDTH);
-					twposRGraph.setMarkerSize(MARKER_SIZE);
-					twposRGraph.setLineThickness(MARKER_LINE_WIDTH);
-
-					DataGroup dg = new DataGroup(2,2);
-					dg.addDataSet(twposLHist, 0);
-					dg.addDataSet(twposLGraph, 2);
-					dg.addDataSet(twposLFunc, 2);
-					dg.addDataSet(twposRHist, 1);
-					dg.addDataSet(twposRGraph, 3);
-					dg.addDataSet(twposRFunc, 3);
+					DataGroup dg = new DataGroup(2,1);
+					dg.addDataSet(twposHist, 0);
+					dg.addDataSet(twposGraph, 1);
+					dg.addDataSet(twposFunc, 1);
 					dataGroups.add(dg, sector,layer,paddle);
 
 					setPlotTitle(sector,layer,paddle);
 
 					// initialize the constants array
-					Double[] consts = {UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE,
-							UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE};
+					Double[] consts = {UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE};
 					// override values
 
 					constants.add(consts, sector, layer, paddle);
@@ -266,12 +239,9 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 
 			if (paddle.goodTrackFound()) {
 
-				dataGroups.getItem(sector,layer,component).getH2F("twposLHist").fill(
+				dataGroups.getItem(sector,layer,component).getH2F("twposHist").fill(
 						 paddle.paddleY(),
-						(paddle.deltaTLeft(0.0)+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
-				dataGroups.getItem(sector,layer,component).getH2F("twposRHist").fill(
-						 paddle.paddleY(),
-						(paddle.deltaTRight(0.0)+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						 (paddle.refTimeRFCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				
 			}
 		}
@@ -291,8 +261,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 	public void fit(int sector, int layer, int paddle,
 			double minRange, double maxRange) {
 
-		H2F twposLHist = dataGroups.getItem(sector,layer,paddle).getH2F("twposLHist");
-		H2F twposRHist = dataGroups.getItem(sector,layer,paddle).getH2F("twposRHist");
+		H2F twposHist = dataGroups.getItem(sector,layer,paddle).getH2F("twposHist");
 
 		// find the range for the fit
 		double lowLimit;
@@ -315,12 +284,11 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 		}
 
 		// fit function to the graph of means
-		GraphErrors twposLGraph = (GraphErrors) dataGroups.getItem(sector,layer,paddle).getData("twposLGraph");
-		GraphErrors twposRGraph = (GraphErrors) dataGroups.getItem(sector,layer,paddle).getData("twposRGraph");
+		GraphErrors twposGraph = (GraphErrors) dataGroups.getItem(sector,layer,paddle).getData("twposGraph");
 		
 		if (fitMethod==FIT_METHOD_SF) {
-			// left
-			ParallelSliceFitter psfL = new ParallelSliceFitter(twposLHist);
+			
+			ParallelSliceFitter psfL = new ParallelSliceFitter(twposHist);
 			psfL.setFitMode(fitMode);
 			psfL.setMinEvents(fitMinEvents);
 			psfL.setBackgroundOrder(backgroundSF);
@@ -333,48 +301,25 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 				showSlices = false;
 			}
 			fitSliceMaxError = 2.0;
-			twposLGraph.copy(fixGraph(psfL.getMeanSlices(),"twposLGraph"));
-			// right
-			ParallelSliceFitter psfR = new ParallelSliceFitter(twposRHist);
-			psfR.setFitMode(fitMode);
-			psfR.setMinEvents(fitMinEvents);
-			psfR.setBackgroundOrder(backgroundSF);
-			psfR.setNthreads(1);
-			setOutput(false);
-			psfR.fitSlicesX();
-			setOutput(true);
-			if (showSlices) {
-				psfR.inspectFits();
-				showSlices = false;
-			}
-			fitSliceMaxError = 2.0;
-			twposRGraph.copy(fixGraph(psfR.getMeanSlices(),"twposRGraph"));
+			twposGraph.copy(fixGraph(psfL.getMeanSlices(),"twposGraph"));
 		}
 		else if (fitMethod==FIT_METHOD_MAX) {
 			maxGraphError = 0.3;
-			twposLGraph.copy(maxGraph(twposLHist, "twposLGraph"));
-			twposRGraph.copy(maxGraph(twposRHist, "twposRGraph"));
+			twposGraph.copy(maxGraph(twposHist, "twposGraph"));
 		}
 		else {
-			twposLGraph.copy(twposLHist.getProfileX());
-			twposRGraph.copy(twposRHist.getProfileX());
+			twposGraph.copy(twposHist.getProfileX());
 		}
 				
-		F1D twposLFunc = dataGroups.getItem(sector,layer,paddle).getF1D("twposLFunc");
-		F1D twposRFunc = dataGroups.getItem(sector,layer,paddle).getF1D("twposRFunc");
-		twposLFunc.setRange(lowLimit, highLimit);
-		twposRFunc.setRange(lowLimit, highLimit);
+		F1D twposFunc = dataGroups.getItem(sector,layer,paddle).getF1D("twposFunc");
+		twposFunc.setRange(lowLimit, highLimit);
 
-		twposLFunc.setParameter(0, 0.0);
-		twposLFunc.setParameter(1, 0.0);
-		twposLFunc.setParameter(2, 0.0);
-		twposRFunc.setParameter(0, 0.0);
-		twposRFunc.setParameter(1, 0.0);
-		twposRFunc.setParameter(2, 0.0);
+		twposFunc.setParameter(0, 0.0);
+		twposFunc.setParameter(1, 0.0);
+		twposFunc.setParameter(2, 0.0);
 
 		try {
-			DataFitter.fit(twposLFunc, twposLGraph, fitOption);
-			DataFitter.fit(twposRFunc, twposRGraph, fitOption);
+			DataFitter.fit(twposFunc, twposGraph, fitOption);
 
 		} catch (Exception e) {
 			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
@@ -386,8 +331,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 
 		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
-				"Override tw1_left:", "Override tw2_left:", "SPACE",
-				"Override tw1_right:", "Override tw2_right:"};
+				"Override tw1:", "Override tw2:"};
 
 		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
@@ -404,10 +348,8 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 				backgroundSF = Integer.parseInt(panel.textFields[3].getText());
 			}
 			
-			double overrideTW1L = toDouble(panel.textFields[4].getText());
-			double overrideTW2L = toDouble(panel.textFields[5].getText());
-			double overrideTW1R = toDouble(panel.textFields[6].getText());
-			double overrideTW2R = toDouble(panel.textFields[7].getText());
+			double overrideTW1 = toDouble(panel.textFields[4].getText());
+			double overrideTW2 = toDouble(panel.textFields[5].getText());
 			
 			int minP = paddle;
 			int maxP = paddle;
@@ -430,10 +372,8 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 				for (int p=minP; p<=maxP; p++) {
 					// save the override values
 					Double[] consts = constants.getItem(s, layer, p);
-					consts[TW1L_OVERRIDE] = overrideTW1L;
-					consts[TW2L_OVERRIDE] = overrideTW2L;
-					consts[TW1R_OVERRIDE] = overrideTW1R;
-					consts[TW2R_OVERRIDE] = overrideTW2R;
+					consts[TW1_OVERRIDE] = overrideTW1;
+					consts[TW2_OVERRIDE] = overrideTW2;
 
 					fit(s, layer, p, minRange, maxRange);
 
@@ -447,71 +387,43 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 	}
 
 
-	public Double getTW1L(int sector, int layer, int paddle) {
+	public Double getTW1(int sector, int layer, int paddle) {
 
-		double tw1l = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW1L_OVERRIDE];
+		double tw1 = 0.0;
+		double overrideVal = constants.getItem(sector, layer, paddle)[TW1_OVERRIDE];
 
 		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw1l = overrideVal;
+			tw1 = overrideVal;
 		}
 		else {
-			tw1l = dataGroups.getItem(sector,layer,paddle).getF1D("twposLFunc").getParameter(0);
+			tw1 = dataGroups.getItem(sector,layer,paddle).getF1D("twposFunc").getParameter(0);
 		}
-		return tw1l;
+		return tw1;
 	}
 
-	public Double getTW2L(int sector, int layer, int paddle) {
+	public Double getTW2(int sector, int layer, int paddle) {
 
-		double tw2l = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW2L_OVERRIDE];
+		double tw2 = 0.0;
+		double overrideVal = constants.getItem(sector, layer, paddle)[TW2_OVERRIDE];
 
 		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw2l = overrideVal;
+			tw2 = overrideVal;
 		}
 		else {
-			tw2l = dataGroups.getItem(sector,layer,paddle).getF1D("twposLFunc").getParameter(1);
+			tw2 = dataGroups.getItem(sector,layer,paddle).getF1D("twposFunc").getParameter(1);
 		}
-		return tw2l;
+		return tw2;
 	}
 	
-	public Double getTW1R(int sector, int layer, int paddle) {
-
-		double tw1r= 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW1R_OVERRIDE];
-
-		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw1r = overrideVal;
-		}
-		else {
-			tw1r = dataGroups.getItem(sector,layer,paddle).getF1D("twposRFunc").getParameter(0);
-		}
-		return tw1r;
-	}
-
-	public Double getTW2R(int sector, int layer, int paddle) {
-
-		double tw2r = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW2R_OVERRIDE];
-
-		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw2r = overrideVal;
-		}
-		else {
-			tw2r = dataGroups.getItem(sector,layer,paddle).getF1D("twposRFunc").getParameter(1);
-		}
-		return tw2r;
-	}
-
 	@Override
 	public void saveRow(int sector, int layer, int paddle) {
-		calib.setDoubleValue(getTW1L(sector,layer,paddle),
+		calib.setDoubleValue(getTW1(sector,layer,paddle),
 				"tw1_left", sector, layer, paddle);
-		calib.setDoubleValue(getTW2L(sector,layer,paddle),
+		calib.setDoubleValue(getTW2(sector,layer,paddle),
 				"tw2_left", sector, layer, paddle);
-		calib.setDoubleValue(getTW1R(sector,layer,paddle),
+		calib.setDoubleValue(getTW1(sector,layer,paddle),
 				"tw1_right", sector, layer, paddle);
-		calib.setDoubleValue(getTW2R(sector,layer,paddle),
+		calib.setDoubleValue(getTW2(sector,layer,paddle),
 				"tw2_right", sector, layer, paddle);
 
 	}
@@ -531,33 +443,13 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 	@Override
 	public void drawPlots(int sector, int layer, int paddle, EmbeddedCanvas canvas) {
 
-		H2F hist = new H2F();
-		F1D func = new F1D("twposFunc");
-		if (showPlotType == "TWPOS_LEFT") { 
-			hist = dataGroups.getItem(sector,layer,paddle).getH2F("twposLHist");
-			func = dataGroups.getItem(sector,layer,paddle).getF1D("twposLFunc");
-		}
-		else {
-			hist = dataGroups.getItem(sector,layer,paddle).getH2F("twposRHist");
-			func = dataGroups.getItem(sector,layer,paddle).getF1D("twposRFunc");
-		}
+		H2F hist = dataGroups.getItem(sector,layer,paddle).getH2F("twposHist");
+		F1D func = dataGroups.getItem(sector,layer,paddle).getF1D("twposFunc");
 
 		canvas.draw(hist);    
 		canvas.draw(func, "same");
 	}
 	
-	@Override
-	public void showPlots(int sector, int layer) {
-
-		showPlotType = "TWPOS_LEFT";
-		stepName = "Time walk position - left";
-		super.showPlots(sector, layer);
-		showPlotType = "TWPOS_RIGHT";
-		stepName = "Time walk position - right";
-		super.showPlots(sector, layer);
-
-	}
-
 	@Override
 	public DataGroup getSummary(int sector, int layer) {
 
@@ -569,9 +461,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
     @Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
     	
-    	canvas.getPad(2).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
-    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	canvas.getPad(3).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
+    	canvas.getPad(1).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
     			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	
 	}	

@@ -517,6 +517,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
 		// overridden in each step
+		canvas.getPad().setAutoScale();
 	}
 
 	public void setOutput(boolean outputOn) {

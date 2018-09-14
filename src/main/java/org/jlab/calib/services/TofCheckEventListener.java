@@ -276,6 +276,8 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
     @Override
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
     	
+    	canvas.getPad(1).setAxisRange(-20.0, 20.0,
+    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	canvas.getPad(2).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
     			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
     	canvas.getPad(3).setAxisRange(630, 740,

@@ -550,5 +550,12 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 //		System.out.println("highLimit "+paddleLength(sector,layer,paddle) * 0.4);
 
 	}
+	
+    @Override
+	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
+    	
+    	canvas.getPad(1).setAxisRange(paddleLength(sector,layer,paddle) * -0.6, paddleLength(sector,layer,paddle) * 0.6, -3.0, 3.0);
+    	
+	}	
 
 }

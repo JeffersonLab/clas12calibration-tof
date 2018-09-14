@@ -174,7 +174,7 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 
 					// create all the histograms
 					H1F hist = new H1F("left_right",histTitle(sector,layer,paddle),
-							1001, -25.05, 25.05);
+							601, -15.05, 15.05);
 					H1F tdcHist = new H1F("tdc_left_right",histTitle(sector,layer,paddle),
 							2001, -50.05, 50.05);
 
