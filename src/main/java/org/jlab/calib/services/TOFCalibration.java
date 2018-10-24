@@ -148,6 +148,10 @@ ChangeListener {
 	// configuration settings
 	JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(),
 			new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(), new JCheckBox()}; 
+	
+	// Target GMEAN channel
+	private JTextField[] targetGMean = {new JTextField(6),new JTextField(6),new JTextField(6)};
+	
 	// Path length normalisation setting
 	JComboBox<String> pathNormList = new JComboBox<String>();
 	public static int pathNorm = 0;
@@ -341,7 +345,7 @@ ChangeListener {
 
 			if (engines[HV].engineOn) {
 				JFrame hvFrame = new JFrame("Adjust HV");
-				hvFrame.add(new TOFHVAdjustPanel((TofHVEventListener) engines[HV]));
+				hvFrame.add(new TOFHVAdjustPanel((TofHVEventListener) engines[HV],this));
 				hvFrame.setSize(1000, 800);
 				hvFrame.setVisible(true);
 				hvFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -421,6 +425,15 @@ ChangeListener {
 			}
 
 			// set the config values
+			TofHVEventListener hvEngine = (TofHVEventListener) engines[HV];			
+			hvEngine.EXPECTED_MIP_CHANNEL[0] = Integer.parseInt(targetGMean[0].getText());
+			hvEngine.EXPECTED_MIP_CHANNEL[1] = Integer.parseInt(targetGMean[1].getText());
+			hvEngine.EXPECTED_MIP_CHANNEL[2] = Integer.parseInt(targetGMean[2].getText());
+			hvEngine.NEWHV_MIP_CHANNEL[0] = Integer.parseInt(targetGMean[0].getText());
+			hvEngine.NEWHV_MIP_CHANNEL[1] = Integer.parseInt(targetGMean[1].getText());
+			hvEngine.NEWHV_MIP_CHANNEL[2] = Integer.parseInt(targetGMean[2].getText());
+			hvEngine.setConstraints();
+			
 			pathNorm = pathNormList.getSelectedIndex();
 			if (rcsText.getText().compareTo("") != 0) {
 				maxRcs = Double.parseDouble(rcsText.getText());
@@ -484,6 +497,7 @@ ChangeListener {
 			System.out.println("");
 			System.out.println("Configuration settings - Tracking/General");
 			System.out.println("-----------------------------------------");
+			System.out.println("Target GMEAN channel 1a/1b/2: "+targetGMean[0].getText()+"/"+targetGMean[1].getText()+"/"+targetGMean[2].getText());
 			System.out.println("Path length normalisation for gmean?: "+pathNormList.getItemAt(pathNorm));
 			System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
 			System.out.println("Minimum vertex z: "+minV);
@@ -858,7 +872,30 @@ ChangeListener {
 		c.weighty = 1;
 		c.anchor = c.NORTHWEST;
 		c.insets = new Insets(3,3,3,3);
+		
+		// TDC range
+		c.gridx = 0;
+		c.gridy = y;
+		trPanel.add(new JLabel("Target GMEAN channel 1a/1b/2:"),c);
+		c.gridx = 1;
+		c.gridy = y;
+		JPanel tgmPanel = new JPanel();
+		targetGMean[0].addActionListener(this);
+		targetGMean[1].addActionListener(this);
+		targetGMean[2].addActionListener(this);
+		targetGMean[0].setText("800");
+		targetGMean[1].setText("2000");
+		targetGMean[2].setText("800");
+		tgmPanel.add(targetGMean[0]);
+		tgmPanel.add(targetGMean[1]);
+		tgmPanel.add(targetGMean[2]);
+		trPanel.add(tgmPanel,c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""),c);
+				
 		// Path length normalisation
+		y++;
 		c.gridx = 0;
 		c.gridy = y;
 		trPanel.add(new JLabel("Path length normalisation for gmean?:"),c);

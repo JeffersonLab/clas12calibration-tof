@@ -50,6 +50,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 	private final int			GM_REBIN_THRESHOLD = 50000;
 
 	public int[]		EXPECTED_MIP_CHANNEL = {800, 2000, 800};
+	public int[]		NEWHV_MIP_CHANNEL = {800, 2000, 800};
 	public final int		ALLOWED_MIP_DIFF = 50;
 	public final double[]	ALPHA = {13.4, 4.7, 8.6};
 	public final double[]	MAX_VOLTAGE = {2500.0, 2000.0, 2500.0};
@@ -76,7 +77,6 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 				"mipa_left/F:mipa_right/F:mipa_left_err/F:mipa_right_err/F:logratio/F:logratio_err/F");
 		calib.setName("/calibration/ftof/gain_balance");
 		calib.setPrecision(3); // record calibration constants to 3 dp
-		//setConstraints();
 
 		// initialize the counter status
 		for (int sector=1; sector<=6; sector++) {
@@ -550,7 +550,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 			//constants.put(desc.getHashCode(), consts);
 		}
 
-		double deltaGain = EXPECTED_MIP_CHANNEL[layer_index] - gainLR;
+		double deltaGain = NEWHV_MIP_CHANNEL[layer_index] - gainLR;
 		double deltaV = (origVoltage * deltaGain) / (gainLR * ALPHA[layer_index]);
 
 		// Safety check - don't exceed maximum voltage change
@@ -603,7 +603,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 			System.out.println("paddle "+paddle);
 			System.out.println("pmt "+pmt);
 			System.out.println("origVoltage = "+origVoltage);
-			System.out.println("Expected MIP channel "+EXPECTED_MIP_CHANNEL[layer_index]);
+			System.out.println("Target MIP channel "+NEWHV_MIP_CHANNEL[layer_index]);
 			System.out.println("gainIn = "+gainIn);
 			System.out.println("centroid = "+centroid);
 			System.out.println("gainLR = "+gainLR);

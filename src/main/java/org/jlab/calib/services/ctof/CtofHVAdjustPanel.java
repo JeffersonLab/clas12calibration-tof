@@ -239,6 +239,37 @@ public class CtofHVAdjustPanel 	extends JPanel
             ex.printStackTrace();
 		}
 		
+		// now write a text file of the new and old HV values
+		String filename = outputFileName.replace(".snp", ".txt");
+		try { 
+
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+
+			for (int i=0; i<calib.getRowCount(); i++) {
+				String hvline = new String();
+				for (int j=0; j<calib.getColumnCount(); j++) {
+					hvline = hvline+calib.getValueAt(i, j);
+					if (j<calib.getColumnCount()-1) {
+						hvline = hvline+" ";
+					}
+				}
+				outputBw.write(hvline);
+				outputBw.newLine();
+			}
+
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error reading file '" 
+							+ filename + "'");                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}		
+		
 		return outputFileName;
 	}
 	 

@@ -41,12 +41,14 @@ public class TOFHVAdjustPanel 	extends JPanel
 	JFileChooser fc;
 	CalibrationConstants calib;
 	TofHVEventListener hv;
+	TOFCalibration tofCal;
 	private JTextField mipPeakText[] = {new JTextField(5),new JTextField(5),new JTextField(5)};
 
 
-	public TOFHVAdjustPanel(TofHVEventListener hvIn) {
+	public TOFHVAdjustPanel(TofHVEventListener hvIn, TOFCalibration tofCalIn) {
 		
 		hv = hvIn;
+		tofCal = tofCalIn;
 		
 		setLayout(new BorderLayout());
 		
@@ -78,13 +80,13 @@ public class TOFHVAdjustPanel 	extends JPanel
 		buttonPanel.add(new JLabel("Desired MIP peak position 1a/1b/2:"));
 		JPanel mipPeakPanel = new JPanel();
 		mipPeakText[0].addActionListener(this);
-		mipPeakText[0].setText("800");
+		mipPeakText[0].setText(Integer.toString(hv.NEWHV_MIP_CHANNEL[0]));
 		mipPeakPanel.add(mipPeakText[0]);
 		mipPeakText[1].addActionListener(this);
-		mipPeakText[1].setText("2000");
+		mipPeakText[1].setText(Integer.toString(hv.NEWHV_MIP_CHANNEL[1]));
 		mipPeakPanel.add(mipPeakText[1]);
 		mipPeakText[2].addActionListener(this);
-		mipPeakText[2].setText("800");
+		mipPeakText[2].setText(Integer.toString(hv.NEWHV_MIP_CHANNEL[2]));
 		mipPeakPanel.add(mipPeakText[2]);
 		buttonPanel.add(mipPeakPanel);
 		
@@ -110,13 +112,14 @@ public class TOFHVAdjustPanel 	extends JPanel
 			if (returnValue == JFileChooser.APPROVE_OPTION) {
 				
 				for (int i=0; i<3; i++) {
-					hv.EXPECTED_MIP_CHANNEL[i] = Integer.parseInt(mipPeakText[i].getText());
+					hv.NEWHV_MIP_CHANNEL[i] = Integer.parseInt(mipPeakText[i].getText());
 				}
-				hv.setConstraints();
 				
 				String outputFileName = processFile();
 				JOptionPane.showMessageDialog(new JPanel(),"High voltage values written to "+outputFileName);
 				calib.fireTableDataChanged();
+				hv.calib.fireTableDataChanged();
+				tofCal.updateDetectorView(false);
 				
 			}
 		
@@ -259,6 +262,37 @@ public class TOFHVAdjustPanel 	extends JPanel
                 + outputFileName + "'");                   
             // Or we could just do this: 
             ex.printStackTrace();
+		}
+		
+		// now write a text file of the new and old HV values
+		String filename = outputFileName.replace(".snp", ".txt");
+		try { 
+
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+
+			for (int i=0; i<calib.getRowCount(); i++) {
+				String hvline = new String();
+				for (int j=0; j<calib.getColumnCount(); j++) {
+					hvline = hvline+calib.getValueAt(i, j);
+					if (j<calib.getColumnCount()-1) {
+						hvline = hvline+" ";
+					}
+				}
+				outputBw.write(hvline);
+				outputBw.newLine();
+			}
+
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error reading file '" 
+							+ filename + "'");                   
+			// Or we could just do this: 
+			ex.printStackTrace();
 		}
 		
 		return outputFileName;
