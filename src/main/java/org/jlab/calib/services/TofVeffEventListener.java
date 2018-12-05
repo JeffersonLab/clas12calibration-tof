@@ -602,7 +602,8 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 		return dg;
 
 	}
-	
+
+//	Think setAutoScale in the Engine class is enough
 //  @Override
 //	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
 //		

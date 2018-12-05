@@ -522,10 +522,4 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 	}
 	
-    @Override
-	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
-    	
-    	canvas.getPad().setAutoScale();
-    	
-	}	
 }

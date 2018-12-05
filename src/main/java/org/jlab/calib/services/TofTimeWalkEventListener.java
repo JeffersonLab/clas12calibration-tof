@@ -42,17 +42,17 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 	// indices for constants
 	public final int LAMBDA_LEFT_OVERRIDE = 0;
-	public final int TW1_LEFT_OVERRIDE = 1;
-	public final int TW2_LEFT_OVERRIDE = 2;
-	public final int LAMBDA_RIGHT_OVERRIDE = 3;
-	public final int TW1_RIGHT_OVERRIDE = 4;
-	public final int TW2_RIGHT_OVERRIDE = 5;
+	public final int LAMBDA_RIGHT_OVERRIDE = 1;
 	
 	// Preferred ranges
 	private final double[]        FIT_MIN = {0.0,  400.0,  700.0,  400.0};
 	private final double[]        FIT_MAX = {0.0, 3500.0, 4000.0, 2500.0};
 	private final double[]        ADC_MIN = {0.0,   20.0,   50.0,   20.0};
 	private final double[]        ADC_MAX = {0.0, 4000.0, 7000.0, 4000.0};
+	
+	// Expected values for colour coding
+	private final double[] EXPECTED_TW = {60.0, 60.0, 45.0};
+	private final double   ALLOWED_TW_DIFF = 10.0; 
 	
 	// Preferred bins
 	private int[] xbins = {0, 166, 87, 166};
@@ -78,16 +78,23 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		filename = nextFileName();
 
 		calib = new CalibrationConstants(3,
-				"tw0_left/F:tw1_left/F:tw2_left/F:tw0_right/F:tw1_right/F:tw2_right/F");
+				"tw0_left/F:tw0_right/F");
 
 		calib.setName("/calibration/ftof/time_walk");
 		calib.setPrecision(4);
+		
+		for (int i=0; i<3; i++) {
 
-		// assign constraints
-		calib.addConstraint(3, fitLambda[LEFT]*0.9,
-				fitLambda[LEFT]*1.1);
-		calib.addConstraint(6, fitLambda[RIGHT]*0.9,
-				fitLambda[RIGHT]*1.1);
+			int layer = i+1;
+			calib.addConstraint(3, EXPECTED_TW[i]-ALLOWED_TW_DIFF, 
+					EXPECTED_TW[i]+ALLOWED_TW_DIFF, 1, layer);
+			// calib.addConstraint(calibration column, min value, max value,
+			// col to check if constraint should apply, value of col if constraint should be applied);
+			// (omit last two if applying to all rows)
+			calib.addConstraint(4, EXPECTED_TW[i]-ALLOWED_TW_DIFF, 
+					EXPECTED_TW[i]+ALLOWED_TW_DIFF, 1, layer);
+		}
+		
 
 	}
 
@@ -168,15 +175,15 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 						timeWalkValues.addEntry(sector, layer, paddle);
 						timeWalkValues.setDoubleValue(fitLambda[0],
 								"tw0_left", sector, layer, paddle);
-						timeWalkValues.setDoubleValue(0.0034,
+						timeWalkValues.setDoubleValue(0.500,
 								"tw1_left", sector, layer, paddle);
-						timeWalkValues.setDoubleValue(0.795,
+						timeWalkValues.setDoubleValue(0.000,
 								"tw2_left", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(fitLambda[1],
 								"tw0_right", sector, layer, paddle);
-						timeWalkValues.setDoubleValue(0.0034,
+						timeWalkValues.setDoubleValue(0.500,
 								"tw1_right", sector, layer, paddle);
-						timeWalkValues.setDoubleValue(0.795,
+						timeWalkValues.setDoubleValue(0.000,
 								"tw2_right", sector, layer, paddle);
 					}
 				}
@@ -302,9 +309,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					}
 
 					// initialize the constants array
-					Double[] consts = {UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE, 
-									   UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE,
-									   UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE};
+					Double[] consts = {UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE};
 					// override values
 					constants.add(consts, sector, layer, paddle);
 
@@ -590,8 +595,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 		String[] fields = {"Min range for fit:", "Max range for fit:", "SPACE", 
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
-				"Override Lambda Left:", "Override TW1 Left:", "Override TW2 Left:", "SPACE",
-				"Override Lambda Right:", "Override TW1 Right:", "Override TW2 Right:"};
+				"Override Lambda Left:", "Override Lambda Right:"};
 		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
 		int result = JOptionPane.showConfirmDialog(null, panel, 
@@ -607,11 +611,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 				backgroundSF = Integer.parseInt(panel.textFields[3].getText());
 			}
 			double overrideLL = toDouble(panel.textFields[4].getText());
-			double overrideTW1L = toDouble(panel.textFields[5].getText());
-			double overrideTW2L = toDouble(panel.textFields[6].getText());
-			double overrideLR = toDouble(panel.textFields[7].getText());
-			double overrideTW1R = toDouble(panel.textFields[8].getText());
-			double overrideTW2R = toDouble(panel.textFields[9].getText());
+			double overrideLR = toDouble(panel.textFields[5].getText());
 
 			int minP = paddle;
 			int maxP = paddle;
@@ -635,11 +635,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					// save the override values
 					Double[] consts = constants.getItem(s, layer, p);
 					consts[LAMBDA_LEFT_OVERRIDE] = overrideLL;
-					consts[TW1_LEFT_OVERRIDE] = overrideTW1L;
-					consts[TW2_LEFT_OVERRIDE] = overrideTW2L;
 					consts[LAMBDA_RIGHT_OVERRIDE] = overrideLR;
-					consts[TW1_RIGHT_OVERRIDE] = overrideTW1R;
-					consts[TW2_RIGHT_OVERRIDE] = overrideTW2R;
 
 					fit(s, layer, p, minRange, maxRange);
 
@@ -680,57 +676,6 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		return lambdaRight;
 	}   
 	
-	public Double getTW1Left(int sector, int layer, int paddle) {
-		double tw1L = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW1_LEFT_OVERRIDE];
-
-		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw1L = overrideVal;
-		}
-		else {
-			tw1L = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1_left",sector, layer, paddle);
-		}
-		return tw1L;
-	}
-
-	public Double getTW1Right(int sector, int layer, int paddle) {
-		double tw1R = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW1_RIGHT_OVERRIDE];
-
-		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw1R = overrideVal;
-		}
-		else {
-			tw1R = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1_right",sector, layer, paddle);
-		}
-		return tw1R;
-	}
-	
-	public Double getTW2Left(int sector, int layer, int paddle) {
-		double tw2L = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW2_LEFT_OVERRIDE];
-
-		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw2L = overrideVal;
-		}
-		else {
-			tw2L = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2_left",sector, layer, paddle);
-		}
-		return tw2L;
-	}
-
-	public Double getTW2Right(int sector, int layer, int paddle) {
-		double tw2R = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW2_RIGHT_OVERRIDE];
-
-		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw2R = overrideVal;
-		}
-		else {
-			tw2R = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2_right",sector, layer, paddle);
-		}
-		return tw2R;
-	}	
    
 
 	@Override
@@ -738,16 +683,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 		calib.setDoubleValue(getLambdaLeft(sector,layer,paddle),
 				"tw0_left", sector, layer, paddle);
-		calib.setDoubleValue(getTW1Left(sector,layer,paddle),
-				"tw1_left", sector, layer, paddle);
-		calib.setDoubleValue(getTW2Left(sector,layer,paddle),
-				"tw2_left", sector, layer, paddle);
 		calib.setDoubleValue(getLambdaRight(sector,layer,paddle),
 				"tw0_right", sector, layer, paddle);
-		calib.setDoubleValue(getTW1Right(sector,layer,paddle),
-				"tw1_right", sector, layer, paddle);
-		calib.setDoubleValue(getTW2Right(sector,layer,paddle),
-				"tw2_right", sector, layer, paddle);
 	}
 	
 	@Override
@@ -966,15 +903,16 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	@Override
 	public boolean isGoodPaddle(int sector, int layer, int paddle) {
 
-		return (getLambdaLeft(sector,layer,paddle) >= fitLambda[LEFT]*0.9 && 
-				getLambdaLeft(sector,layer,paddle) <= fitLambda[LEFT]*1.1 &&
-				getLambdaRight(sector,layer,paddle) >= fitLambda[RIGHT]*0.9 && 
-				getLambdaRight(sector,layer,paddle) <= fitLambda[RIGHT]*1.1);
+		return (getLambdaLeft(sector,layer,paddle) >= EXPECTED_TW[layer-1]-ALLOWED_TW_DIFF  && 
+				getLambdaLeft(sector,layer,paddle) <= EXPECTED_TW[layer-1]+ALLOWED_TW_DIFF &&
+				getLambdaRight(sector,layer,paddle) >= EXPECTED_TW[layer-1]-ALLOWED_TW_DIFF && 
+				getLambdaRight(sector,layer,paddle) <= EXPECTED_TW[layer-1]+ALLOWED_TW_DIFF);
+		
 	}
 
 	@Override
 	public DataGroup getSummary(int sector, int layer) {
-
+		
 		int layer_index = layer-1;
 		double[] paddleNumbers = new double[NUM_PADDLES[layer_index]];
 		double[] paddleUncs = new double[NUM_PADDLES[layer_index]];
@@ -1015,14 +953,15 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 	}
 
-    @Override
-	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
-    	
-    	canvas.getPad(1).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	canvas.getPad(2).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	canvas.getPad(3).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-		canvas.getPad(4).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	canvas.getPad(5).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	
-	}
+//	Think setAutoScale in the Engine class is enough
+//    @Override
+//	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
+//    	
+//    	canvas.getPad(1).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//    	canvas.getPad(2).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//    	canvas.getPad(3).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//		canvas.getPad(4).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//    	canvas.getPad(5).setAxisRange(ADC_MIN[layer], ADC_MAX[layer], -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//    	
+//	}
 }

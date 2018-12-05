@@ -551,11 +551,12 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 
 	}
 	
-    @Override
-	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
-    	
-    	canvas.getPad(1).setAxisRange(paddleLength(sector,layer,paddle) * -0.6, paddleLength(sector,layer,paddle) * 0.6, -3.0, 3.0);
-    	
-	}	
+//	Think setAutoScale in the Engine class is enough	
+//    @Override
+//	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
+//    	
+//    	canvas.getPad(1).setAxisRange(paddleLength(sector,layer,paddle) * -0.6, paddleLength(sector,layer,paddle) * 0.6, -3.0, 3.0);
+//    	
+//	}	
 
 }

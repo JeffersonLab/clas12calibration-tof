@@ -53,7 +53,7 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
     public final int OVERRIDE_RIGHT = 1;
 
     public final double EXPECTED_CONV = TOFPaddle.NS_PER_CH;
-    public final double ALLOWED_DIFF = 0.1;
+    public final double ALLOWED_DIFF = 0.02;
     
     private String fitOption = "RQ";
 	private String showPlotType = "CONV_LEFT";
@@ -579,14 +579,15 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
         return dg;
 
     }
-    
-    @Override
-	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
-		
-    	canvas.getPad(1).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	canvas.getPad(2).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	canvas.getPad(3).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	
-	}
+
+//	Think setAutoScale in the Engine class is enough
+//    @Override
+//	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
+//		
+//    	canvas.getPad(1).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//    	canvas.getPad(2).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//    	canvas.getPad(3).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//    	
+//	}
 
 }

@@ -78,12 +78,12 @@ public class CtofAttenEventListener extends CTOFCalibrationEngine {
 		// assign constraints corresponding to layer 1 values for now
 		// need addConstraint to be able to check layer and paddle
 		for (int paddle=1; paddle<=NUM_PADDLES[0]; paddle++) {
-			calib.addConstraint(3, expectedAttlen(1,1,paddle)*0.9,
-					expectedAttlen(1,1,paddle)*1.1,
+			calib.addConstraint(3, expectedAttlen(1,1,paddle)*0.8,
+					expectedAttlen(1,1,paddle)*1.2,
 					2,
 					paddle);
-			calib.addConstraint(4, expectedAttlen(1,1,paddle)*0.9,
-					expectedAttlen(1,1,paddle)*1.1,
+			calib.addConstraint(4, expectedAttlen(1,1,paddle)*0.8,
+					expectedAttlen(1,1,paddle)*1.2,
 					2,
 					paddle);
 		}
@@ -424,7 +424,7 @@ public class CtofAttenEventListener extends CTOFCalibrationEngine {
 		double attlen = getAttlen(sector,layer,paddle);
 		double expAttlen = expectedAttlen(sector,layer,paddle);
 
-		return (attlen >= (0.9*expAttlen)) && (attlen <= (1.1*expAttlen));
+		return (attlen >= (0.8*expAttlen)) && (attlen <= (1.2*expAttlen));
 
 	}
 

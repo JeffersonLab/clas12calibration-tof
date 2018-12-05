@@ -53,6 +53,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 	private final int            GM_REBIN_THRESHOLD = 50000;
 
 	public int        EXPECTED_MIP_CHANNEL = 2000;
+	public int		  NEWHV_MIP_CHANNEL = 2000;
 	public final int        ALLOWED_MIP_DIFF = 50;
 	public final double[]    ALPHA = {4.0};
 	public final double[]    MAX_VOLTAGE = {2500.0};
@@ -167,7 +168,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			int sector = paddle.getDescriptor().getSector();
 			int layer = paddle.getDescriptor().getLayer();
 			int component = paddle.getDescriptor().getComponent();
-
+		
 			if (paddle.isValidGeoMean() && paddle.geometricMean() > EXPECTED_MIP_CHANNEL * 0.25) {
 
 				if (TOFCalibration.pathNorm == TOFCalibration.PATH_NORM_NO) {
@@ -522,7 +523,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			//constants.put(desc.getHashCode(), consts);
 		}
 
-		double deltaGain = EXPECTED_MIP_CHANNEL - gainLR;
+		double deltaGain = NEWHV_MIP_CHANNEL - gainLR;
 		double deltaV = (origVoltage * deltaGain) / (gainLR * ALPHA[layer_index]);
 
 		// Safety check - don''t exceed maximum voltage change
@@ -565,7 +566,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			System.out.println("paddle "+paddle);
 			System.out.println("pmt "+pmt);
 			System.out.println("origVoltage = "+origVoltage);
-			System.out.println("Expected MIP channel "+EXPECTED_MIP_CHANNEL);
+			System.out.println("Target MIP channel "+NEWHV_MIP_CHANNEL);
 			System.out.println("gainIn = "+gainIn);
 			System.out.println("centroid = "+centroid);
 			System.out.println("gainLR = "+gainLR);

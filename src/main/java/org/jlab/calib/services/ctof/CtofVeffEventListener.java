@@ -58,7 +58,8 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
     public final int VEFF_LR_OVERRIDE = 2;
 
     public final double EXPECTED_VEFF = 16.0;
-    public final double ALLOWED_VEFF_DIFF = 0.1;
+    final double MIN_VEFF = 13.5;
+    final double MAX_VEFF = 16.5;
     
     private String fitOption = "RQ";
     int backgroundSF = -1;
@@ -78,10 +79,8 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
 
         // assign constraints to all paddles
         // effective velocity to be within 10% of 16.0 cm/ns
-        calib.addConstraint(3, EXPECTED_VEFF*(1-ALLOWED_VEFF_DIFF),
-                EXPECTED_VEFF*(1+ALLOWED_VEFF_DIFF));
-        calib.addConstraint(4, EXPECTED_VEFF*(1-ALLOWED_VEFF_DIFF),
-                EXPECTED_VEFF*(1+ALLOWED_VEFF_DIFF));
+        calib.addConstraint(3, MIN_VEFF, MAX_VEFF);
+        calib.addConstraint(4, MIN_VEFF, MAX_VEFF);
 
     }
     
@@ -495,9 +494,9 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
     @Override
     public boolean isGoodPaddle(int sector, int layer, int paddle) {
 
-        return (getVeff(sector,layer,paddle) >= EXPECTED_VEFF*(1-ALLOWED_VEFF_DIFF)
+        return (getVeff(sector,layer,paddle) >= MIN_VEFF
                 &&
-                getVeff(sector,layer,paddle) <= EXPECTED_VEFF*(1+ALLOWED_VEFF_DIFF));
+                getVeff(sector,layer,paddle) <= MAX_VEFF);
 
     }
 

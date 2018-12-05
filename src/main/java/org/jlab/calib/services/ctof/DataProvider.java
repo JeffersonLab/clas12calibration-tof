@@ -168,7 +168,7 @@ public class DataProvider {
 				int adcIdx2 = getIdx(adcBank, 1, component);
 				int tdcIdx1 = getIdx(tdcBank, 2, component);
 				int tdcIdx2 = getIdx(tdcBank, 3, component);
-
+				
 				int adcL = 0;
 				int adcR = 0;
 				int tdcL = 0;
@@ -220,7 +220,6 @@ public class DataProvider {
 							trf = rfBank.getFloat("time", rfIdx);
 						}
 					}
-					// System.out.println("Louise 226");
 					int trkId = hitsBank.getShort("trkID", hitIndex);
 					// Get track
 					double energy = hitsBank.getFloat("energy", hitIndex);

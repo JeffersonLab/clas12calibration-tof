@@ -70,7 +70,7 @@ public class CtofHVAdjustPanel 	extends JPanel
 		// Desired MIP peak position
 		buttonPanel.add(new JLabel("Desired MIP peak position:"));
 		mipPeakText.addActionListener(this);
-		mipPeakText.setText("1500");
+		mipPeakText.setText(Integer.toString(hv.NEWHV_MIP_CHANNEL));
 		buttonPanel.add(mipPeakText); 
 		
 		// Create field for file selection
@@ -95,7 +95,7 @@ public class CtofHVAdjustPanel 	extends JPanel
 				
 				// Desired MIP peak
 				hv.EXPECTED_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
-				hv.setConstraints();  				
+				hv.NEWHV_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
 				
 				String outputFileName = processFile();
 				JOptionPane.showMessageDialog(new JPanel(),"High voltage values written to "+outputFileName);

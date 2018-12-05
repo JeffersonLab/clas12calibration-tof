@@ -452,18 +452,54 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 	
 	@Override
 	public DataGroup getSummary(int sector, int layer) {
+		
+		int layer_index = layer-1;
+		double[] paddleNumbers = new double[NUM_PADDLES[layer_index]];
+		double[] paddleUncs = new double[NUM_PADDLES[layer_index]];
+		double[] tw1s = new double[NUM_PADDLES[layer_index]];
+		double[] zeroUncs = new double[NUM_PADDLES[layer_index]];
+		double[] tw2s = new double[NUM_PADDLES[layer_index]];
+
+		for (int p = 1; p <= NUM_PADDLES[layer_index]; p++) {
+
+			paddleNumbers[p - 1] = (double) p;
+			paddleUncs[p - 1] = 0.0;
+			tw1s[p - 1] = getTW1(sector, layer, p);
+			tw2s[p - 1] = getTW2(sector, layer, p);
+			zeroUncs[p - 1] = 0.0;
+		}
+
+		GraphErrors tw1Summ = new GraphErrors("tw1Summ", paddleNumbers,
+				tw1s, paddleUncs, zeroUncs);
+
+		tw1Summ.setTitleX("Paddle Number");
+		tw1Summ.setTitleY("TW1");
+		tw1Summ.setMarkerSize(MARKER_SIZE);
+		tw1Summ.setLineThickness(MARKER_LINE_WIDTH);
+
+		GraphErrors tw2Summ = new GraphErrors("tw2Summ", paddleNumbers,
+				tw2s, paddleUncs, zeroUncs);
+
+		tw2Summ.setTitleX("Paddle Number");
+		tw2Summ.setTitleY("TW2");
+		tw2Summ.setMarkerSize(MARKER_SIZE);
+		tw2Summ.setLineThickness(MARKER_LINE_WIDTH);
 
 		DataGroup dg = new DataGroup(2,1);
+		dg.addDataSet(tw1Summ, 0);
+		dg.addDataSet(tw2Summ, 1);
+
 		return dg;
 
 	}
-	
-    @Override
-	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
-    	
-    	canvas.getPad(1).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
-    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-    	
-	}	
+
+//	Think setAutoScale in the Engine class is enough
+//    @Override
+//	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
+//    	
+//    	canvas.getPad(1).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
+//    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+//    	
+//	}	
 	
 }

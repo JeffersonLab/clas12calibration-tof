@@ -58,7 +58,8 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
     final double LEFT_RIGHT_RATIO = 0.2;
     final double MIN_DIST = -35.0;
     final double MAX_DIST = -15.0;
-    final double MAX_LEFTRIGHT = 10.0;
+    final double MIN_LEFTRIGHT = -30.0;
+    final double MAX_LEFTRIGHT = -20.0;
     private String fitOption = "RQ";
 
     public CtofLeftRightEventListener() {
@@ -73,7 +74,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
         calib.setName("/calibration/ctof/time_offsets/upstream_downstream");
         calib.setPrecision(3);
 
-        calib.addConstraint(3, -MAX_LEFTRIGHT, MAX_LEFTRIGHT);
+        calib.addConstraint(3, MIN_LEFTRIGHT, MAX_LEFTRIGHT);
         
     }
 
@@ -412,7 +413,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
     @Override
     public boolean isGoodPaddle(int sector, int layer, int paddle) {
 
-        return (getCentroid(sector,layer,paddle) >= -MAX_LEFTRIGHT
+        return (getCentroid(sector,layer,paddle) >= MIN_LEFTRIGHT
                 &&
                 getCentroid(sector,layer,paddle) <= MAX_LEFTRIGHT);
     }

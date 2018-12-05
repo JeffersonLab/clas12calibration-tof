@@ -154,6 +154,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 //    private JTextField ctofCenterText = new JTextField(5);
 //    public static double ctofCenter = 0.0;
     
+	// Target GMEAN channel
+	private JTextField targetGMean = new JTextField(6);
+    
 	// Path length normalisation setting
 	JComboBox<String> pathNormList = new JComboBox<String>();
 	
@@ -414,6 +417,11 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 //            if (ctofCenterText.getText().compareTo("") != 0) {
 //                ctofCenter = Double.parseDouble(ctofCenterText.getText());
 //            }
+            CtofHVEventListener hvEngine = (CtofHVEventListener) engines[HV];
+			hvEngine.EXPECTED_MIP_CHANNEL = Integer.parseInt(targetGMean.getText());
+			hvEngine.NEWHV_MIP_CHANNEL = Integer.parseInt(targetGMean.getText());
+			hvEngine.setConstraints();
+            
 			TOFCalibration.pathNorm = pathNormList.getSelectedIndex();
 
             if (rcsText.getText().compareTo("") != 0) {
@@ -466,8 +474,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("Configuration settings - Tracking/General");
             System.out.println("-----------------------------------------");
             //System.out.println("CTOF Center z (cm): "+ctofCenter);
-			System.out.println("Path length normalisation for gmean?: "+pathNormList.getItemAt(TOFCalibration.pathNorm));            
-            System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
+			System.out.println("Target GMEAN channel: "+targetGMean.getText());
+			System.out.println("Path length normalisation for gmean?: "+pathNormList.getItemAt(TOFCalibration.pathNorm));     
+			System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
             System.out.println("Minimum vertex z: "+minV);
             System.out.println("Maximum vertex z: "+maxV);
             System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(TOFCalibration.vertexCorr));
@@ -846,7 +855,21 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 //        c.gridy = y;
 //        trPanel.add(ctofCenterText,c);
         
+		// Target GMEAN channel
+		c.gridx = 0;
+		c.gridy = y;
+		trPanel.add(new JLabel("Target GMEAN channel:"),c);
+		c.gridx = 1;
+		c.gridy = y;
+		targetGMean.addActionListener(this);
+		targetGMean.setText("1500");
+		trPanel.add(targetGMean,c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""),c);
+        
 		// Path length normalisation
+		y++;
 		c.gridx = 0;
 		c.gridy = y;
 		trPanel.add(new JLabel("Path length normalisation for gmean?:"),c);

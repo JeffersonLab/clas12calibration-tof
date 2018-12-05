@@ -873,7 +873,7 @@ ChangeListener {
 		c.anchor = c.NORTHWEST;
 		c.insets = new Insets(3,3,3,3);
 		
-		// TDC range
+		// Target GMEAN channel
 		c.gridx = 0;
 		c.gridy = y;
 		trPanel.add(new JLabel("Target GMEAN channel 1a/1b/2:"),c);
