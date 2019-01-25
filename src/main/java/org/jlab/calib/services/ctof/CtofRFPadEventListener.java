@@ -39,8 +39,8 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 
 	private String fitOption = "RQ";
 	
-	private final double MIN_SIGMA = 0.040;
-	private final double MAX_SIGMA = 0.150;
+	private final double MIN_SIGMA = 0.064;
+	private final double MAX_SIGMA = 0.096;
 
 	public CtofRFPadEventListener() {
 

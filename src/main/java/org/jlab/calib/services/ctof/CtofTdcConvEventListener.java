@@ -52,10 +52,10 @@ import org.jlab.utils.groups.IndexedList;
 public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 
 	public final int OVERRIDE_LEFT = 0;
-	public final int OVERRIDE_RIGHT = 0;
+	public final int OVERRIDE_RIGHT = 1;
 
 	public final double EXPECTED_CONV = TOFPaddle.NS_PER_CH;
-	public final double ALLOWED_DIFF = 0.1;
+	public final double ALLOWED_DIFF = 0.02;
 
 	private String fitOption = "RQ";
 	private String showPlotType = "CONV_LEFT";

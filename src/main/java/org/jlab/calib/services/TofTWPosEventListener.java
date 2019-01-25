@@ -333,7 +333,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
 				"Override tw1:", "Override tw2:"};
 
-		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
+		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer, TOFCustomFitPanel.USE_RANGE_Y);
 
 		int result = JOptionPane.showConfirmDialog(null, panel, 
 				"Adjust Fit / Override for paddle "+paddle, JOptionPane.OK_CANCEL_OPTION);
@@ -351,34 +351,69 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 			double overrideTW1 = toDouble(panel.textFields[4].getText());
 			double overrideTW2 = toDouble(panel.textFields[5].getText());
 			
+			
 			int minP = paddle;
 			int maxP = paddle;
+			int minL = layer;
+			int maxL = layer;
 			int minS = sector;
 			int maxS = sector;
-			if (panel.applyLevel == panel.APPLY_P) {
-				// if fitting one paddle then show inspectFits view
-				showSlices = true;
+			if (panel.applyLevel == panel.APPLY_R) {
+				if (panel.minS.getText().compareTo("") !=0) {
+					minS =Integer.parseInt(panel.minS.getText());
+				}
+				if (panel.maxS.getText().compareTo("") !=0) {
+					maxS =Integer.parseInt(panel.maxS.getText()); 
+				}
+				if (panel.minL.getText().compareTo("") !=0) {
+					minL =Integer.parseInt(panel.minL.getText());
+				}
+				if (panel.maxL.getText().compareTo("") !=0) {
+					maxL =Integer.parseInt(panel.maxL.getText()); 
+				}
+				if (panel.minP.getText().compareTo("") !=0) {
+					minP =Integer.parseInt(panel.minP.getText());
+				}
+				if (panel.maxP.getText().compareTo("") !=0) {
+					maxP =Integer.parseInt(panel.maxP.getText()); 
+				}
 			}
 			else {
-				minP = 1;
-				maxP = NUM_PADDLES[layer-1];
+				if (panel.applyLevel == panel.APPLY_P) {
+					// if fitting one paddle then show inspectFits view
+					showSlices = true;
+				}
+				else {
+					minP = 1;
+					maxP = NUM_PADDLES[layer-1];
+				}
+				if (panel.applyLevel == panel.APPLY_L) {
+					minS = 1;
+					maxS = 6;
+				}
 			}
-			if (panel.applyLevel == panel.APPLY_L) {
-				minS = 1;
-				maxS = 6;
-			}
+			
+			System.out.println("minS "+minS+
+					"maxS "+maxS+
+					"minL "+minL+
+					"maxL "+maxL+
+					"minP "+minP+
+					"maxP "+maxP
+					);
 	
 			for (int s=minS; s<=maxS; s++) {
-				for (int p=minP; p<=maxP; p++) {
-					// save the override values
-					Double[] consts = constants.getItem(s, layer, p);
-					consts[TW1_OVERRIDE] = overrideTW1;
-					consts[TW2_OVERRIDE] = overrideTW2;
-
-					fit(s, layer, p, minRange, maxRange);
-
-					// update the table
-					saveRow(s,layer,p);
+				for (int l=minL; l<=maxL; l++) {
+					for (int p=minP; p<=maxP; p++) {
+						// save the override values
+						Double[] consts = constants.getItem(s, l, p);
+						consts[TW1_OVERRIDE] = overrideTW1;
+						consts[TW2_OVERRIDE] = overrideTW2;
+	
+						fit(s, l, p, minRange, maxRange);
+	
+						// update the table
+						saveRow(s,l,p);
+					}
 				}
 			}
 			calib.fireTableDataChanged();

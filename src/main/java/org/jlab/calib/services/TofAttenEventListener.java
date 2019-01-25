@@ -70,21 +70,24 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 		filename = nextFileName();
 
 		calib = new CalibrationConstants(3,
-				"attlen_left/F:attlen_right/F:attlen_left_err/F:attlen_right_err/F:y_offset/F");
+				"paddleNum/I:attlen_left/F:attlen_right/F:attlen_left_err/F:attlen_right_err/F:y_offset/F");
 		calib.setName("/calibration/ftof/attenuation");
 		calib.setPrecision(3);
 
-		// assign constraints corresponding to layer 1 values for now
-		// need addConstraint to be able to check layer and paddle
-		for (int paddle=1; paddle<=23; paddle++) {
-			calib.addConstraint(3, expectedAttlen(1,1,paddle)*0.9,
-					expectedAttlen(1,1,paddle)*1.1,
-					2,
-					paddle);
-			calib.addConstraint(4, expectedAttlen(1,1,paddle)*0.9,
-					expectedAttlen(1,1,paddle)*1.1,
-					2,
-					paddle);
+		// assign constraints depending on paddle number column
+		for (int sector = 1; sector <= 6; sector++) {
+			for (int layer=1; layer<=3; layer++) {
+				for (int paddle=1; paddle <= NUM_PADDLES[layer-1]; paddle++) {
+					calib.addConstraint(4, expectedAttlen(sector,layer,paddle)*0.8,
+							expectedAttlen(sector,layer,paddle)*1.2,
+							3,
+							paddleNumber(sector,layer,paddle));
+					calib.addConstraint(5, expectedAttlen(sector,layer,paddle)*0.8,
+							expectedAttlen(sector,layer,paddle)*1.2,
+							3,
+							paddleNumber(sector,layer,paddle));
+				}
+			}
 		}
 
 	}
@@ -404,6 +407,8 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 
 	@Override
 	public void saveRow(int sector, int layer, int paddle) {
+		calib.setIntValue(paddleNumber(sector,layer,paddle),
+				"paddleNum", sector, layer, paddle);
 		calib.setDoubleValue(getAttlen(sector,layer,paddle),
 				"attlen_left", sector, layer, paddle);
 		calib.setDoubleValue(getAttlen(sector,layer,paddle),
@@ -440,7 +445,7 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 		double attlen = getAttlen(sector,layer,paddle);
 		double expAttlen = expectedAttlen(sector,layer,paddle);
 
-		return (attlen >= (0.9*expAttlen)) && (attlen <= (1.1*expAttlen));
+		return (attlen >= (0.8*expAttlen)) && (attlen <= (1.2*expAttlen));
 
 	}
 
@@ -559,4 +564,43 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 //    	
 //	}	
 
+	@Override
+	public void writeFile(String filename) {
+		
+		boolean[] writeCols = {true,true,true,false, // exclude paddle number
+							   true,true,true,true,true};
+
+		try { 
+
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+
+			for (int i=0; i<calib.getRowCount(); i++) {
+				String line = new String();
+				for (int j=0; j<calib.getColumnCount(); j++) {
+					if (writeCols[j]) {
+						line = line+calib.getValueAt(i, j);
+						if (j<calib.getColumnCount()-1) {
+							line = line+" ";
+						}
+					}
+				}
+				outputBw.write(line);
+				outputBw.newLine();
+			}
+
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error reading file '" 
+							+ filename + "'");                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}
+
+	}
+	
 }

@@ -50,7 +50,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 		calib.setPrecision(3);
 
 		// assign constraints
-		calib.addConstraint(3, -MAX_OFFSET, MAX_OFFSET);
+		//calib.addConstraint(3, -MAX_OFFSET, MAX_OFFSET);
 
 	}
 
@@ -259,9 +259,10 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 	@Override
 	public boolean isGoodPaddle(int sector, int layer, int paddle) {
 
-		return (getOffset(sector,layer,paddle) >= -MAX_OFFSET
-				&&
-				getOffset(sector,layer,paddle) <= MAX_OFFSET);
+		return true;
+//		return (getOffset(sector,layer,paddle) >= -MAX_OFFSET
+//				&&
+//				getOffset(sector,layer,paddle) <= MAX_OFFSET);
 
 	}
 

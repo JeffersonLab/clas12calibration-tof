@@ -557,27 +557,20 @@ ChangeListener {
 		
     	TofTimingOptionsPanel panel = new TofTimingOptionsPanel();
     	int result = JOptionPane.showConfirmDialog(null, panel, 
-				"Choose time offsets", JOptionPane.OK_CANCEL_OPTION);
+				"Choose file output options", JOptionPane.OK_CANCEL_OPTION);
 
 		if (result == JOptionPane.OK_OPTION) {
 
-			// write current status of all files
-			// hv
-			//engines[HV].writeFile("FTOF_CALIB_GAIN_BALANCE.txt");
-			// atten
-			//engines[ATTEN].writeFile("FTOF_CALIB_ATTENUATION.txt");
-			// status
-			//engines[HV].saveCounterStatus("FTOF_CALIB_STATUS.txt");
-			// effective velocity
-			//engines[VEFF].writeFile("FTOF_CALIB_EFFECTIVE_VELOCITY.txt");
-			// time walk
-			// ** still to bring together TW and TWPOS
-			engines[TW].writeFile("FTOF_CALIB_TIME_WALK.txt");
 			// tres
 			TofRFPadEventListener rfpadEng = (TofRFPadEventListener) engines[RFPAD];
 			rfpadEng.writeSigmaFile("FTOF_CALIB_TRES.txt");
+
 			// time offsets
 			writeTimeOffsets("FTOF_CALIB_TIME_OFFSETS.txt", panel.stepOptions);
+			
+			// time walk file containing main time walk and twpos
+			writeTWFile("FTOF_CALIB_TIME_WALK.txt", panel.stepOptions);
+			
 			// TDC conv
 			//engines[TDC_CONV].writeFile("FTOF_CALIB_TDC_CONV.txt");
 		}
@@ -628,6 +621,71 @@ ChangeListener {
 								+" "+new DecimalFormat("0.000").format(leftRight)
 								+" "+new DecimalFormat("0.000").format(rfpad)
 								+" "+new DecimalFormat("0.000").format(p2p);
+						outputBw.write(line);
+						outputBw.newLine();
+					}
+				}
+			}
+
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error writing file '" );                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}
+
+	}	
+	
+	public void writeTWFile(String filename, int[] stepOptions) {
+		
+		try { 
+			
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+			
+			// get the engines
+			TofTimeWalkEventListener twEng = (TofTimeWalkEventListener) engines[TW];
+			TofTWPosEventListener twposEng = (TofTWPosEventListener) engines[TWPOS];
+			
+			for (int sector = 1; sector <= 6; sector++) {
+				for (int layer = 1; layer <= 3; layer++) {
+					int layer_index = layer - 1;
+					for (int paddle = 1; paddle <= TOFCalibrationEngine.NUM_PADDLES[layer_index]; paddle++) {
+						
+						double tw0L = 0.0;
+						double tw0R = 0.0;
+						if (stepOptions[3]==0) {
+							tw0L = twEng.timeWalkValues.getDoubleValue("tw0_left", sector,layer,paddle);
+							tw0R = twEng.timeWalkValues.getDoubleValue("tw0_right", sector,layer,paddle);
+						}
+						else {
+							tw0L = twEng.getLambdaLeft(sector,layer,paddle);
+							tw0R = twEng.getLambdaRight(sector,layer,paddle);
+						}
+						double tw1 = 0.0;
+						double tw2 = 0.0;
+						if (stepOptions[4]==0) {
+							tw1 = twposEng.twposValues.getDoubleValue("tw1_left", sector,layer,paddle);
+							tw2 = twposEng.twposValues.getDoubleValue("tw2_left", sector,layer,paddle);
+						}
+						else {
+							tw1 = twposEng.getTW1(sector,layer,paddle);
+							tw2 = twposEng.getTW2(sector,layer,paddle);
+						}
+
+						String line = new String();
+						line = sector+" "+layer+" "+paddle
+								+" "+new DecimalFormat("0.000").format(tw0L)
+								+" "+new DecimalFormat("0.00000").format(tw1)
+								+" "+new DecimalFormat("0.00000").format(tw2)
+								+" "+new DecimalFormat("0.000").format(tw0R)
+								+" "+new DecimalFormat("0.00000").format(tw1)
+								+" "+new DecimalFormat("0.00000").format(tw2);
+								
 						outputBw.write(line);
 						outputBw.newLine();
 					}
