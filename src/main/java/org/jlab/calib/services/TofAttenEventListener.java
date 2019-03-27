@@ -427,13 +427,13 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 		double expAttlen = 0.0;
 
 		if (layer==1) {
-			expAttlen = (0.251*paddleLength(sector,layer,paddle)) + 124.96;
+			expAttlen = (0.349*paddleLength(sector,layer,paddle)) + 68.726;
 		}
 		else if (layer==2) {
-			expAttlen = (0.637*paddleLength(sector,layer,paddle)) + 128.08;
+			expAttlen = (0.512*paddleLength(sector,layer,paddle)) + 91.159;
 		} 
 		else if (layer==3) {
-			expAttlen = (0.251*paddleLength(sector,layer,paddle)) + 124.96;
+			expAttlen = 200.0;
 		}
 
 		return expAttlen;

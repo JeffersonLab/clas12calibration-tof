@@ -37,11 +37,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 	private String showPlotType = "VERTEX_RF";
 
-	private String fitOption = "RQ";
-	
-	private final double[] MIN_SIGMA = {0.0, 0.080, 0.020, 0.080};
-	private final double[] MAX_SIGMA = {0.0, 0.300, 0.150, 0.300};
-	
+	private String fitOption = "RQ";	
 
 	public TofRFPadEventListener() {
 
@@ -50,17 +46,24 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		fileNamePrefix = "FTOF_CALIB_RFPAD_";
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
-
+		
 		calib = 
 				new CalibrationConstants(3,
-						"rfpad/F:rfpad_sigma/F");
+						"paddleNum/I:rfpad/F:rfpad_sigma/F");
 
 		calib.setName("/calibration/ftof/timing_offset/rfpad");
 		calib.setPrecision(3);
 
-		// assign constraints
-		for (int i=1; i<=3; i++) {
-			calib.addConstraint(4, MIN_SIGMA[i], MAX_SIGMA[i], 1, i);
+		// assign constraints depending on paddle number column
+		for (int sector = 1; sector <= 6; sector++) {
+			for (int layer=1; layer<=3; layer++) {
+				for (int paddle=1; paddle <= NUM_PADDLES[layer-1]; paddle++) {
+					calib.addConstraint(5, expectedRes(sector,layer,paddle)*0.8,
+							expectedRes(sector,layer,paddle)*1.2,
+							3,
+							paddleNumber(sector,layer,paddle));
+				}
+			}
 		}		
 
 	}
@@ -404,7 +407,9 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 
 	@Override
 	public void saveRow(int sector, int layer, int paddle) {
-
+		
+		calib.setIntValue(paddleNumber(sector,layer,paddle),
+				"paddleNum", sector, layer, paddle);
 		calib.setDoubleValue(getOffset(sector,layer,paddle),
 				"rfpad", sector, layer, paddle);
 		calib.setDoubleValue(getSigma(sector,layer,paddle),
@@ -471,12 +476,30 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		}
 	}
 
+	public double expectedRes(int sector, int layer, int paddle) {
+
+		double expRes = 0.0;
+
+		if (layer==1) {
+			expRes = ((4.545*paddle) + 95.455)/1000.0;
+		}
+		else if (layer==2) {
+			expRes = ((0.820*paddle) + 59.180)/1000.0;
+		} 
+		else if (layer==3) {
+			expRes = 0.2;
+		}
+
+		return expRes;
+	}
+	
 	@Override
 	public boolean isGoodPaddle(int sector, int layer, int paddle) {
 
-		return (getSigma(sector,layer,paddle) >= MIN_SIGMA[layer]
-				&&
-				getSigma(sector,layer,paddle) <= MAX_SIGMA[layer]);
+		double res = getSigma(sector,layer,paddle);
+		double expRes = expectedRes(sector,layer,paddle);
+
+		return (res >= (0.8*expRes)) && (res <= (1.2*expRes));
 
 	}
 
@@ -521,5 +544,44 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		return dg;
 
 	}
+	
+	@Override
+	public void writeFile(String filename) {
+		
+		boolean[] writeCols = {true,true,true,false, // exclude paddle number
+							   true,true};
+
+		try { 
+
+			// Open the output file
+			File outputFile = new File(filename);
+			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+			BufferedWriter outputBw = new BufferedWriter(outputFw);
+
+			for (int i=0; i<calib.getRowCount(); i++) {
+				String line = new String();
+				for (int j=0; j<calib.getColumnCount(); j++) {
+					if (writeCols[j]) {
+						line = line+calib.getValueAt(i, j);
+						if (j<calib.getColumnCount()-1) {
+							line = line+" ";
+						}
+					}
+				}
+				outputBw.write(line);
+				outputBw.newLine();
+			}
+
+			outputBw.close();
+		}
+		catch(IOException ex) {
+			System.out.println(
+					"Error reading file '" 
+							+ filename + "'");                   
+			// Or we could just do this: 
+			ex.printStackTrace();
+		}
+
+	}	
 	
 }

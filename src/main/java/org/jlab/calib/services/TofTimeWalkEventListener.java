@@ -51,8 +51,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	private final double[]        ADC_MAX = {0.0, 4000.0, 7000.0, 4000.0};
 	
 	// Expected values for colour coding
-	private final double[] EXPECTED_TW = {60.0, 60.0, 45.0};
-	private final double   ALLOWED_TW_DIFF = 10.0; 
+	private final double[] EXPECTED_TW = {57.5, 57.5, 57.5};
+	private final double   ALLOWED_TW_DIFF = 17.5; 
 	
 	// Preferred bins
 	private int[] xbins = {0, 166, 87, 166};

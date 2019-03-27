@@ -159,7 +159,9 @@ ChangeListener {
 	public final static int PATH_NORM_NO = 1;
 	
 	private JTextField rcsText = new JTextField(5);
+	private JTextField rcsText2 = new JTextField(7); // panel 2
 	public static double maxRcs = 0.0;
+	public static double maxRcs2 = 0.0;  // panel 2
 	private JTextField minVText = new JTextField(5);
 	public static double minV = -9999.0;
 	private JTextField maxVText = new JTextField(5);
@@ -190,7 +192,9 @@ ChangeListener {
 	public final static int TRACK_POS = 2;
     JComboBox<Double> trfList = new JComboBox<Double>();
 	JComboBox<String> pidList = new JComboBox<String>();
+	JComboBox<String> pidList2 = new JComboBox<String>();
 	public static int trackPid = 0;
+	public static int trackPid2 = 0;
 	public final static int PID_ALL = 0;
 	public final static int PID_L = 1;
 	public final static int PID_PI = 2;
@@ -438,6 +442,9 @@ ChangeListener {
 			if (rcsText.getText().compareTo("") != 0) {
 				maxRcs = Double.parseDouble(rcsText.getText());
 			}
+			if (rcsText2.getText().compareTo("") != 0) {
+				maxRcs2 = Double.parseDouble(rcsText2.getText());
+			}
 			if (minVText.getText().compareTo("") != 0) {
 				minV = Double.parseDouble(minVText.getText());
 			}
@@ -458,6 +465,7 @@ ChangeListener {
 			trackCharge = trackChargeList.getSelectedIndex();
 			TOFCalibrationEngine.BEAM_BUCKET = (Double) trfList.getSelectedItem();
 			trackPid = pidList.getSelectedIndex();
+			trackPid2 = pidList2.getSelectedIndex();
 
 			if (triggerText.getText().compareTo("") != 0) {
 				triggerBit = Integer.parseInt(triggerText.getText());
@@ -499,7 +507,7 @@ ChangeListener {
 			System.out.println("-----------------------------------------");
 			System.out.println("Target GMEAN channel 1a/1b/2: "+targetGMean[0].getText()+"/"+targetGMean[1].getText()+"/"+targetGMean[2].getText());
 			System.out.println("Path length normalisation for gmean?: "+pathNormList.getItemAt(pathNorm));
-			System.out.println("Maximum reduced chi squared for tracks: "+maxRcs);
+			System.out.println("Maximum reduced chi squared for tracks: "+maxRcs+" (1a/1b) "+maxRcs2+ " (2)");
 			System.out.println("Minimum vertex z: "+minV);
 			System.out.println("Maximum vertex z: "+maxV);
 			System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(vertexCorr));
@@ -507,7 +515,7 @@ ChangeListener {
 			System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(massAss));
 			System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
 			System.out.println("RF period: "+TOFCalibrationEngine.BEAM_BUCKET);
-			System.out.println("PID: "+pidList.getItemAt(trackPid));
+			System.out.println("PID: "+pidList.getItemAt(trackPid)+" (1a/1b) "+pidList2.getItemAt(trackPid2)+ " (2)");
 			System.out.println("Trigger: "+triggerBit);
 			System.out.println("2D histogram graph method: "+fitList.getSelectedItem());
 			System.out.println("Slicefitter mode: "+fitModeList.getSelectedItem());
@@ -966,16 +974,22 @@ ChangeListener {
 		c.gridx = 2;
 		c.gridy = y;
 		trPanel.add(new JLabel(""),c);	
+		
 		// Chi squared
 		y++;
 		c.gridx = 0;
 		c.gridy = y;
-		trPanel.add(new JLabel("Maximum reduced chi squared for track:"),c);
-		rcsText.addActionListener(this);
-		rcsText.setText("75.0");
+		trPanel.add(new JLabel("Maximum reduced chi squared for track (1a and 1b / 2):"),c);
 		c.gridx = 1;
 		c.gridy = y;
-		trPanel.add(rcsText,c);
+		JPanel rcsPanel = new JPanel();
+		rcsText.addActionListener(this);
+		rcsText2.addActionListener(this);
+		rcsText.setText("100.0");
+		rcsText2.setText("100000.0");
+		rcsPanel.add(rcsText);
+		rcsPanel.add(rcsText2);
+		trPanel.add(rcsPanel,c);
 		c.gridx = 2;
 		c.gridy = y;
 		trPanel.add(new JLabel("Enter 0 for no cut"),c);
@@ -1035,15 +1049,16 @@ ChangeListener {
         c.gridx = 0;
         c.gridy = y;
         trPanel.add(new JLabel("Mass assumption for beta calculation:"),c);
+        c.gridx = 1;
+        c.gridy = y;
         massAssList.addItem("Pion");
         massAssList.addItem("Proton");
         massAssList.addItem("Electron");
         massAssList.addItem("Use PID");
         massAssList.setSelectedIndex(USE_PID);
         massAssList.addActionListener(this);
-        c.gridx = 1;
-        c.gridy = y;
         trPanel.add(massAssList,c);
+        
 		// track charge
 		y++;
 		c.gridx = 0;
@@ -1066,24 +1081,37 @@ ChangeListener {
         trfList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
-        trPanel.add(trfList,c);     
+        trPanel.add(trfList,c);   
+        
 		// PID
 		y++;
 		c.gridx = 0;
 		c.gridy = y;
-		trPanel.add(new JLabel("PID:"),c);
+		trPanel.add(new JLabel("PID (1a and 1b / 2):"),c);
+		c.gridx = 1;
+		c.gridy = y;
+		JPanel pidPanel = new JPanel();
 		pidList.addItem("All");
 		pidList.addItem("Leptons");
 		pidList.addItem("Pions");
 		pidList.addItem("Protons");
 		pidList.addItem("Leptons and pions");
+		pidList.setSelectedIndex(PID_LPI);
 		pidList.addActionListener(this);
-		c.gridx = 1;
-		c.gridy = y;
-		trPanel.add(pidList,c);
+		pidPanel.add(pidList);
+		pidList2.addItem("All");
+		pidList2.addItem("Leptons");
+		pidList2.addItem("Pions");
+		pidList2.addItem("Protons");
+		pidList2.addItem("Leptons and pions");
+		pidList2.setSelectedIndex(PID_ALL);
+		pidList2.addActionListener(this);
+		pidPanel.add(pidList2,c);
+		trPanel.add(pidPanel,c);
 		c.gridx = 2;
 		c.gridy = y;
 		trPanel.add(new JLabel(""),c);
+		
 		// trigger
 		y++;
 		c.gridx = 0;

@@ -604,13 +604,18 @@ public class TOFPaddle {
 
 	public boolean goodTrackFound() {
 
-		double maxRcs = 75.0;
+		double maxRcs = 100.0;
 		double minV = -10.0;
 		double maxV = 10.0;
 		double minP = 0.0;
 		double maxP = 9.0;
 		if (tof == "FTOF") {
-			maxRcs = TOFCalibration.maxRcs;
+			if (getDescriptor().getLayer() == 3) {
+				maxRcs = TOFCalibration.maxRcs2;
+			}
+			else {
+				maxRcs = TOFCalibration.maxRcs;
+			}
 			minV = TOFCalibration.minV;
 			maxV = TOFCalibration.maxV;
 			minP = TOFCalibration.minP;
@@ -631,15 +636,23 @@ public class TOFPaddle {
 	}
 	
 	public boolean pidMatch() {
+		
+		int selectedPid = 0;
+		if (getDescriptor().getLayer() == 3) {
+			selectedPid = TOFCalibration.trackPid2;
+		}
+		else {
+			selectedPid = TOFCalibration.trackPid;
+		}
 
-		return (TOFCalibration.trackPid==TOFCalibration.PID_ALL) ||
-					(TOFCalibration.trackPid==TOFCalibration.PID_L && (PARTICLE_ID==13 || PARTICLE_ID==-13)) ||
-					(TOFCalibration.trackPid==TOFCalibration.PID_L && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
-					(TOFCalibration.trackPid==TOFCalibration.PID_PI && (PARTICLE_ID==211 || PARTICLE_ID==-211)) ||
-					(TOFCalibration.trackPid==TOFCalibration.PID_P && (PARTICLE_ID==2212)) ||
-					(TOFCalibration.trackPid==TOFCalibration.PID_LPI && (PARTICLE_ID==13 || PARTICLE_ID==-13)) ||
-					(TOFCalibration.trackPid==TOFCalibration.PID_LPI && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
-					(TOFCalibration.trackPid==TOFCalibration.PID_LPI && (PARTICLE_ID==211 || PARTICLE_ID==-211));
+		return (selectedPid==TOFCalibration.PID_ALL) ||
+					(selectedPid==TOFCalibration.PID_L && (PARTICLE_ID==13 || PARTICLE_ID==-13)) ||
+					(selectedPid==TOFCalibration.PID_L && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
+					(selectedPid==TOFCalibration.PID_PI && (PARTICLE_ID==211 || PARTICLE_ID==-211)) ||
+					(selectedPid==TOFCalibration.PID_P && (PARTICLE_ID==2212)) ||
+					(selectedPid==TOFCalibration.PID_LPI && (PARTICLE_ID==13 || PARTICLE_ID==-13)) ||
+					(selectedPid==TOFCalibration.PID_LPI && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
+					(selectedPid==TOFCalibration.PID_LPI && (PARTICLE_ID==211 || PARTICLE_ID==-211));
 					
 	}
 
