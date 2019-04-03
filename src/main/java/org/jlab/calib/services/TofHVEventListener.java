@@ -54,7 +54,7 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 	public final int		ALLOWED_MIP_DIFF = 50;
 	public final double[]	ALPHA = {13.4, 4.7, 8.6};
 	public final double[]	MAX_VOLTAGE = {2500.0, 2000.0, 2500.0};
-	public final double		MAX_DELTA_V = 250.0;
+	public double		MAX_DELTA_V = 250.0;
 	public final int		MIN_STATS = 100;
 
 	public String hvSetPrefix = "FTOFHVSET";

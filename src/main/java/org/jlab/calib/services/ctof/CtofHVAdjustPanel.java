@@ -41,6 +41,7 @@ public class CtofHVAdjustPanel 	extends JPanel
 	CalibrationConstants calib;
 	CtofHVEventListener hv;
     private JTextField mipPeakText = new JTextField(5);
+	private JTextField maxHVChange = new JTextField(5);
 
 	public CtofHVAdjustPanel(CtofHVEventListener hvIn) {
 		
@@ -73,6 +74,12 @@ public class CtofHVAdjustPanel 	extends JPanel
 		mipPeakText.setText(Integer.toString(hv.NEWHV_MIP_CHANNEL));
 		buttonPanel.add(mipPeakText); 
 		
+		// Max HV adjustment
+		buttonPanel.add(new JLabel("Max HV change:"));
+		maxHVChange.addActionListener(this);
+		maxHVChange.setText(Double.toString(hv.MAX_DELTA_V));
+		buttonPanel.add(maxHVChange);
+		
 		// Create field for file selection
 		buttonPanel.add(new JLabel("Select EPICS snapshot file to calculate new HV values:"));
 		fc = new JFileChooser();
@@ -96,6 +103,7 @@ public class CtofHVAdjustPanel 	extends JPanel
 				// Desired MIP peak
 				hv.EXPECTED_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
 				hv.NEWHV_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
+				hv.MAX_DELTA_V = Double.parseDouble(maxHVChange.getText());
 				
 				String outputFileName = processFile();
 				JOptionPane.showMessageDialog(new JPanel(),"High voltage values written to "+outputFileName);
