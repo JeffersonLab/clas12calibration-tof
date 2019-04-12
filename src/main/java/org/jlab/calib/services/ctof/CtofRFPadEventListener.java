@@ -200,7 +200,7 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			if (pad.goodTrackFound() && pad.includeInCTOFTiming()) {
 				
 				dataGroups.getItem(sector,layer,component).getH1F("fineHistRaw").fill(
-						(pad.refSTTime()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						(pad.refSTTimeHPosCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 			}
 		}
 	}    

@@ -351,11 +351,53 @@ public class TOFPaddle {
 		return refTime() - TWPosCorr();
 	}
 
-	
 	public double refSTTimeCorr() {
+		return refSTTime() - rfpad() - HPosCorr();
+	}
+
+	public double refSTTimeRFCorr() {
 		return refSTTime() - rfpad();
 	}
 
+	public double refSTTimeHPosCorr() {
+		return refSTTime() - HPosCorr();
+	}
+	
+	private double HPosCorr() {
+		if (tof=="CTOF") {
+			return hposA()*paddleY() + hposB()*paddleY()*paddleY() + hposC()*paddleY()*paddleY()*paddleY();
+		} else {
+			return 0.0;
+		}
+	}
+	
+	public double hposA() {
+		double val = 0.0;
+		if (tof == "CTOF") {
+			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposA", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+		return val;
+	}
+
+	public double hposB() {
+		double val = 0.0;
+		if (tof == "CTOF") {
+			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposB", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+		return val;
+	}
+
+	public double hposC() {
+		double val = 0.0;
+		if (tof == "CTOF") {
+			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposC", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+		return val;
+	}
+	
 	private double TWPosCorr() {
 		if (tof=="FTOF") {
 			return tw1()*paddleY()* paddleY() + tw2()*paddleY();
@@ -697,7 +739,8 @@ public class TOFPaddle {
 		System.out.println("goodTrackFound " + goodTrackFound() + " chargeMatch " + chargeMatch() + " pidMatch "+pidMatch());
 		System.out.println("refTime " + refTime() + " startTime " + startTime() + " averageHitTime "
 				+ averageHitTime() + " vertexCorr " + vertexCorr());
-		System.out.println("refSTTime " + refSTTime());
+		System.out.println("refSTTime " + refSTTime() + " refSTTimeRFCorr "+ refSTTimeRFCorr() + " refSTTimeHPosCorr "+ refSTTimeHPosCorr() + " refSTTimeCorr "+ refSTTimeCorr());
+		System.out.println("hposA " + hposA() + "hposB " + hposB() + "hposC " + hposC());
 		System.out.println("startTimeP2PCorr " + startTimeP2PCorr());
 		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1 " + tw1() + " tw2 "
 				+ tw2() + " lamR " + lamR() + " LR " + leftRightAdjustment()

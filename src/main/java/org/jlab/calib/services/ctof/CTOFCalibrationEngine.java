@@ -86,6 +86,7 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
     public static CalibrationConstants p2pValues;
     public static CalibrationConstants veffValues;
     public static CalibrationConstants rfpadValues;
+    public static CalibrationConstants hposValues;
 
     // Calculated counter status values
     public static IndexedList<Integer> adcLeftStatus = new IndexedList<Integer>(3);
@@ -106,6 +107,8 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
                         "paddle2paddle/F");
         rfpadValues =    new CalibrationConstants(3,
                 "rfpad/F");
+        hposValues =    new CalibrationConstants(3,
+                "hposA/F:hposB/F:hposC/F");        
 
     }
     
@@ -364,7 +367,7 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         }
         return doubleVal;
     }
-
+    
     public void setPlotTitle(int sector, int layer, int paddle) {
         // Overridden in calibration step classes
     }

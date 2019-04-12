@@ -106,6 +106,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             new CtofLeftRightEventListener(),
             new CtofVeffEventListener(),
             new CtofRFPadEventListener(),
+            new CtofHPosEventListener(),
             new CtofP2PEventListener(),
             new CtofCheckEventListener()};
     
@@ -116,8 +117,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     public final int LEFT_RIGHT = 3;
     public final int VEFF = 4;
     public final int RFPAD = 5;
-    public final int P2P = 6;
-    public final int CHECK = 7;
+    public final int HPOS = 6;
+    public final int P2P = 7;
+    public final int CHECK = 8;
     
     String[] dirs = {"/calibration/ctof/gain_balance",
                      "/calibration/ctof/attenuation",
@@ -125,6 +127,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
                      "/calibration/ctof/time_offsets/upstream_downstream",
                      "/calibration/ctof/effective_velocity",
                      "/calibration/ctof/time_offsets/rfpad",
+                     "/calibration/ctof/hpos",
                      "/calibration/ctof/time_offsets/P2P",
 					 "/calibration/ctof/time_offsets/check"};
     
@@ -149,7 +152,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 //            160, -40.0, 40.0);
     
     // configuration settings
-    JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(),
+    JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(), new JCheckBox(),
     						  new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox()};    
 //    private JTextField ctofCenterText = new JTextField(5);
 //    public static double ctofCenter = 0.0;
@@ -307,6 +310,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             engine = engines[VEFF];
         } else if (selectedDir == dirs[RFPAD]) {
             engine = engines[RFPAD];
+        } else if (selectedDir == dirs[HPOS]) {
+            engine = engines[HPOS];
         } else if (selectedDir == dirs[P2P]) {
             engine = engines[P2P];
         } else if (selectedDir == dirs[CHECK]) {
@@ -461,6 +466,12 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             engines[VEFF].fitMode = (String) fitModeList.getSelectedItem();
             if (minEventsText.getText().compareTo("") != 0) {
                 engines[VEFF].fitMinEvents = Integer.parseInt(minEventsText.getText());
+            }
+            
+            engines[HPOS].fitMethod = fitList.getSelectedIndex();
+            engines[HPOS].fitMode = (String) fitModeList.getSelectedItem();
+            if (minEventsText.getText().compareTo("") != 0) {
+                engines[HPOS].fitMinEvents = Integer.parseInt(minEventsText.getText());
             }
             
 			// min and max TDC
@@ -788,7 +799,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 
     public void configure() {
         
-        configFrame.setSize(800, 700);
+    	configFrame.setSize(900, 830);
         //configFrame.setSize(1000, 600);
         configFrame.setLocationRelativeTo(pane);
         configFrame.setDefaultCloseOperation(configFrame.DO_NOTHING_ON_CLOSE);
