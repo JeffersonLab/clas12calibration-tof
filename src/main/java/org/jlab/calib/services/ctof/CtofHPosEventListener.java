@@ -68,7 +68,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		calib = new CalibrationConstants(3,
 				"hposA/F:hposB/F:hposC/F:hposD/F:hposE/F");
 		calib.setName("/calibration/ctof/hpos");
-		calib.setPrecision(5);
+		calib.setPrecision(7);
 
 		// assign constraints to all paddles
 
@@ -180,7 +180,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
 			// create all the functions and graphs
 		
-			String funcText = "[a]*x+[b]*x*x+[c]*x*x*x";
+			String funcText = "[a]*x+[b]*x*x+[c]*x*x*x+[d]";
 			F1D hposFunc = new F1D("hposFunc", funcText, -50.0, 50.0);
 			
 			GraphErrors hposGraph = new GraphErrors("hposGraph");
