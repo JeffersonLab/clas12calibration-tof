@@ -196,19 +196,19 @@ public class TOFPaddle {
 		return lamL;
 	}
 
-	public double tw1() {
+	public double tw1pos() {
 		double tw1 = 0.0;
 		if (tof == "FTOF") {
-			tw1 = TOFCalibrationEngine.twposValues.getDoubleValue("tw1_left", desc.getSector(), desc.getLayer(),
+			tw1 = TOFCalibrationEngine.twposValues.getDoubleValue("tw1pos", desc.getSector(), desc.getLayer(),
 					desc.getComponent());
 		}
 		return tw1;
 	}
 
-	public double tw2() {
+	public double tw2pos() {
 		double tw2 = 0.0;
 		if (tof == "FTOF") {
-			tw2 = TOFCalibrationEngine.twposValues.getDoubleValue("tw2_left", desc.getSector(), desc.getLayer(),
+			tw2 = TOFCalibrationEngine.twposValues.getDoubleValue("tw2pos", desc.getSector(), desc.getLayer(),
 					desc.getComponent());
 		}
 		return tw2;
@@ -400,7 +400,7 @@ public class TOFPaddle {
 	
 	private double TWPosCorr() {
 		if (tof=="FTOF") {
-			return tw1()*paddleY()* paddleY() + tw2()*paddleY();
+			return tw1pos()*paddleY()* paddleY() + tw2pos()*paddleY();
 		} else {
 			return 0.0;
 		}
@@ -742,8 +742,8 @@ public class TOFPaddle {
 		System.out.println("refSTTime " + refSTTime() + " refSTTimeRFCorr "+ refSTTimeRFCorr() + " refSTTimeHPosCorr "+ refSTTimeHPosCorr() + " refSTTimeCorr "+ refSTTimeCorr());
 		System.out.println("hposA " + hposA() + "hposB " + hposB() + "hposC " + hposC());
 		System.out.println("startTimeP2PCorr " + startTimeP2PCorr());
-		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1 " + tw1() + " tw2 "
-				+ tw2() + " lamR " + lamR() + " LR " + leftRightAdjustment()
+		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1pos " + tw1pos() + " tw2pos "
+				+ tw2pos() + " lamR " + lamR() + " LR " + leftRightAdjustment()
 				+ " veff " + veff() + " tdcConvL "+ tdcConvL() + " tdcConvR "+ tdcConvR());
 		System.out.println("paddleLength " + paddleLength() + " paddleY " + paddleY() + "ctofCenter "+ctofCenter());
 		System.out.println("timeLeftAfterTW " + timeLeftAfterTW() + " timeRightAfterTW " + timeRightAfterTW());

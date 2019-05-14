@@ -704,9 +704,9 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 						String line = new String();
 						line = sector+" "+layer+" "+paddle+" "
 								+new DecimalFormat("0.000").format(getLambdaLeft(sector,layer,paddle))
-								+" 0.500"+" 0.000 "
+								+" 0.000"+" 0.000 "
 								+new DecimalFormat("0.000").format(getLambdaRight(sector,layer,paddle))
-								+" 0.500"+" 0.000";
+								+" 0.000"+" 0.000";
 						outputBw.write(line);
 						outputBw.newLine();
 					}

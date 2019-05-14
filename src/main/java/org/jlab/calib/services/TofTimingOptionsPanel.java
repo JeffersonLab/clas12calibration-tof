@@ -18,8 +18,6 @@ public class TofTimingOptionsPanel extends JPanel implements ActionListener {
 	public static final int UPDOWN = 0;
 	public static final int RFPAD = 1;
 	public static final int P2P = 2;
-	public static final int TW = 3;
-	public static final int TWPOS = 4;
 	public static final int USE_PREV = 0;
 	public static final int USE_NEW = 1;
 	JRadioButton[]   stepRadiosPrev = {new JRadioButton(), new JRadioButton(), new JRadioButton(), new JRadioButton(), new JRadioButton()};
@@ -38,8 +36,8 @@ public class TofTimingOptionsPanel extends JPanel implements ActionListener {
 		c.gridx = 2;
 		add(new JLabel("New"),c);
 
-		String[] stepNames = {"Left Right","RF Paddle","P2P", "Timewalk", "TW Position"};
-		int numSteps = 5;
+		String[] stepNames = {"Left Right","RF Paddle","P2P"};
+		int numSteps = 3;
 		if (TOFPaddle.tof == "CTOF") {
 			stepNames[0] = "Up Down";
 			numSteps = 3;

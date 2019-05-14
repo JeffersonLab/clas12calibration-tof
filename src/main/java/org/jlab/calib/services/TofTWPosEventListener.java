@@ -64,8 +64,8 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 		filename = nextFileName();
 
 		calib = new CalibrationConstants(3,
-				"tw1_left/F:tw2_left/F:tw1_right/F:tw2_right/F");
-		calib.setName("/calibration/ftof/time_walk/position");
+				"tw1pos/F:tw2pos/F");
+		calib.setName("/calibration/ftof/time_walk_pos");
 		calib.setPrecision(5);
 
 		// assign constraints to all paddles
@@ -101,20 +101,14 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 					int sector = Integer.parseInt(lineValues[0]);
 					int layer = Integer.parseInt(lineValues[1]);
 					int paddle = Integer.parseInt(lineValues[2]);
-					double tw1L = Double.parseDouble(lineValues[3]);
-					double tw2L = Double.parseDouble(lineValues[4]);
-					double tw1R = Double.parseDouble(lineValues[5]);
-					double tw2R = Double.parseDouble(lineValues[6]);
+					double tw1pos = Double.parseDouble(lineValues[3]);
+					double tw2pos = Double.parseDouble(lineValues[4]);
 					
 					twposValues.addEntry(sector, layer, paddle);
-					twposValues.setDoubleValue(tw1L,
-							"tw1_left", sector, layer, paddle);
-					twposValues.setDoubleValue(tw2L,
-							"tw2_left", sector, layer, paddle);
-					twposValues.setDoubleValue(tw1R,
-							"tw1_right", sector, layer, paddle);
-					twposValues.setDoubleValue(tw2R,
-							"tw2_right", sector, layer, paddle);
+					twposValues.setDoubleValue(tw1pos,
+							"tw1pos", sector, layer, paddle);
+					twposValues.setDoubleValue(tw2pos,
+							"tw2pos", sector, layer, paddle);
 					
 					line = bufferedReader.readLine();
 				}
@@ -142,13 +136,9 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 					for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 						twposValues.addEntry(sector, layer, paddle);
 						twposValues.setDoubleValue(0.0,
-								"tw1_left", sector, layer, paddle);
+								"tw1pos", sector, layer, paddle);
 						twposValues.setDoubleValue(0.0,
-								"tw2_left", sector, layer, paddle);
-						twposValues.setDoubleValue(0.0,
-								"tw1_right", sector, layer, paddle);
-						twposValues.setDoubleValue(0.0,
-								"tw2_right", sector, layer, paddle);
+								"tw2pos", sector, layer, paddle);
 						
 					}
 				}
@@ -157,7 +147,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			twposValues = dcp.readConstants("/calibration/ftof/time_walk");
+			twposValues = dcp.readConstants("/calibration/ftof/time_walk_pos");
 			dcp.disconnect();
 		}
 		prevCalRead = true;
@@ -186,8 +176,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 					twposHist.setTitleY("delta T (ns)");
 
 					// create all the functions and graphs
-					double tw1 = TOFCalibrationEngine.twposValues.getDoubleValue("tw1_left", sector, layer, paddle);
-					double tw2 = TOFCalibrationEngine.twposValues.getDoubleValue("tw2_left", sector, layer, paddle);
+	
 					//String funcText = "[a]*x*x+[b]*x-("+tw1+"*x*x+"+tw2+"*x+[c])";
 					String funcText = "[a]*x*x+[b]*x+[c]";
 					//System.out.println("funcTextL "+funcTextL);
@@ -453,13 +442,9 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 	@Override
 	public void saveRow(int sector, int layer, int paddle) {
 		calib.setDoubleValue(getTW1(sector,layer,paddle),
-				"tw1_left", sector, layer, paddle);
+				"tw1pos", sector, layer, paddle);
 		calib.setDoubleValue(getTW2(sector,layer,paddle),
-				"tw2_left", sector, layer, paddle);
-		calib.setDoubleValue(getTW1(sector,layer,paddle),
-				"tw1_right", sector, layer, paddle);
-		calib.setDoubleValue(getTW2(sector,layer,paddle),
-				"tw2_right", sector, layer, paddle);
+				"tw2pos", sector, layer, paddle);
 
 	}
 

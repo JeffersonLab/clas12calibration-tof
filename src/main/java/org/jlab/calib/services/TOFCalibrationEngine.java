@@ -112,7 +112,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 		rfpadValues =	new CalibrationConstants(3,
 				"rfpad/F");
 		twposValues = new CalibrationConstants(3,
-				"tw1_left/F:tw2_left/F:tw3_left/F:tw1_right/F:tw2_right/F:tw3_right/F");
+				"tw1pos/F:tw2pos/F");
 
 	}
 
