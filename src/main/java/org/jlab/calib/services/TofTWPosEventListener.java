@@ -66,7 +66,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 		calib = new CalibrationConstants(3,
 				"tw1pos/F:tw2pos/F");
 		calib.setName("/calibration/ftof/time_walk_pos");
-		calib.setPrecision(5);
+		calib.setPrecision(7);
 
 		// assign constraints to all paddles
 

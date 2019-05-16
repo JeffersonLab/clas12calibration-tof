@@ -17,7 +17,7 @@
     <dependency>
       <groupId>org.jlab.coat</groupId>
       <artifactId>coat-libs</artifactId>
-      <version>5.7.1-SNAPSHOT</version>
+      <version>6.1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jlab.coda</groupId>

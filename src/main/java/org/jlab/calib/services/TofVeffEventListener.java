@@ -264,9 +264,8 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 	@Override
 	public void fit(int sector, int layer, int paddle,
 			double minRange, double maxRange) {
-
+		
 		H2F veffHist = dataGroups.getItem(sector,layer,paddle).getH2F("veff");
-
 
 		// find the range for the fit
 		double lowLimit;
@@ -289,10 +288,8 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 			highLimit = paddleLength(sector,layer,paddle) * 0.35;
 			//highLimit = paddleLength(sector,layer,paddle) * 0.85;
 		}
-
 		// fit function to the graph of means
 		GraphErrors veffGraph = (GraphErrors) dataGroups.getItem(sector,layer,paddle).getData("veffGraph");
-		
 		if (fitMethod==FIT_METHOD_SF) {
 			ParallelSliceFitter psf = new ParallelSliceFitter(veffHist);
 			psf.setFitMode(fitMode);
@@ -316,7 +313,6 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 		else {
 			veffGraph.copy(veffHist.getProfileX());
 		}
-				
 		F1D veffFunc = dataGroups.getItem(sector,layer,paddle).getF1D("veffFunc");
 		veffFunc.setRange(lowLimit, highLimit);
 

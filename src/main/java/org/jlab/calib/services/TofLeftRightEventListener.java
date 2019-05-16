@@ -233,7 +233,7 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 	
 	@Override
 	public void fit(int sector, int layer, int paddle, double minRange, double maxRange) {
-
+		
 		H1F lrHist = dataGroups.getItem(sector,layer,paddle).getH1F("left_right");
 		int maxBin = lrHist.getMaximumBin();
 		double maxPos = lrHist.getXaxis().getBinCenter(maxBin);
@@ -259,14 +259,14 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 		else {
 			highLimit = maxPos+10.0;
 		}
-
+	
 		lrFunc.setRange(lowLimit, highLimit);
 		lrFunc.setParameter(0, lrHist.getBinContent(maxBin));
 		lrFunc.setParLimits(0, lrHist.getBinContent(maxBin)*0.7, lrHist.getBinContent(maxBin)*1.2);
 		lrFunc.setParameter(1, maxPos);
 		lrFunc.setParameter(2, 1.0);
 		//lrFunc.setParLimits(2, 0.5, 5.0);
-
+		
 		if (lrHist.getEntries() > 50) {
 			try {
 				DataFitter.fit(lrFunc, lrHist, fitOption);
@@ -276,7 +276,7 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 			}
 		}
 		lrHist.setFunction(null);
-
+		
 	}
 
 	public void tdc_fit(int sector, int layer, int paddle,

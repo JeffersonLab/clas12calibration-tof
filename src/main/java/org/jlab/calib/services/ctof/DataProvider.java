@@ -206,7 +206,7 @@ public class DataProvider {
 						DataBank eventBank = event.getBank("REC::Event");
 						DataBank  recPartBank = event.getBank("REC::Particle");
 						if (recPartBank.getInt("pid", 0) == 11) {
-							paddle.ST_TIME = eventBank.getFloat("STTime", 0);
+							paddle.ST_TIME = eventBank.getFloat("startTime", 0);
 						}
 						else {
 							paddle.ST_TIME = -1000.0;
