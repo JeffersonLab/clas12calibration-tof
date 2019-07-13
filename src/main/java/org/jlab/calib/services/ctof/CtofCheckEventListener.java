@@ -83,7 +83,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 
 			H2F vzHist = 
 					new H2F("vzHist","Paddle "+paddle,
-							100, -5.0, 5.0,
+							100, CTOFCalibration.minV, CTOFCalibration.maxV,
 							bins, -bb*0.5, bb*0.5);
 			vzHist.setTitleX("vz (cm)");
 			vzHist.setTitleY("delta T (ns)");

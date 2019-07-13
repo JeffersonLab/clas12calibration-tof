@@ -323,7 +323,8 @@ public class TOFPaddle {
 
 	public double vertexCorr() {
 		if (TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES) {
-			return VERTEX_Z / 29.98;
+			// target z = 3.0cm
+			return (VERTEX_Z - 3.0) / 29.98;
 		} else {
 			return 0.0;
 		}
@@ -365,7 +366,7 @@ public class TOFPaddle {
 	
 	private double HPosCorr() {
 		if (tof=="CTOF") {
-			return hposA()*paddleY() + hposB()*paddleY()*paddleY() + hposC()*paddleY()*paddleY()*paddleY();
+			return hposA()*Math.exp(hposB()*paddleY());
 		} else {
 			return 0.0;
 		}
@@ -384,15 +385,6 @@ public class TOFPaddle {
 		double val = 0.0;
 		if (tof == "CTOF") {
 			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposB", desc.getSector(), desc.getLayer(),
-					desc.getComponent());
-		}
-		return val;
-	}
-
-	public double hposC() {
-		double val = 0.0;
-		if (tof == "CTOF") {
-			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposC", desc.getSector(), desc.getLayer(),
 					desc.getComponent());
 		}
 		return val;
@@ -740,7 +732,7 @@ public class TOFPaddle {
 		System.out.println("refTime " + refTime() + " startTime " + startTime() + " averageHitTime "
 				+ averageHitTime() + " vertexCorr " + vertexCorr());
 		System.out.println("refSTTime " + refSTTime() + " refSTTimeRFCorr "+ refSTTimeRFCorr() + " refSTTimeHPosCorr "+ refSTTimeHPosCorr() + " refSTTimeCorr "+ refSTTimeCorr());
-		System.out.println("hposA " + hposA() + "hposB " + hposB() + "hposC " + hposC());
+		System.out.println("hposA " + hposA() + "hposB " + hposB());
 		System.out.println("startTimeP2PCorr " + startTimeP2PCorr());
 		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1pos " + tw1pos() + " tw2pos "
 				+ tw2pos() + " lamR " + lamR() + " LR " + leftRightAdjustment()

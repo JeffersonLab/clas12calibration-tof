@@ -9,6 +9,7 @@ import java.util.Map;
 import org.jlab.calib.services.TOFCalibrationEngine;
 //import org.jlab.calib.services.TOFCalibrationEngine;
 import org.jlab.calib.services.TOFPaddle;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
@@ -201,17 +202,6 @@ public class DataProvider {
 						paddle.TIMESTAMP = configBank.getLong("timestamp", 0);
 					}
 					
-					// Get the start time, requiring that first particle in the event is an electron
-					if (event.hasBank("REC::Event") && event.hasBank("REC::Particle")) {
-						DataBank eventBank = event.getBank("REC::Event");
-						DataBank  recPartBank = event.getBank("REC::Particle");
-						if (recPartBank.getInt("pid", 0) == 11) {
-							paddle.ST_TIME = eventBank.getFloat("startTime", 0);
-						}
-						else {
-							paddle.ST_TIME = -1000.0;
-						}
-					}
 
 					// get the RF time with id=1
 					double trf = 0.0;
@@ -220,6 +210,7 @@ public class DataProvider {
 							trf = rfBank.getFloat("time", rfIdx);
 						}
 					}
+
 					int trkId = hitsBank.getShort("trkID", hitIndex);
 					// Get track
 					double energy = hitsBank.getFloat("energy", hitIndex);
@@ -256,6 +247,45 @@ public class DataProvider {
 						// For CTOF vertex z in mm -> convert to cm
 						//paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx) / 10.0;
 
+						// Get the start time, requiring that first particle in the event is an electron
+						if (event.hasBank("REC::Event") && event.hasBank("REC::Particle")) {
+							DataBank eventBank = event.getBank("REC::Event");
+							DataBank  recPartBank = event.getBank("REC::Particle");
+							String stName = "startTime";
+							if (eventBank.toString().contains("hipo3")) {
+								stName = "STTime";
+							}
+							
+							if (recPartBank.getInt("pid", 0) == 11) {
+								//paddle.ST_TIME = eventBank.getFloat(stName, 0);
+								// LC Jul 2019
+								// get the electron start time from the scintillator bank
+								if (event.hasBank("REC::Scintillator") ) {
+									DataBank scinBank = event.getBank("REC::Scintillator");
+									double elecStartTime = 0.0;
+									for (int i = 0; i < scinBank.rows(); i++) {
+										if (scinBank.getByte("detector",i)==DetectorType.FTOF.getDetectorId()
+												&&
+												scinBank.getByte("layer",i)==2
+												&&
+												scinBank.getShort("pindex",i)==0) {
+											elecStartTime = scinBank.getFloat("time",i) 
+													- (scinBank.getFloat("path", i)/PhysicsConstants.speedOfLight());
+											break;
+										}
+									}
+									paddle.ST_TIME  = elecStartTime + 
+											((- elecStartTime + trf + 1000.5* CTOFCalibrationEngine.BEAM_BUCKET)
+													%CTOFCalibrationEngine.BEAM_BUCKET - CTOFCalibrationEngine.BEAM_BUCKET/2);
+								} else {
+									paddle.ST_TIME = -1000.0;
+								}
+							}
+							else {
+								paddle.ST_TIME = -1000.0;
+							}
+						}
+						
 						paddle.CHARGE = trkBank.getByte("q", trkIdx);
 
 						if (CTOFCalibration.maxRcs != 0.0) {

@@ -180,7 +180,8 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
 			// create all the functions and graphs
 		
-			String funcText = "[a]*x+[b]*x*x+[c]*x*x*x+[d]";
+			String funcText = "([a]*exp([b]*x))+[c]";
+			// create all the functions
 			F1D hposFunc = new F1D("hposFunc", funcText, -50.0, 50.0);
 			
 			GraphErrors hposGraph = new GraphErrors("hposGraph");
@@ -226,7 +227,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 			int component = paddle.getDescriptor().getComponent();
 
 			if (paddle.goodTrackFound() && paddle.includeInCTOFTiming()) {
-
+				
 				dataGroups.getItem(sector,layer,component).getH2F("hposHist").fill(
 						 paddle.paddleY(),
 						 (paddle.refSTTimeRFCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
@@ -304,10 +305,9 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
 		double hposA = CTOFCalibrationEngine.hposValues.getDoubleValue("hposA",1, 1, paddle);
 		double hposB = CTOFCalibrationEngine.hposValues.getDoubleValue("hposB",1, 1, paddle);
-		double hposC = CTOFCalibrationEngine.hposValues.getDoubleValue("hposC",1, 1, paddle);
-		hposFunc.setParameter(0, hposA);
-		hposFunc.setParameter(1, hposB);
-		hposFunc.setParameter(2, hposC);
+		hposFunc.setParameter(0, 0.005); //hposA);
+		hposFunc.setParameter(1, 0.1); //hposB
+		hposFunc.setParameter(2, 0.0);
 
 		try {
 			DataFitter.fit(hposFunc, hposGraph, fitOption);
@@ -322,7 +322,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
 		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
-				"Override hposA:", "Override hposB:","Override hposC:"};
+				"Override hposA:", "Override hposB:"};
 
 		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
@@ -341,7 +341,6 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 			
 			double overrideA = toDouble(panel.textFields[4].getText());
 			double overrideB = toDouble(panel.textFields[5].getText());
-			double overrideC = toDouble(panel.textFields[6].getText());
 			
 			int minP = paddle;
 			int maxP = paddle;
@@ -360,7 +359,6 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 				Double[] consts = constants.getItem(sector, layer, p);
 				consts[HPOSA_OVERRIDE] = overrideA;
 				consts[HPOSB_OVERRIDE] = overrideB;
-				consts[HPOSC_OVERRIDE] = overrideC;
 
 				fit(sector, layer, p, minRange, maxRange);
 
@@ -380,11 +378,6 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 	public Double getHPOSB(int sector, int layer, int paddle) {
 
 		return getHPOS(sector, layer, paddle, 1);
-	}
-	
-	public Double getHPOSC(int sector, int layer, int paddle) {
-
-		return getHPOS(sector, layer, paddle, 2);
 	}
 
 	public Double getHPOS(int sector, int layer, int paddle, int param) {
@@ -407,7 +400,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 				"hposA", sector, layer, paddle);
 		calib.setDoubleValue(getHPOSB(sector,layer,paddle),
 				"hposB", sector, layer, paddle);
-		calib.setDoubleValue(getHPOSC(sector,layer,paddle),
+		calib.setDoubleValue(0.0,
 				"hposC", sector, layer, paddle);
 		calib.setDoubleValue(0.0,
 				"hposD", sector, layer, paddle);
@@ -447,7 +440,6 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		double[] hposas = new double[NUM_PADDLES[layer_index]];
 		double[] zeroUncs = new double[NUM_PADDLES[layer_index]];
 		double[] hposbs = new double[NUM_PADDLES[layer_index]];
-		double[] hposcs = new double[NUM_PADDLES[layer_index]];
 
 		for (int p = 1; p <= NUM_PADDLES[layer_index]; p++) {
 
@@ -455,7 +447,6 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 			paddleUncs[p - 1] = 0.0;
 			hposas[p - 1] = getHPOSA(sector, layer, p);
 			hposbs[p - 1] = getHPOSB(sector, layer, p);
-			hposcs[p - 1] = getHPOSC(sector, layer, p);
 			zeroUncs[p - 1] = 0.0;
 		}
 
@@ -475,18 +466,9 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		bSumm.setMarkerSize(MARKER_SIZE);
 		bSumm.setLineThickness(MARKER_LINE_WIDTH);
 
-		GraphErrors cSumm = new GraphErrors("cSumm", paddleNumbers,
-				hposas, paddleUncs, zeroUncs);
-
-		cSumm.setTitleX("Paddle Number");
-		cSumm.setTitleY("HPOSC");
-		cSumm.setMarkerSize(MARKER_SIZE);
-		cSumm.setLineThickness(MARKER_LINE_WIDTH);
-
-		DataGroup dg = new DataGroup(3,1);
+		DataGroup dg = new DataGroup(2,1);
 		dg.addDataSet(aSumm, 0);
 		dg.addDataSet(bSumm, 1);
-		dg.addDataSet(cSumm, 2);
 
 		return dg;
 
