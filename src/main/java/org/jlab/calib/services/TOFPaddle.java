@@ -323,8 +323,8 @@ public class TOFPaddle {
 
 	public double vertexCorr() {
 		if (TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES) {
-			// target z = 3.0cm
-			return (VERTEX_Z - 3.0) / 29.98;
+			double targetPos = -3.0;
+			return (VERTEX_Z - targetPos) / 29.98;
 		} else {
 			return 0.0;
 		}
