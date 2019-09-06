@@ -249,6 +249,7 @@ public class DataProvider {
 						paddle.TRACK_ID = trkId;
 						paddle.VERTEX_Z = tbtBank.getFloat("Vtx0_z", trkId-1);
 						paddle.CHARGE = tbtBank.getInt("q", trkId-1);
+						paddle.ENERGY = energy;
 						
 						if (TOFCalibration.maxRcs != 0.0) {
 							paddle.TRACK_REDCHI2 = tbtBank.getFloat("chi2", trkId-1)/tbtBank.getShort("ndf", trkId-1);

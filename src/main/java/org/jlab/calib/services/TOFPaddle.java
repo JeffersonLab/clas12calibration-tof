@@ -24,6 +24,7 @@ public class TOFPaddle {
 	public int ADCR = 0;
 	public int TDCL = 0;
 	public int TDCR = 0;
+	public double ENERGY = 0;
 	public float ADC_TIMEL = 0;
 	public float ADC_TIMER = 0;
 	public double XPOS = 0.0;
@@ -186,6 +187,34 @@ public class TOFPaddle {
 		}
 		return rfpad;
 	}
+	
+	public double tw0() {
+		double tw0 = 0.0;
+		if (tof == "FTOF") {
+			tw0 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_left", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+		return tw0;
+	}
+
+	public double tw1() {
+		double tw1 = 0.0;
+		if (tof == "FTOF") {
+			tw1 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1_left", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+		return tw1;
+	}
+	
+	public double tw2() {
+		double tw2 = 0.0;
+		if (tof == "FTOF") {
+			tw2 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2_left", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+		return tw2;
+	}
+	
 	
 	public double lamL() {
 		double lamL = 0.0;
@@ -432,6 +461,38 @@ public class TOFPaddle {
 			return tdcToTimeR(TDCR);
 		}
 	}	
+	
+	// LC Sep 19
+	private double TWCorr() {
+		
+		double twCorr = tw0()*Math.exp(tw1()*ENERGY) + tw2()/ENERGY;
+
+		return twCorr;
+
+	}
+	
+	// LC Sep 19
+	public double deltaTTW(double offset) {
+
+		double lr = leftRightAdjustment();
+
+		double beta = 1.0;
+		if (beta() != 0.0) {
+			beta = beta();
+		}
+
+		//double dtL = tdcToTimeL(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
+		//		- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
+		double dtL = -refTimeTWPosCorr();
+
+		// subtract the correction based on previous calibration values
+		dtL = dtL - TWCorr();
+		dtL = dtL + offset;
+		double bb = TOFCalibrationEngine.BEAM_BUCKET;
+		dtL = (dtL + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
+
+		return dtL;
+	}
 
 	public double deltaTLeft(double offset) {
 
@@ -444,7 +505,7 @@ public class TOFPaddle {
 
 		double dtL = tdcToTimeL(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
 				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
-
+		
 		// subtract the correction based on previous calibration values
 		dtL = dtL - TWCorrL();
 		dtL = dtL + offset;
@@ -453,46 +514,6 @@ public class TOFPaddle {
 
 		return dtL;
 	}
-	
-	public double deltaTLeftTest(double offset) {
-		
-		boolean show=false;
-		if (this.XPOS==280.42010498046875) show=true;
-
-		double lr = leftRightAdjustment();
-
-		double beta = 1.0;
-		if (beta() != 0.0) {
-			beta = beta();
-		}
-
-		double dtL = tdcToTimeL(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
-				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
-
-		if (show) {
-			System.out.println("tdcToTime(TDCL) "+tdcToTimeL(TDCL));
-			System.out.println("(lr / 2) "+(lr / 2));
-			System.out.println("rfpad() "+rfpad());
-			System.out.println("((0.5 * paddleLength() + paddleY()) / this.veff()) "+((0.5 * paddleLength() + paddleY()) / this.veff()));
-			System.out.println("(PATH_LENGTH / (beta * 29.98)) "+(PATH_LENGTH / (beta * 29.98)));
-			System.out.println("dtL "+dtL);
-			
-		}
-		
-		// subtract the correction based on previous calibration values
-		dtL = dtL - TWCorrL();
-		if (show) {
-			System.out.println("dtL2 "+dtL);
-		}
-		dtL = dtL + offset;
-		double bb = TOFCalibrationEngine.BEAM_BUCKET;
-		dtL = (dtL + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
-
-		if (show) {
-			System.out.println("dtL3 "+dtL);
-		}
-		return dtL;
-	}	
 
 	public double deltaTRight(double offset) {
 
@@ -514,23 +535,16 @@ public class TOFPaddle {
 
 		return dtR;
 	}
-
-//	public double deltaTLeftRFCorr() {
-//		return deltaTLeft(0.0) + rfpad();
-//	}
-//	
-//	public double deltaTRightRFCorr() {
-//		return deltaTRight(0.0) + rfpad();
-//	}
 	
 	public double ctofCenter() {
 		double center = 0.0;
+		double targetPos = -3.0;
 		int paddle = this.getDescriptor().getComponent();
 		if (paddle%2==0) {
-			center = -8.5031;
+			center = -8.5031 - targetPos;
 		}
 		else {
-			center = -8.9874;
+			center = -8.9874 - targetPos;
 		}
 		return center;
 	}
