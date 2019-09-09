@@ -322,6 +322,18 @@ public class TOFPaddle {
 		startTime = averageHitTime() - (PATH_LENGTH / (beta * 29.98));
 		return startTime;
 	}
+	
+	public double startTimeNoTW() {
+		double startTime = 0.0;
+
+		double beta = 1.0;
+		if (beta() != 0.0) {
+			beta = beta();
+		}
+
+		startTime = averageHitTimeNoTW() - (PATH_LENGTH / (beta * 29.98));
+		return startTime;
+	}
 
 	public double reconStartTime() {
 		double startTime = 0.0;
@@ -339,6 +351,17 @@ public class TOFPaddle {
 		return startTime() + rfpad() + p2p();
 	}
 
+	public double averageHitTimeNoTW() {
+
+		double lr = leftRightAdjustment();
+		double tL = tdcToTimeL(TDCL) - (lr / 2) - ((0.5 * paddleLength() + paddleY()) / this.veff());
+
+		double tR = tdcToTimeL(TDCR) + (lr / 2) - ((0.5 * paddleLength() - paddleY()) / this.veff());
+
+		return (tL + tR) / 2.0;
+
+	}
+	
 	public double averageHitTime() {
 
 		double lr = leftRightAdjustment();
@@ -362,6 +385,10 @@ public class TOFPaddle {
 	public double refTime() {
 		return this.RF_TIME - (this.startTime() - vertexCorr());
 	}
+	
+	public double refTimeNoTW() {
+		return this.RF_TIME - (this.startTimeNoTW() - vertexCorr());
+	}	
 
 	// ref time for CTOF - use STTime from REC::Event
 	public double refSTTime() {
@@ -428,26 +455,26 @@ public class TOFPaddle {
 
 	}
 	
-	private double TWCorrL() {
-		
-		double tw0Corr = lamL() / Math.pow(ADCL, 0.5);
-
-		return tw0Corr;
-
-	}
-
-	private double TWCorrR() {
-		
-		double tw0Corr = lamR() / Math.pow(ADCR, 0.5);
-
-		return tw0Corr;
-
-	}
+//	private double TWCorrL() {
+//		
+//		double tw0Corr = lamL() / Math.pow(ADCL, 0.5);
+//
+//		return tw0Corr;
+//
+//	}
+//
+//	private double TWCorrR() {
+//		
+//		double tw0Corr = lamR() / Math.pow(ADCR, 0.5);
+//
+//		return tw0Corr;
+//
+//	}
 	
 	public double timeLeftAfterTW() {
 		if (tof == "FTOF") {
 			// return tdcToTime(TDCL) - (lamL() / Math.pow(ADCL, 0.5));
-			return tdcToTimeL(TDCL) - TWCorrL();
+			return tdcToTimeL(TDCL) - 0.5*TWCorr();
 		} else {
 			return tdcToTimeL(TDCL);
 		}
@@ -456,7 +483,7 @@ public class TOFPaddle {
 	public double timeRightAfterTW() {
 		if (tof == "FTOF") {
 			// return tdcToTime(TDCR) - (lamR() / Math.pow(ADCR, 0.5));
-			return tdcToTimeR(TDCR) - TWCorrR();
+			return tdcToTimeR(TDCR) - 0.5*TWCorr();
 		} else {
 			return tdcToTimeR(TDCR);
 		}
@@ -474,16 +501,10 @@ public class TOFPaddle {
 	// LC Sep 19
 	public double deltaTTW(double offset) {
 
-		double lr = leftRightAdjustment();
-
-		double beta = 1.0;
-		if (beta() != 0.0) {
-			beta = beta();
-		}
-
 		//double dtL = tdcToTimeL(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
 		//		- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
-		double dtL = -refTimeTWPosCorr();
+		
+		double dtL = -refTimeNoTW();
 
 		// subtract the correction based on previous calibration values
 		dtL = dtL - TWCorr();
@@ -494,47 +515,47 @@ public class TOFPaddle {
 		return dtL;
 	}
 
-	public double deltaTLeft(double offset) {
-
-		double lr = leftRightAdjustment();
-
-		double beta = 1.0;
-		if (beta() != 0.0) {
-			beta = beta();
-		}
-
-		double dtL = tdcToTimeL(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
-				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
-		
-		// subtract the correction based on previous calibration values
-		dtL = dtL - TWCorrL();
-		dtL = dtL + offset;
-		double bb = TOFCalibrationEngine.BEAM_BUCKET;
-		dtL = (dtL + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
-
-		return dtL;
-	}
-
-	public double deltaTRight(double offset) {
-
-		double lr = leftRightAdjustment();
-
-		double beta = 1.0;
-		if (beta() != 0.0) {
-			beta = beta();
-		}
-
-		double dtR = tdcToTimeR(TDCR) + (lr / 2) + rfpad() - ((0.5 * paddleLength() - paddleY()) / this.veff())
-				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
-
-		// subtract the correction based on previous calibration values
-		dtR = dtR - TWCorrR();
-		dtR = dtR + offset;
-		double bb = TOFCalibrationEngine.BEAM_BUCKET;
-		dtR = (dtR + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
-
-		return dtR;
-	}
+//	public double deltaTLeft(double offset) {
+//
+//		double lr = leftRightAdjustment();
+//
+//		double beta = 1.0;
+//		if (beta() != 0.0) {
+//			beta = beta();
+//		}
+//
+//		double dtL = tdcToTimeL(TDCL) - (lr / 2) + rfpad() - ((0.5 * paddleLength() + paddleY()) / this.veff())
+//				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
+//		
+//		// subtract the correction based on previous calibration values
+//		dtL = dtL - TWCorrL();
+//		dtL = dtL + offset;
+//		double bb = TOFCalibrationEngine.BEAM_BUCKET;
+//		dtL = (dtL + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
+//
+//		return dtL;
+//	}
+//
+//	public double deltaTRight(double offset) {
+//
+//		double lr = leftRightAdjustment();
+//
+//		double beta = 1.0;
+//		if (beta() != 0.0) {
+//			beta = beta();
+//		}
+//
+//		double dtR = tdcToTimeR(TDCR) + (lr / 2) + rfpad() - ((0.5 * paddleLength() - paddleY()) / this.veff())
+//				- (PATH_LENGTH / (beta * 29.98)) - vertexCorr() - this.RF_TIME;
+//
+//		// subtract the correction based on previous calibration values
+//		dtR = dtR - TWCorrR();
+//		dtR = dtR + offset;
+//		double bb = TOFCalibrationEngine.BEAM_BUCKET;
+//		dtR = (dtR + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
+//
+//		return dtR;
+//	}
 	
 	public double ctofCenter() {
 		double center = 0.0;
@@ -753,7 +774,7 @@ public class TOFPaddle {
 				+ " veff " + veff() + " tdcConvL "+ tdcConvL() + " tdcConvR "+ tdcConvR());
 		System.out.println("paddleLength " + paddleLength() + " paddleY " + paddleY() + "ctofCenter "+ctofCenter());
 		System.out.println("timeLeftAfterTW " + timeLeftAfterTW() + " timeRightAfterTW " + timeRightAfterTW());
-		System.out.println("deltaTLeft " + this.deltaTLeft(0.0) + " deltaTRight " + this.deltaTRight(0.0));
+		System.out.println("deltaTLeft " + this.deltaTTW(0.0) + " deltaTRight ");
 
 	}
 
