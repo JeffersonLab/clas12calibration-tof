@@ -117,13 +117,21 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 					adcLHist.setTitleY("delta T (ns)");
 					dg.addDataSet(adcLHist, 4);
 
-					H2F adcRHist = 
-							new H2F("adcRHist",histTitle(sector,layer,paddle),
-									100, ADC_MIN[layer], ADC_MAX[layer],
+//					H2F adcRHist = 
+//							new H2F("adcRHist",histTitle(sector,layer,paddle),
+//									100, ADC_MIN[layer], ADC_MAX[layer],
+//									bins, -bb*0.5, bb*0.5);
+//					adcRHist.setTitleX("ADC Right");
+//					adcRHist.setTitleY("delta T (ns)");
+//					dg.addDataSet(adcRHist, 5);
+					
+					H2F energyHist = 
+							new H2F("energyHist",histTitle(sector,layer,paddle),
+									100, 0.0, 50.0,
 									bins, -bb*0.5, bb*0.5);
-					adcRHist.setTitleX("ADC Right");
-					adcRHist.setTitleY("delta T (ns)");
-					dg.addDataSet(adcRHist, 5);
+					energyHist.setTitleX("Energy");
+					energyHist.setTitleY("delta T (ns)");
+					dg.addDataSet(energyHist, 5);					
 					
 					dataGroups.add(dg,sector,layer,paddle);    
 
@@ -171,8 +179,11 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 						 pad.ADCL,
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
-				dataGroups.getItem(sector,layer,component).getH2F("adcRHist").fill(
-						 pad.ADCR,
+//				dataGroups.getItem(sector,layer,component).getH2F("adcRHist").fill(
+//						 pad.ADCR,
+//						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+				dataGroups.getItem(sector,layer,component).getH2F("energyHist").fill(
+						 pad.ENERGY,
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				
 			}
@@ -197,8 +208,11 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 		showPlotType = "CHECK_ADCL";
 		stepName = "ADC Left vs Vertex Time";
 		super.showPlots(sector, layer);
-		showPlotType = "CHECK_ADCR";
-		stepName = "ADC Right vs Vertex Time";
+//		showPlotType = "CHECK_ADCR";
+//		stepName = "ADC Right vs Vertex Time";
+//		super.showPlots(sector, layer);
+		showPlotType = "CHECK_ENERGY";
+		stepName = "Energy vs Vertex Time";
 		super.showPlots(sector, layer);
 
 	}
@@ -222,8 +236,11 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 		else if (showPlotType == "CHECK_ADCL") { 
 			hist = dataGroups.getItem(sector,layer,paddle).getH2F("adcLHist");
 		}
-		else if (showPlotType == "CHECK_ADCR") {
-			hist = dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist");
+//		else if (showPlotType == "CHECK_ADCR") {
+//			hist = dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist");
+//		}
+		else if (showPlotType == "CHECK_ENERGY") {
+			hist = dataGroups.getItem(sector,layer,paddle).getH2F("energyHist");
 		}
 		
 		hist.setTitleX("");
@@ -244,8 +261,10 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 		dataGroups.getItem(sector,layer,paddle).getH2F("pathHist").setTitleY("delta T (ns)");
 		dataGroups.getItem(sector,layer,paddle).getH2F("adcLHist").setTitleX("ADC Left");
 		dataGroups.getItem(sector,layer,paddle).getH2F("adcLHist").setTitleY("delta T (ns)");
-		dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist").setTitleX("ADC Right");
-		dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist").setTitleY("delta T (ns)");
+//		dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist").setTitleX("ADC Right");
+//		dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist").setTitleY("delta T (ns)");
+		dataGroups.getItem(sector,layer,paddle).getH2F("energyHist").setTitleX("Energy");
+		dataGroups.getItem(sector,layer,paddle).getH2F("energyHist").setTitleY("delta T (ns)");
 	}	
 
 	@Override

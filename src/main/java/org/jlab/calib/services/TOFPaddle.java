@@ -474,7 +474,7 @@ public class TOFPaddle {
 	public double timeLeftAfterTW() {
 		if (tof == "FTOF") {
 			// return tdcToTime(TDCL) - (lamL() / Math.pow(ADCL, 0.5));
-			return tdcToTimeL(TDCL) - 0.5*TWCorr();
+			return tdcToTimeL(TDCL) - TWCorr();
 		} else {
 			return tdcToTimeL(TDCL);
 		}
@@ -483,7 +483,7 @@ public class TOFPaddle {
 	public double timeRightAfterTW() {
 		if (tof == "FTOF") {
 			// return tdcToTime(TDCR) - (lamR() / Math.pow(ADCR, 0.5));
-			return tdcToTimeR(TDCR) - 0.5*TWCorr();
+			return tdcToTimeR(TDCR) - TWCorr();
 		} else {
 			return tdcToTimeR(TDCR);
 		}
@@ -760,7 +760,7 @@ public class TOFPaddle {
 		System.out.println("XPOS " + XPOS + " YPOS " + YPOS + " ZPOS " + ZPOS + " PATH_LENGTH " + PATH_LENGTH 
 				+ " TRACK_ID " + TRACK_ID);
 		System.out.println("PARTICLE_ID "+PARTICLE_ID+" mass "+mass()+" beta " + beta() + " P " + P + " RF_TIME " + RF_TIME + "ST_TIME " + ST_TIME + " RECON_TIME "
-				+ RECON_TIME);
+				+ RECON_TIME + "ENERGY " + ENERGY);
 		System.out.println("VERTEX_Z " + VERTEX_Z + " TRACK_REDCHI2 " + TRACK_REDCHI2 + " CHARGE " + CHARGE
 				+ " TRIGGER_BIT " + TRIGGER_BIT);
 		System.out.println("goodTrackFound " + goodTrackFound() + " chargeMatch " + chargeMatch() + " pidMatch "+pidMatch());
@@ -774,7 +774,7 @@ public class TOFPaddle {
 				+ " veff " + veff() + " tdcConvL "+ tdcConvL() + " tdcConvR "+ tdcConvR());
 		System.out.println("paddleLength " + paddleLength() + " paddleY " + paddleY() + "ctofCenter "+ctofCenter());
 		System.out.println("timeLeftAfterTW " + timeLeftAfterTW() + " timeRightAfterTW " + timeRightAfterTW());
-		System.out.println("deltaTLeft " + this.deltaTTW(0.0) + " deltaTRight ");
+		System.out.println("deltaTW " + this.deltaTTW(0.0));
 
 	}
 

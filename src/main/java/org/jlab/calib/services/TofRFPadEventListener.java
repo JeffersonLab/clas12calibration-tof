@@ -211,7 +211,7 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
 
-			//if (pad.TRACK_ID != -1)	pad.show();
+			//if (sector == 1 && layer==2 && component==10)	pad.show();
 
 			if (pad.goodTrackFound()) {
 				
