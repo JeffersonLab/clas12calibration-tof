@@ -459,7 +459,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		String[] fields = {"Min range for fit:", "Max range for fit:", "SPACE", 
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
 				"Override TW0:", "Override TW1:", "Override TW2:"};
-		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
+
+		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer, TOFCustomFitPanel.USE_RANGE_Y);
 
 		int result = JOptionPane.showConfirmDialog(null, panel, 
 				"Adjust Fit / Override for paddle "+paddle, JOptionPane.OK_CANCEL_OPTION);
@@ -479,19 +480,43 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 			int minP = paddle;
 			int maxP = paddle;
+			int minL = layer;
+			int maxL = layer;
 			int minS = sector;
 			int maxS = sector;
-			if (panel.applyLevel == panel.APPLY_P) {
-				// if fitting one paddle then show inspectFits view
-				showSlices = true;
+			if (panel.applyLevel == panel.APPLY_R) {
+				if (panel.minS.getText().compareTo("") !=0) {
+					minS =Integer.parseInt(panel.minS.getText());
+				}
+				if (panel.maxS.getText().compareTo("") !=0) {
+					maxS =Integer.parseInt(panel.maxS.getText()); 
+				}
+				if (panel.minL.getText().compareTo("") !=0) {
+					minL =Integer.parseInt(panel.minL.getText());
+				}
+				if (panel.maxL.getText().compareTo("") !=0) {
+					maxL =Integer.parseInt(panel.maxL.getText()); 
+				}
+				if (panel.minP.getText().compareTo("") !=0) {
+					minP =Integer.parseInt(panel.minP.getText());
+				}
+				if (panel.maxP.getText().compareTo("") !=0) {
+					maxP =Integer.parseInt(panel.maxP.getText()); 
+				}
 			}
 			else {
-				minP = 1;
-				maxP = NUM_PADDLES[layer-1];
-			}
-			if (panel.applyLevel == panel.APPLY_L) {
-				minS = 1;
-				maxS = 6;
+				if (panel.applyLevel == panel.APPLY_P) {
+					// if fitting one paddle then show inspectFits view
+					showSlices = true;
+				}
+				else {
+					minP = 1;
+					maxP = NUM_PADDLES[layer-1];
+				}
+				if (panel.applyLevel == panel.APPLY_L) {
+					minS = 1;
+					maxS = 6;
+				}
 			}
 			
 			for (int s=minS; s<=maxS; s++) {

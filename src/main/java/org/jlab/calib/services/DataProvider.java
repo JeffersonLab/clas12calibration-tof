@@ -202,23 +202,19 @@ public class DataProvider {
 				
 				//System.out.println("Paddle created "+paddle.getDescriptor().getSector()+paddle.getDescriptor().getLayer()+paddle.getDescriptor().getComponent());
 
-				if (event.hasBank("TimeBasedTrkg::TBTracks") && event.hasBank("RUN::rf")) {
+				if (event.hasBank("TimeBasedTrkg::TBTracks")) {
 
 					DataBank  tbtBank = event.getBank("TimeBasedTrkg::TBTracks");
-					DataBank  rfBank = event.getBank("RUN::rf");
 					
 					if (event.hasBank("RUN::config")) {
 						DataBank  configBank = event.getBank("RUN::config");
 						paddle.TRIGGER_BIT = configBank.getLong("trigger", 0);
 					}
 					
-					// get the RF time with id=1
+					// get the RF time from REC::Event
 					double trf = 0.0; 
-					for (int rfIdx=0; rfIdx<rfBank.rows(); rfIdx++) {
-						if (rfBank.getShort("id",rfIdx)==1) {
-							trf = rfBank.getFloat("time",rfIdx);
-						}
-					}
+					DataBank eventBank = event.getBank("REC::Event");
+					trf = eventBank.getFloat("RFTime",0);
 
 					// Identify electrons and store path length etc for time walk
 					int trkId = hitsBank.getShort("trackid", hitIndex);
@@ -227,7 +223,7 @@ public class DataProvider {
 					//System.out.println("trkId energy trf "+trkId+" "+energy+" "+trf);
 
 					// only use hit with associated track and a minimum energy
-					if (trkId!=-1 && energy>1.5) {
+					if (trkId!=-1 && energy>TOFCalibration.minE) {
 						
 						double c3x  = tbtBank.getFloat("c3_x",trkId-1);
 						double c3y  = tbtBank.getFloat("c3_y",trkId-1);

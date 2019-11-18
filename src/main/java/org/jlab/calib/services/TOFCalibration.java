@@ -185,6 +185,9 @@ ChangeListener {
 	private JTextField maxPText = new JTextField(5);
 	public static double maxP = 0.0;
 	
+	private JTextField minEText = new JTextField(5);
+	public static double minE = 0.0;	
+	
 	JComboBox<String> trackChargeList = new JComboBox<String>();
 	public static int trackCharge = 0;
 	public final static int TRACK_BOTH = 0;
@@ -461,6 +464,10 @@ ChangeListener {
 				maxP = Double.parseDouble(maxPText.getText());
 			}
 			
+			if (minEText.getText().compareTo("") != 0) {
+				minE = Double.parseDouble(minEText.getText());
+			}			
+			
 			massAss = massAssList.getSelectedIndex();
 			trackCharge = trackChargeList.getSelectedIndex();
 			TOFCalibrationEngine.BEAM_BUCKET = (Double) trfList.getSelectedItem();
@@ -512,6 +519,7 @@ ChangeListener {
 			System.out.println("Maximum vertex z: "+maxV);
 			System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(vertexCorr));
 			System.out.println("Momentum range (GeV): "+minP+"-"+maxP);
+			System.out.println("Minimum energy deposit (MeV): "+minE);
 			System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(massAss));
 			System.out.println("Track charge: "+trackChargeList.getItemAt(trackCharge));
 			System.out.println("RF period: "+TOFCalibrationEngine.BEAM_BUCKET);
@@ -976,6 +984,18 @@ ChangeListener {
 		c.gridx = 1;
 		c.gridy = y;
 		trPanel.add(pPanel,c);
+		
+        // min E
+        y++;
+        c.gridx = 0;
+        c.gridy = y;
+        trPanel.add(new JLabel("Minimum energy deposition (MeV):"),c);
+        c.gridx = 1;
+        c.gridy = y;
+		minEText.addActionListener(this);
+		minEText.setText("1.0");
+        trPanel.add(minEText,c);
+		
         // mass assumption
         y++;
         c.gridx = 0;
