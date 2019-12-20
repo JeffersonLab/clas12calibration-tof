@@ -284,11 +284,12 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
 //            System.out.println("getH1FEntries "+getH1FEntries(slices.get(i)));
 //            System.out.println("H1F getEntries "+slices.get(i).getEntries());
             
-            if (getH1FEntries(slices.get(i)) > fitMinEvents) {
-                int maxBin = slices.get(i).getMaximumBin();
+//            if (getH1FEntries(slices.get(i)) > fitMinEvents) {
+            int maxBin = slices.get(i).getMaximumBin();
+            if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
                 sliceMax[i] = slices.get(i).getxAxis().getBinCenter(maxBin);
                 //maxErrs[i] = maxGraphError;
-                maxErrs[i] = slices.get(i).getRMS();
+                maxErrs[i] = slices.get(i).getRMS()/Math.sqrt(slices.get(i).getBinContent(maxBin));
 
                 xVals[i] = hist.getXAxis().getBinCenter(i);
                 xErrs[i] = hist.getXAxis().getBinWidth(i)/2.0;

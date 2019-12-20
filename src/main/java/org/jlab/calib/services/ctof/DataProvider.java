@@ -202,15 +202,6 @@ public class DataProvider {
 						paddle.TIMESTAMP = configBank.getLong("timestamp", 0);
 					}
 					
-
-					// get the RF time with id=1
-					double trf = 0.0;
-					for (int rfIdx = 0; rfIdx < rfBank.rows(); rfIdx++) {
-						if (rfBank.getShort("id", rfIdx) == 1) {
-							trf = rfBank.getFloat("time", rfIdx);
-						}
-					}
-
 					int trkId = hitsBank.getShort("trkID", hitIndex);
 					// Get track
 					double energy = hitsBank.getFloat("energy", hitIndex);
@@ -231,9 +222,8 @@ public class DataProvider {
 						paddle.PATH_LENGTH = hitsBank.getFloat("pathLength", hitIndex);
 						paddle.PATH_LENGTH_BAR = hitsBank.getFloat("pathLengthThruBar", hitIndex);
 						// System.out.println("Louise 237");
-						paddle.RF_TIME = trf;
-						
-						// Get the momentum and record the beta (assuming every hit is a pion!)
+
+                                                // Get the momentum and record the beta (assuming every hit is a pion!)
 						double mom = trkBank.getFloat("p", trkIdx);
 						//double mass = massList[CTOFCalibration.massAss];
 						//double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
@@ -260,6 +250,8 @@ public class DataProvider {
 								//paddle.ST_TIME = eventBank.getFloat(stName, 0);
 								// LC Jul 2019
 								// get the electron start time from the scintillator bank
+                                                                double trf = event.getBank("REC::Event").getFloat("RFTime", 0);
+                                                                paddle.RF_TIME = trf;
 								if (event.hasBank("REC::Scintillator") ) {
 									DataBank scinBank = event.getBank("REC::Scintillator");
 									double elecStartTime = 0.0;

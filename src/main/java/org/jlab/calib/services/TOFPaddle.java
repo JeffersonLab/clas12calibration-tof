@@ -651,8 +651,11 @@ public class TOFPaddle {
 		double pos = halfTimeDiff() * veff();
 		// System.out.println("position "+pos);
 		// System.out.println("veff "+veff());
-		return halfTimeDiff() * veff();
-	}
+                if (tof == "CTOF") {
+                    pos = pos + ctofCenter();
+                }
+		return pos;
+                }
 
 	public double paddleY() {
 
@@ -739,7 +742,7 @@ public class TOFPaddle {
 	}
 
 	public double zPosCTOF() {
-		return ZPOS - ctofCenter();
+		return ZPOS;
 	}
 
 	public DetectorDescriptor getDescriptor() {
