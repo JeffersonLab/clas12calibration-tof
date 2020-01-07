@@ -889,9 +889,9 @@ ChangeListener {
 		targetGMean[0].addActionListener(this);
 		targetGMean[1].addActionListener(this);
 		targetGMean[2].addActionListener(this);
-		targetGMean[0].setText("800");
-		targetGMean[1].setText("2000");
-		targetGMean[2].setText("800");
+		targetGMean[0].setText("650");
+		targetGMean[1].setText("1000");
+		targetGMean[2].setText("650");
 		tgmPanel.add(targetGMean[0]);
 		tgmPanel.add(targetGMean[1]);
 		tgmPanel.add(targetGMean[2]);
@@ -925,8 +925,8 @@ ChangeListener {
 		JPanel rcsPanel = new JPanel();
 		rcsText.addActionListener(this);
 		rcsText2.addActionListener(this);
-		rcsText.setText("100.0");
-		rcsText2.setText("100000.0");
+		rcsText.setText("75.0");
+		rcsText2.setText("5000.0");
 		rcsPanel.add(rcsText);
 		rcsPanel.add(rcsText2);
 		trPanel.add(rcsPanel,c);
@@ -949,7 +949,7 @@ ChangeListener {
 		c.gridy = y;
 		trPanel.add(new JLabel("Maximum vertex z:"),c);
 		maxVText.addActionListener(this);
-		maxVText.setText("10.0");
+		maxVText.setText("5.0");
 		c.gridx = 1;
 		c.gridy = y;
 		trPanel.add(maxVText,c);
@@ -975,9 +975,9 @@ ChangeListener {
 
 		JPanel pPanel = new JPanel();
 		minPText.addActionListener(this);
-		minPText.setText("1.0");
+		minPText.setText("0.4");
 		maxPText.addActionListener(this);
-		maxPText.setText("9.0");
+		maxPText.setText("10.0");
 		pPanel.add(minPText);
 		pPanel.add(new JLabel(" - "));
 		pPanel.add(maxPText);
@@ -993,7 +993,7 @@ ChangeListener {
         c.gridx = 1;
         c.gridy = y;
 		minEText.addActionListener(this);
-		minEText.setText("1.0");
+		minEText.setText("0.5");
         trPanel.add(minEText,c);
 		
         // mass assumption
@@ -1028,8 +1028,8 @@ ChangeListener {
         c.gridx = 0;
         c.gridy = y;
         trPanel.add(new JLabel("RF Period:"),c);
-		trfList.addItem(2.004);
 		trfList.addItem(4.008);
+		trfList.addItem(2.004);
         trfList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
@@ -1106,7 +1106,7 @@ ChangeListener {
 		c.gridy = y;
 		trPanel.add(new JLabel("Minimum events per slice:"),c);
 		minEventsText.addActionListener(this);
-		minEventsText.setText("10");
+		minEventsText.setText("5");
 		c.gridx = 1;
 		c.gridy = y;
 		trPanel.add(minEventsText,c);

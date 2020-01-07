@@ -873,7 +873,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 		c.gridx = 1;
 		c.gridy = y;
 		targetGMean.addActionListener(this);
-		targetGMean.setText("1500");
+		targetGMean.setText("900");
 		trPanel.add(targetGMean,c);
 		c.gridx = 2;
 		c.gridy = y;
@@ -923,7 +923,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridy = y;
         trPanel.add(new JLabel("Maximum vertex z:"),c);
         maxVText.addActionListener(this);
-        maxVText.setText("10.0");
+        maxVText.setText("5.0");
         c.gridx = 1;
         c.gridy = y;
         trPanel.add(maxVText,c);
@@ -970,7 +970,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         massAssList.addItem("Proton");
         massAssList.addItem("Electron");
         massAssList.addItem("Use PID");
-        massAssList.setSelectedIndex(TOFCalibration.USE_PID);
+        massAssList.setSelectedIndex(TOFCalibration.MASS_PION);
         massAssList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
@@ -980,9 +980,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridx = 0;
         c.gridy = y;
         trPanel.add(new JLabel("Track charge:"),c);
-        trackChargeList.addItem("Both");
         trackChargeList.addItem("Negative");
         trackChargeList.addItem("Positive");
+        trackChargeList.addItem("Both");
         trackChargeList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
@@ -992,8 +992,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridx = 0;
         c.gridy = y;
         trPanel.add(new JLabel("RF Period:"),c);
-		trfList.addItem(2.004);
 		trfList.addItem(4.008);
+		trfList.addItem(2.004);
         trfList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
@@ -1053,7 +1053,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridy = y;
         trPanel.add(new JLabel("Minimum events per slice:"),c);
         minEventsText.addActionListener(this);
-        minEventsText.setText("10");
+        minEventsText.setText("5");
         c.gridx = 1;
         c.gridy = y;
         trPanel.add(minEventsText,c);
