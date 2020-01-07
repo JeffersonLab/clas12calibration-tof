@@ -983,6 +983,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         trackChargeList.addItem("Negative");
         trackChargeList.addItem("Positive");
         trackChargeList.addItem("Both");
+        trackChargeList.setSelectedIndex(TOFCalibration.TRACK_NEG);
         trackChargeList.addActionListener(this);
         c.gridx = 1;
         c.gridy = y;
