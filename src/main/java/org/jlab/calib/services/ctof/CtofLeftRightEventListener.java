@@ -232,7 +232,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
             
 			if (paddle.goodTrackFound()) {
 				dataGroups.getItem(sector,layer,component).getH1F("left_right").fill(
-						2.0*(paddle.veffHalfTimeDiff() - paddle.paddleY()/paddle.veff()));
+						2.0*(paddle.veffHalfTimeDiff() - (paddle.paddleY()- paddle.ctofCenter())/paddle.veff()));
 			}
         }
     }

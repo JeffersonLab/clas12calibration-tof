@@ -172,7 +172,7 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
                             "veff",
                             numBins, min, max, 
                             //200, -15.0, 15.0);
-                            100, -28.0, 2.0);
+                            100, -15.0, -5.0);
 
             hist.setName("veff");
             hist.setTitle("Half Time Diff vs Position : Paddle "+paddle);
@@ -509,7 +509,7 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
 
     @Override
     public void drawPlots(int sector, int layer, int paddle, EmbeddedCanvas canvas) {
-
+        
         GraphErrors graph = dataGroups.getItem(sector,layer,paddle).getGraph("veffGraph");
         if (graph.getDataSize(0) != 0) {
             graph.setTitleX("");
