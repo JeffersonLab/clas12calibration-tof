@@ -127,12 +127,12 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					int sector = Integer.parseInt(lineValues[0]);
 					int layer = Integer.parseInt(lineValues[1]);
 					int paddle = Integer.parseInt(lineValues[2]);
-					double tw0L = Double.parseDouble(lineValues[3]);
-					double tw1L = Double.parseDouble(lineValues[4]);
-					double tw2L = Double.parseDouble(lineValues[5]);
-					double tw0R = Double.parseDouble(lineValues[6]);
-					double tw1R = Double.parseDouble(lineValues[7]);
-					double tw2R = Double.parseDouble(lineValues[8]);
+					double tw0L = Double.parseDouble(lineValues[4]);
+					double tw1L = Double.parseDouble(lineValues[5]);
+					double tw2L = Double.parseDouble(lineValues[6]);
+					double tw0R = Double.parseDouble(lineValues[7]);
+					double tw1R = Double.parseDouble(lineValues[8]);
+					double tw2R = Double.parseDouble(lineValues[9]);
 
 					timeWalkValues.addEntry(sector, layer, paddle);
 					timeWalkValues.setDoubleValue(tw0L,
@@ -608,7 +608,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					int layer_index = layer - 1;
 					for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 						String line = new String();
-						line = sector+" "+layer+" "+paddle+" "
+						line = sector+" "+layer+" "+paddle+" " + "1" +  " "
 								+new DecimalFormat("0.000").format(getTW0(sector,layer,paddle))+" "
 								+new DecimalFormat("0.000").format(getTW1(sector,layer,paddle))+" "
 								+new DecimalFormat("0.000").format(getTW2(sector,layer,paddle))+" "
@@ -649,6 +649,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			//graph.setTitleY("");
 			canvas.draw(graph);
 			canvas.draw(dataGroups.getItem(sector,layer,paddle).getF1D("trFunc"), "same");
+                        canvas.getPad(0).getAxisZ().setLog(true);
+                        canvas.getPad(1).getAxisZ().setLog(true);
 		}
 
 	}
@@ -660,11 +662,12 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		F1D func = new F1D("trFunc");
 		hist = dataGroups.getItem(sector,layer,paddle).getH2F("offsetHist");
 		func = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc");
-
+                func.setLineColor(1);
 		//hist.setTitleX("");
 		//hist.setTitleY("");
 		canvas.draw(hist);    
 		canvas.draw(func, "same");
+                canvas.getPad().getAxisZ().setLog(true);
 		//canvas.draw(smfunc, "same");
 	}
 
