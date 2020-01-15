@@ -257,18 +257,18 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
 		}
 		else {
 			//lowLimit = maxPos-0.65;
-			lowLimit = maxPos-10.0;
+			lowLimit = maxPos-1.0;
 		}
 		if (maxRange != UNDEFINED_OVERRIDE) {
 			// use custom values for fit
 			highLimit = maxRange;
 		}
 		else {
-			highLimit = maxPos+10.0;
+			highLimit = maxPos+1.0;
 		}
 		lrFunc.setRange(lowLimit, highLimit);
 		lrFunc.setParameter(0, lrHist.getBinContent(maxBin));
-		lrFunc.setParLimits(0, lrHist.getBinContent(maxBin)*0.7, lrHist.getBinContent(maxBin)*1.2);
+		lrFunc.setParLimits(0, lrHist.getBinContent(maxBin)*0.5, lrHist.getBinContent(maxBin)*1.2);
 		lrFunc.setParameter(1, maxPos);
 		lrFunc.setParameter(2, 1.0);
 		//lrFunc.setParLimits(2, 0.5, 5.0);

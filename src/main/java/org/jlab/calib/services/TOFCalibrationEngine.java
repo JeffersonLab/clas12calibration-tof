@@ -330,37 +330,48 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 		return n;
 	}
 
-	public GraphErrors maxGraph(H2F hist, String graphName) {
+    public GraphErrors maxGraph(H2F hist, String graphName) {
+        
+        ArrayList<H1F> slices = hist.getSlicesX();
+        int nBins = hist.getXAxis().getNBins();
+        int nBinsGraph = 0;
+        
+        // Get the nBins to include in graph
+        for (int i=0; i<nBins; i++) {
+        	int maxBin = slices.get(i).getMaximumBin();
+            if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
+        		nBinsGraph++;
+        	}
+        }
+        if (nBinsGraph==0) {
+        	nBinsGraph=nBins; // avoid exception when no bins to include
+        }
+        
+        double[] sliceMax = new double[nBinsGraph];
+        double[] maxErrs = new double[nBinsGraph];
+        double[] xVals = new double[nBinsGraph];
+        double[] xErrs = new double[nBinsGraph];
+        
+        int j=0;
+        for (int i=0; i<nBins; i++) {
+            
+            int maxBin = slices.get(i).getMaximumBin();
+            if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
+                sliceMax[j] = slices.get(i).getxAxis().getBinCenter(maxBin);
+                maxErrs[j] = slices.get(i).getRMS()/Math.sqrt(slices.get(i).getBinContent(maxBin));
 
-		ArrayList<H1F> slices = hist.getSlicesX();
-		int nBins = hist.getXAxis().getNBins();
-		double[] sliceMax = new double[nBins];
-		double[] maxErrs = new double[nBins];
-		double[] xVals = new double[nBins];
-		double[] xErrs = new double[nBins];
-
-		for (int i=0; i<nBins; i++) {
-
-			//			System.out.println("getH1FEntries "+getH1FEntries(slices.get(i)));
-			//			System.out.println("H1F getEntries "+slices.get(i).getEntries());
-
-			if (getH1FEntries(slices.get(i)) > fitMinEvents) {
-				int maxBin = slices.get(i).getMaximumBin();
-				sliceMax[i] = slices.get(i).getxAxis().getBinCenter(maxBin);
-				maxErrs[i] = slices.get(i).getRMS();
-				//maxErrs[i] = maxGraphError;
-
-				xVals[i] = hist.getXAxis().getBinCenter(i);
-				xErrs[i] = hist.getXAxis().getBinWidth(i)/2.0;
-			}
-		}
-
-		GraphErrors maxGraph = new GraphErrors(graphName, xVals, sliceMax, xErrs, maxErrs);
-		maxGraph.setName(graphName);
-
-		return maxGraph;
-
-	}
+                xVals[j] = hist.getXAxis().getBinCenter(i);
+                xErrs[j] = hist.getXAxis().getBinWidth(i)/2.0;
+                j++;
+            }
+        }
+        
+        GraphErrors maxGraph = new GraphErrors(graphName, xVals, sliceMax, xErrs, maxErrs);
+        maxGraph.setName(graphName);
+        
+        return maxGraph;
+        
+    }
 
 	public GraphErrors fixGraph(GraphErrors graphIn, String graphName) {
 

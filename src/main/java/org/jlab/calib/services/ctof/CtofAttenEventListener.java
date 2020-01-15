@@ -284,7 +284,7 @@ public class CtofAttenEventListener extends CTOFCalibrationEngine {
 
 	public void customFit(int sector, int layer, int paddle){
 
-		outputGraph(sector, layer, paddle);
+		//outputGraph(sector, layer, paddle);
 
 		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
@@ -480,57 +480,4 @@ public class CtofAttenEventListener extends CTOFCalibrationEngine {
 		return dg;
 
 	}
-
-	public void outputGraph(int sector, int layer, int paddle) {
-		String outputFileName = "CtofGraphSLC"+sector+layer+paddle+".txt";
-		String histFileName = "CtofHistSLC"+sector+layer+paddle+".txt";
-
-		try { 
-
-			// Open the output file
-			File outputFile = new File(outputFileName);
-			FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
-			BufferedWriter outputBw = new BufferedWriter(outputFw);
-			File histFile = new File(histFileName);
-			FileWriter histFw = new FileWriter(histFile.getAbsoluteFile());
-			BufferedWriter histBw = new BufferedWriter(histFw);
-
-			H2F attenHist = dataGroups.getItem(sector,layer,paddle).getH2F("atten");
-
-			for (int i=0; i<attenHist.getXAxis().getNBins(); i++) {
-				H1F h1 = attenHist.sliceX(i);
-				if (h1.integral()>1.0) {
-					outputBw.write(attenHist.getXAxis().getBinCenter(i)+" "+
-							h1.getMean()+" "+
-							attenHist.getXAxis().getBinWidth(i)/2.0+" "+
-							h1.getRMS());
-					outputBw.newLine();
-				}
-				for (int j=0; j<attenHist.getYAxis().getNBins(); j++) {
-
-					histBw.write(attenHist.getXAxis().getBinCenter(i)+" "+
-							attenHist.getYAxis().getBinCenter(j)+" "+
-							attenHist.getBinContent(i, j));
-					histBw.newLine();
-				}
-			}
-
-			outputBw.close();
-			histBw.close();
-		}
-		catch(IOException ex) {
-			ex.printStackTrace();
-		}
-
-		//		System.out.println("attlen "+getAttlen(sector,layer,paddle));
-		//		System.out.println("error in attlen "+getAttlenError(sector,layer,paddle));
-		//		System.out.println("gradient "+dataGroups.getItem(sector,layer,paddle).getF1D("attenFunc")
-		//				.getParameter(1));
-		//		System.out.println(" error in gradient "+dataGroups.getItem(sector,layer,paddle).getF1D("attenFunc")
-		//				.parameter(1).error());
-		//		System.out.println("lowLimit "+paddleLength(sector,layer,paddle) * -0.4);
-		//		System.out.println("highLimit "+paddleLength(sector,layer,paddle) * 0.4);
-
-	}
-
 }

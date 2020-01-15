@@ -274,25 +274,35 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         
         ArrayList<H1F> slices = hist.getSlicesX();
         int nBins = hist.getXAxis().getNBins();
-        double[] sliceMax = new double[nBins];
-        double[] maxErrs = new double[nBins];
-        double[] xVals = new double[nBins];
-        double[] xErrs = new double[nBins];
+        int nBinsGraph = 0;
         
+        // Get the nBins to include in graph
+        for (int i=0; i<nBins; i++) {
+        	int maxBin = slices.get(i).getMaximumBin();
+            if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
+        		nBinsGraph++;
+        	}
+        }
+        if (nBinsGraph==0) {
+        	nBinsGraph=nBins; // avoid exception when no bins to include
+        }
+        
+        double[] sliceMax = new double[nBinsGraph];
+        double[] maxErrs = new double[nBinsGraph];
+        double[] xVals = new double[nBinsGraph];
+        double[] xErrs = new double[nBinsGraph];
+        
+        int j=0;
         for (int i=0; i<nBins; i++) {
             
-//            System.out.println("getH1FEntries "+getH1FEntries(slices.get(i)));
-//            System.out.println("H1F getEntries "+slices.get(i).getEntries());
-            
-//            if (getH1FEntries(slices.get(i)) > fitMinEvents) {
             int maxBin = slices.get(i).getMaximumBin();
             if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
-                sliceMax[i] = slices.get(i).getxAxis().getBinCenter(maxBin);
-                //maxErrs[i] = maxGraphError;
-                maxErrs[i] = slices.get(i).getRMS()/Math.sqrt(slices.get(i).getBinContent(maxBin));
+                sliceMax[j] = slices.get(i).getxAxis().getBinCenter(maxBin);
+                maxErrs[j] = slices.get(i).getRMS()/Math.sqrt(slices.get(i).getBinContent(maxBin));
 
-                xVals[i] = hist.getXAxis().getBinCenter(i);
-                xErrs[i] = hist.getXAxis().getBinWidth(i)/2.0;
+                xVals[j] = hist.getXAxis().getBinCenter(i);
+                xErrs[j] = hist.getXAxis().getBinWidth(i)/2.0;
+                j++;
             }
         }
         

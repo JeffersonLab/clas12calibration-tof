@@ -172,7 +172,7 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
                             "veff",
                             numBins, min, max, 
                             //200, -15.0, 15.0);
-                            100, -15.0, -5.0);
+                            100, -12.0, -5.0);
 
             hist.setName("veff");
             hist.setTitle("Half Time Diff vs Position : Paddle "+paddle);
@@ -298,7 +298,11 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
         else {
             veffGraph.copy(veffHist.getProfileX());
         }
-                
+        
+        double min = paddleLength(1,1,paddle) * -0.6;
+        double max = paddleLength(1,1,paddle) * 0.6;
+
+        //CTOFCalibration.canvas.getPad(1).setAxisRange(min, max, -12.0, -9.0);
         F1D veffFunc = dataGroups.getItem(sector,layer,paddle).getF1D("veffFunc");
         veffFunc.setRange(lowLimit, highLimit);
 
