@@ -562,10 +562,10 @@ public class TOFPaddle {
 		double targetPos = -3.0;
 		int paddle = this.getDescriptor().getComponent();
 		if (paddle%2==0) {
-			center = -8.5031 - targetPos;
+			center = -8.5031 + targetPos;
 		}
 		else {
-			center = -8.9874 - targetPos;
+			center = -8.9874 + targetPos;
 		}
 		return center;
 	}
