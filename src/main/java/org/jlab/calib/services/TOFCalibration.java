@@ -295,7 +295,7 @@ ChangeListener {
 		pane.add(processorPane,BorderLayout.PAGE_END);
 
 		JFrame frame = new JFrame("FTOF Calibration");
-		frame.setSize(1800, 1000);
+		frame.setSize(1600, 900);
 
 		frame.add(pane);
 		//frame.pack();
@@ -820,7 +820,7 @@ ChangeListener {
 
 	public void configure() {
 
-		configFrame.setSize(900, 830);
+		configFrame.setSize(900, 900);
 		//configFrame.setSize(1000, 600); // vnc size
 		configFrame.setLocationRelativeTo(pane);
 		configFrame.setDefaultCloseOperation(configFrame.DO_NOTHING_ON_CLOSE);
@@ -850,19 +850,24 @@ ChangeListener {
 		Box confPanel = new Box(BoxLayout.Y_AXIS);
 		TofPrevConfigPanel[] engPanels = {new TofPrevConfigPanel(new TOFCalibrationEngine()), 
 				new TofPrevConfigPanel(new TOFCalibrationEngine()), 
+                                new TofPrevConfigPanel(new TOFCalibrationEngine()), 
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine()),
 				new TofPrevConfigPanel(new TOFCalibrationEngine())};
 
-		for (int i=3; i< engines.length-1; i++) {  // skip HV, attenuation, TDC, check
-			engPanels[i-3] = new TofPrevConfigPanel(engines[i]);
-			confPanel.add(engPanels[i-3]);
+                int j=0;
+		for (int i=0; i< engines.length-1; i++) {  // skip HV, TDC, check
+                    if(i!=1 && i!=2) {
+			engPanels[j] = new TofPrevConfigPanel(engines[i]);
+			confPanel.add(engPanels[j]);
+                        j++;
+                    }
 		}
-		// add TDC Conv at the end
-		engPanels[engPanels.length-1] = new TofPrevConfigPanel(engines[TDC_CONV]);
-		confPanel.add(engPanels[engPanels.length-1]);
+//		// add TDC Conv at the end
+//		engPanels[engPanels.length-1] = new TofPrevConfigPanel(engines[TDC_CONV]);
+//		confPanel.add(engPanels[engPanels.length-1]);
 
 		JPanel butPage2 = new configButtonPanel(this, false, "Next");
 		confOuterPanel.add(confPanel, BorderLayout.NORTH);

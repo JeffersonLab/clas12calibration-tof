@@ -135,8 +135,8 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			rfpadValues = dcp.readConstants("/calibration/ftof/timing_offset");
-			dcp.disconnect();
+			rfpadValues = dcp.readConstants("/calibration/ftof/time_offsets");
+ 			dcp.disconnect();
 		}
 		prevCalRead = true;
 		System.out.println(stepName+" previous calibration values populated successfully");

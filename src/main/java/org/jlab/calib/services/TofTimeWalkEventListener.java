@@ -127,26 +127,29 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					int sector = Integer.parseInt(lineValues[0]);
 					int layer = Integer.parseInt(lineValues[1]);
 					int paddle = Integer.parseInt(lineValues[2]);
-					double tw0L = Double.parseDouble(lineValues[4]);
-					double tw1L = Double.parseDouble(lineValues[5]);
-					double tw2L = Double.parseDouble(lineValues[6]);
-					double tw0R = Double.parseDouble(lineValues[7]);
-					double tw1R = Double.parseDouble(lineValues[8]);
-					double tw2R = Double.parseDouble(lineValues[9]);
+					double tw0 = Double.parseDouble(lineValues[3]);
+					double tw1 = Double.parseDouble(lineValues[4]);
+					double tw2 = Double.parseDouble(lineValues[5]);
+					double tw3 = Double.parseDouble(lineValues[6]);
+					double tw4 = Double.parseDouble(lineValues[7]);
+					double tw5 = Double.parseDouble(lineValues[8]);
+					double tw6 = Double.parseDouble(lineValues[9]);
 
 					timeWalkValues.addEntry(sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw0L,
-							"tw0_left", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw1L,
-							"tw1_left", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw2L,
-							"tw2_left", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw0R,
-							"tw0_right", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw1R,
-							"tw1_right", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw2R,
-							"tw2_right", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw0,
+							"tw0", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw1,
+							"tw1", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw2,
+							"tw2", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw3,
+							"tw3", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw4,
+							"tw4", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw5,
+							"tw5", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw6,
+							"tw6", sector, layer, paddle);
 					
 					line = bufferedReader.readLine();
 				}
@@ -174,17 +177,19 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 						timeWalkValues.addEntry(sector, layer, paddle);
 						timeWalkValues.setDoubleValue(fitTW0,
-								"tw0_left", sector, layer, paddle);
+								"tw0", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(fitTW1,
-								"tw1_left", sector, layer, paddle);
+								"tw1", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(fitTW2,
-								"tw2_left", sector, layer, paddle);
+								"tw2", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(0.0,
-								"tw0_right", sector, layer, paddle);
+								"tw3", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(0.0,
-								"tw1_right", sector, layer, paddle);
+								"tw4", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(0.0,
-								"tw2_right", sector, layer, paddle);
+								"tw5", sector, layer, paddle);
+						timeWalkValues.setDoubleValue(0.0,
+								"tw6", sector, layer, paddle);
 					}
 				}
 			}			
@@ -192,7 +197,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			timeWalkValues = dcp.readConstants("/calibration/ftof/time_walk");
+			timeWalkValues = dcp.readConstants("/calibration/ftof/time_walk_exp");
 			dcp.disconnect();
 		}
 		prevCalRead = true;

@@ -85,6 +85,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public static CalibrationConstants convValues;
 	public static CalibrationConstants leftRightValues;
 	public static CalibrationConstants p2pValues;
+	public static CalibrationConstants gainValues;
 	public static CalibrationConstants veffValues;
 	public static CalibrationConstants timeWalkValues;
 	public static CalibrationConstants rfpadValues;
@@ -103,10 +104,12 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 				"left/F:right/F");
 		leftRightValues = new CalibrationConstants(3,
 				"left_right/F");
+		gainValues = new CalibrationConstants(3,
+				"mipa_left/F");
 		veffValues = new CalibrationConstants(3,
 				"veff_left/F");
 		timeWalkValues = new CalibrationConstants(3,
-				"tw0_left/F:tw1_left/F:tw2_left/F:tw0_right/F:tw1_right/F:tw2_right/F");
+				"tw0/F:tw1/F:tw2/F:tw3/F:tw4/F:tw5/F:tw6/F");
 		p2pValues =	new CalibrationConstants(3,
 				"paddle2paddle/F");
 		rfpadValues =	new CalibrationConstants(3,

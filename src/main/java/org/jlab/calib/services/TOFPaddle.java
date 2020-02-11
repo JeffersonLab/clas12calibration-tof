@@ -46,7 +46,8 @@ public class TOFPaddle {
 	public int RUN = 0;
 	public long TIMESTAMP = 0;
 
-	private final double C = 29.98;
+        private final double DEDX_MIP = 1.956; // units = MeV/g/cm^2
+	private final double C = 29.9792458;
 	public static final double NS_PER_CH = 0.02345;
 	// public static final double NS_PER_CH = 0.024;
 
@@ -135,7 +136,16 @@ public class TOFPaddle {
 		return this.geometricMean() > minGM[layer];
 	}
 
-	public double veff() {
+	public double mips() {
+		double mipa = 0.0;
+		if (tof == "FTOF") {
+			mipa = TOFCalibrationEngine.gainValues.getDoubleValue("mipa_left", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		} 
+                return mipa;
+	}
+
+        public double veff() {
 		double veff = 16.0;
 		if (tof == "FTOF") {
 			veff = TOFCalibrationEngine.veffValues.getDoubleValue("veff_left", desc.getSector(), desc.getLayer(),
@@ -149,7 +159,7 @@ public class TOFPaddle {
 
 		return veff;
 	}
-	
+
 	public double tdcConvL() {
 		double tdcConv = NS_PER_CH;
 		if (tof == "FTOF") {
@@ -188,31 +198,31 @@ public class TOFPaddle {
 		return rfpad;
 	}
 	
-	public double tw0() {
-		double tw0 = 0.0;
-		if (tof == "FTOF") {
-			tw0 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_left", desc.getSector(), desc.getLayer(),
-					desc.getComponent());
-		}
-		return tw0;
-	}
-
 	public double tw1() {
 		double tw1 = 0.0;
 		if (tof == "FTOF") {
-			tw1 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1_left", desc.getSector(), desc.getLayer(),
+			tw1 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1", desc.getSector(), desc.getLayer(),
 					desc.getComponent());
 		}
 		return tw1;
 	}
-	
+
 	public double tw2() {
 		double tw2 = 0.0;
 		if (tof == "FTOF") {
-			tw2 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2_left", desc.getSector(), desc.getLayer(),
+			tw2 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2", desc.getSector(), desc.getLayer(),
 					desc.getComponent());
 		}
 		return tw2;
+	}
+	
+	public double tw3() {
+		double tw3 = 0.0;
+		if (tof == "FTOF") {
+			tw3 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw3", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+		return tw3;
 	}
 	
 	
@@ -492,7 +502,7 @@ public class TOFPaddle {
 	// LC Sep 19
 	private double TWCorr() {
 		
-		double twCorr = tw0()*Math.exp(tw1()*ENERGY) + tw2()/ENERGY;
+		double twCorr = tw1()*Math.exp(tw2()*energy()) + tw3()/energy();
 
 		return twCorr;
 
@@ -600,6 +610,19 @@ public class TOFPaddle {
 
 	}
 
+        public double energy() {
+            double energyCalc = ENERGY;
+            if(mips()!=0) {
+                double AdcToEConv = mips() / (DEDX_MIP * thickness());
+ 
+                double edepLeft  = ADCL / AdcToEConv;
+                double edepRight = ADCR / AdcToEConv;
+                
+                energyCalc = Math.sqrt(edepLeft * edepRight);
+            }
+            return energyCalc;
+        }
+        
 	public double leftRight() {
 		return (timeLeftAfterTW() - timeRightAfterTW());
 	}
