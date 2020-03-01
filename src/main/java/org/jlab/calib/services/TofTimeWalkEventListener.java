@@ -55,9 +55,10 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	private int[] xbins = {0, 166, 87, 166};
 	private int ybins = 40;
 
-	final double fitTW0 = 1.5;  // default values for the constants
+	final double fitTW0 = 1.8;  // default values for the constants
 	final double fitTW1 = -0.03;
 	final double fitTW2 = 3.8;
+        final double fitTW0range = 0.5;
 	
 	private IndexedList<H2F> offsetHists = new IndexedList<H2F>(4);  // indexed by s,l,c, offset (in beam bucket multiples)
 	private int NUM_OFFSET_HISTS = 20;
@@ -408,10 +409,11 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		// fit function to the graph of means
 		F1D twLFunc = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc");
 		twLFunc.setRange(startChannelForFit, endChannelForFit);
-		twLFunc.setParameter(1, 0.0);
-		twLFunc.setParameter(1, 2*fitTW0);
+		twLFunc.setParameter(0, 0.0);
+		twLFunc.setParameter(1, fitTW0);
 		twLFunc.setParameter(2, fitTW1);
 		twLFunc.setParameter(3, fitTW2);
+                twLFunc.setParLimits(1, fitTW0-fitTW0range, fitTW0+fitTW0range);
 		try {
 			DataFitter.fit(twLFunc, twLGraph, fitOption);
 		}
