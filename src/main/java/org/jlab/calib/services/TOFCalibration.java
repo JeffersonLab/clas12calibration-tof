@@ -490,6 +490,12 @@ ChangeListener {
 				engines[TW].fitMinEvents = Integer.parseInt(minEventsText.getText());
 			}
 
+			engines[TWPOS].fitMethod = fitList.getSelectedIndex();
+			engines[TWPOS].fitMode = (String) fitModeList.getSelectedItem();
+			if (minEventsText.getText().compareTo("") != 0) {
+				engines[TWPOS].fitMinEvents = Integer.parseInt(minEventsText.getText());
+			}
+
 			engines[VEFF].fitMethod = fitList.getSelectedIndex();
 			engines[VEFF].fitMode = (String) fitModeList.getSelectedItem();
 			if (minEventsText.getText().compareTo("") != 0) {
