@@ -49,6 +49,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 
 		calib.setName("/calibration/ctof/time_offsets/check");
 		calib.setPrecision(3);	
+		logScale = true;
 
 	}
 
@@ -91,7 +92,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 
 			H2F hitHist = 
 					new H2F("hitHist","Paddle "+paddle,
-							100, -60.0, 60.0,
+							100, -40.0, 40.0,
 							bins, -bb*0.5, bb*0.5);
 			hitHist.setTitleX("hit position (cm)");
 			hitHist.setTitleY("delta T (ns)");
@@ -99,7 +100,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 
 			H2F pathHist = 
 					new H2F("pathHist","Paddle "+paddle,
-							100, 20, 80,
+							100, 23.0,55.0,
 							bins, -bb*0.5, bb*0.5);
 			pathHist.setTitleX("path (cm)");
 			pathHist.setTitleY("delta T (ns)");

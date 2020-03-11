@@ -77,7 +77,7 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
     public int fitMinEvents = 0;
     public double maxGraphError = 0.1;
     public double fitSliceMaxError = 0.3;
-    //public double[] dummyPoint = {0.0}; // dummy point for graph to prevent canvas throwing error when drawing dataGroup
+	public boolean logScale = false;
 
     // Values from previous calibration
     // Need to be static as used by all engines
@@ -404,7 +404,8 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
             fitCanvases[canvasNum].cd(padNum);
             fitCanvases[canvasNum].getPad(padNum).setTitle("Paddle "+paddleNum);
             fitCanvases[canvasNum].getPad(padNum).setOptStat(0);
-            drawPlots(sector, layer, paddleNum, fitCanvases[canvasNum]);
+            fitCanvases[canvasNum].getPad(padNum).getAxisZ().setLog(logScale);
+			drawPlots(sector, layer, paddleNum, fitCanvases[canvasNum]);
 
             padNum = padNum + 1;
 
@@ -439,8 +440,10 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
     }
     
     public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
-        // overridden in each step
-    }
+    	for (int i=0; i<canvas.getNColumns()*canvas.getNRows(); i++) {
+    		canvas.getPad(i).getAxisZ().setLog(logScale);
+    	}
+	}
 
     public void setOutput(boolean outputOn) {
         if (outputOn) {

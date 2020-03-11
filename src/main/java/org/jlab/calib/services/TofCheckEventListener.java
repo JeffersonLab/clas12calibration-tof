@@ -35,6 +35,8 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 
 	private final double[]        ADC_MIN = {0.0, 20.0,  50.0,  20.0};
 	private final double[]        ADC_MAX = {0.0, 4000.0, 7000.0, 4000.0};
+	private final double[]        PATH_MIN = {0.0, 690.0,  670.0,  630.0};
+	private final double[]        PATH_MAX = {0.0, 760.0, 760.0, 760.0};
 	
 	public TofCheckEventListener() {
 
@@ -50,6 +52,8 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 
 		calib.setName("/calibration/ftof/timing_offset/check");
 		calib.setPrecision(3);	
+		
+		logScale = true;
 
 	}
 
@@ -103,7 +107,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 
 					H2F pathHist = 
 							new H2F("pathHist",histTitle(sector,layer,paddle),
-									100, 630, 740,
+									100, PATH_MIN[layer], PATH_MAX[layer],
 									bins, -bb*0.5, bb*0.5);
 					pathHist.setTitleX("path (cm)");
 					pathHist.setTitleY("delta T (ns)");
@@ -192,7 +196,8 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 
 	@Override
 	public void showPlots(int sector, int layer) {
-
+		
+		//logScale = true;
 		showPlotType = "CHECK_MOM";
 		stepName = "Momentum vs Vertex Time";
 		super.showPlots(sector, layer);
@@ -292,16 +297,4 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 		// no file required for check step
 	}
 
-//	Think setAutoScale in the Engine class is enough
-//    @Override
-//	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
-//    	
-//    	canvas.getPad(1).setAxisRange(-20.0, 20.0,
-//    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-//    	canvas.getPad(2).setAxisRange(-paddleLength(sector,layer,paddle)*0.55, paddleLength(sector,layer,paddle)*0.55,
-//    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-//    	canvas.getPad(3).setAxisRange(630, 740,
-//    			-BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
-//    	
-//	}	
 }

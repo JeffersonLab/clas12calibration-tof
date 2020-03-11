@@ -578,6 +578,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 
 		canvas.getPad(2).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
 		canvas.getPad(3).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+		super.rescaleGraphs(canvas, sector, layer, paddle);
 
 	}
 

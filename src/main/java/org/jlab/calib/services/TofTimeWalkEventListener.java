@@ -79,6 +79,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 		calib.setName("/calibration/ftof/time_walk");
 		calib.setPrecision(4);
+		logScale = true;
 		
 		for (int i=0; i<3; i++) {
 
@@ -661,8 +662,6 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			//graph.setTitleY("");
 			canvas.draw(graph);
 			canvas.draw(dataGroups.getItem(sector,layer,paddle).getF1D("trFunc"), "same");
-                        canvas.getPad(0).getAxisZ().setLog(true);
-                        canvas.getPad(1).getAxisZ().setLog(true);
 		}
 
 	}
@@ -679,17 +678,15 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		//hist.setTitleY("");
 		canvas.draw(hist);    
 		canvas.draw(func, "same");
-                canvas.getPad().getAxisZ().setLog(true);
-		//canvas.draw(smfunc, "same");
 	}
 
-	@Override
-	public void showPlots(int sector, int layer) {
-
-		stepName = "Time walk";
-		super.showPlots(sector, layer);
-
-	}
+//	@Override
+//	public void showPlots(int sector, int layer) {
+//
+//		stepName = "Time walk";
+//		super.showPlots(sector, layer);
+//
+//	}
 	
 	public void showSlices(int sector, int layer, int component) {
 
