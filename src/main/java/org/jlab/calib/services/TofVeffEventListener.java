@@ -318,8 +318,6 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 
 		veffFunc.setParameter(0, 0.0);
 		veffFunc.setParameter(1, 1.0/16.0);
-		//		veffFunc.setParLimits(0, -5.0, 5.0);
-		//		veffFunc.setParLimits(1, 1.0/20.0, 1.0/12.0);
 		try {
 			DataFitter.fit(veffFunc, veffGraph, fitOption);
 
@@ -327,6 +325,15 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
 			e.printStackTrace();
 		}
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[VEFF_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			veffFunc.setParameter(1, 1.0/consts[VEFF_OVERRIDE]);
+		}
+		if (consts[VEFF_LR_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			veffFunc.setParameter(0, consts[VEFF_LR_OVERRIDE]/2.0);
+		}		
 	}
 
 	public void customFit(int sector, int layer, int paddle){

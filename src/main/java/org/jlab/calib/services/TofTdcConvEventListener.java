@@ -380,6 +380,15 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
             e.printStackTrace();
         }
         
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[OVERRIDE_LEFT] != UNDEFINED_OVERRIDE) {
+			convFuncLeft.setParameter(1, EXPECTED_CONV- consts[OVERRIDE_LEFT]);
+		}
+		if (consts[OVERRIDE_RIGHT] != UNDEFINED_OVERRIDE) {
+			convFuncRight.setParameter(1, EXPECTED_CONV - consts[OVERRIDE_RIGHT]);
+		}
+        
     }
 
     public void customFit(int sector, int layer, int paddle){

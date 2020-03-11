@@ -311,6 +311,12 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
 			e.printStackTrace();
 		}
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[GEOMEAN_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			gmFunc.setParameter(1, consts[GEOMEAN_OVERRIDE]);
+		}
 
 	}
 
