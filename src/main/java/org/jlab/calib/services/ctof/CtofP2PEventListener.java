@@ -117,7 +117,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			p2pValues = dcp.readConstants("/calibration/ftof/time_offsets");
+			p2pValues = dcp.readConstants("/calibration/ctof/time_offsets");
 			dcp.disconnect();
 		}
 		prevCalRead = true;
@@ -178,7 +178,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 				int component = paddle.getDescriptor().getComponent();
 
 				dataGroups.getItem(sector,layer,component).getH1F("vertexDiffHist").fill(
-								paddle.startTimeP2PCorr() - paddle.getCTOFJitter() - paddle.ST_TIME);
+								paddle.startTimeP2PCorr() - paddle.ST_TIME);
 			}
 		}
 	}    

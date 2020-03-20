@@ -157,9 +157,9 @@ public class DataProvider {
 		}
 		
 		// Only continue if we have adc and tdc banks
-//		if (!event.hasBank("FTOF::adc") || !event.hasBank("FTOF::tdc")) {
-//			return paddleList;
-//		}
+		if (!event.hasBank("FTOF::adc") || !event.hasBank("FTOF::tdc")) {
+			return paddleList;
+		}
 
 		DataBank  adcBank = event.getBank("FTOF::adc");
 		DataBank  tdcBank = event.getBank("FTOF::tdc");
@@ -176,10 +176,16 @@ public class DataProvider {
 //		}
 		
 		// iterate through hits bank getting corresponding adc and tdc
-		if (event.hasBank("FTOF::hits")) {
+		if (event.hasBank("FTOF::hits") && event.hasBank("RUN::config")) {
 			DataBank  hitsBank = event.getBank("FTOF::hits");
 
-			for (int hitIndex=0; hitIndex<hitsBank.rows(); hitIndex++) {
+                        DataBank  configBank = event.getBank("RUN::config");
+                        long triggerBit = configBank.getLong("trigger", 0);
+                        int  run        = configBank.getInt("run", 0);
+                        long timeStamp  = configBank.getLong("timestamp", 0);
+                        			
+                        
+                        for (int hitIndex=0; hitIndex<hitsBank.rows(); hitIndex++) {
 
 				double tx     = hitsBank.getFloat("tx", hitIndex);
 				double ty     = hitsBank.getFloat("ty", hitIndex);
@@ -190,6 +196,9 @@ public class DataProvider {
 						(int) hitsBank.getByte("sector", hitIndex),
 						(int) hitsBank.getByte("layer", hitIndex),
 						(int) hitsBank.getShort("component", hitIndex));
+                                
+                                paddle.setRun(run, triggerBit, timeStamp);
+                                
 				paddle.setAdcTdc(
 						adcBank.getInt("ADC", hitsBank.getShort("adc_idx1", hitIndex)),
 						adcBank.getInt("ADC", hitsBank.getShort("adc_idx2", hitIndex)),
@@ -199,17 +208,13 @@ public class DataProvider {
 				paddle.ADC_TIMEL = adcBank.getFloat("time", hitsBank.getShort("adc_idx1", hitIndex));
 				paddle.ADC_TIMER = adcBank.getFloat("time", hitsBank.getShort("adc_idx2", hitIndex));
 				paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
-				
+				paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
+						
 				//System.out.println("Paddle created "+paddle.getDescriptor().getSector()+paddle.getDescriptor().getLayer()+paddle.getDescriptor().getComponent());
 
-				if (event.hasBank("TimeBasedTrkg::TBTracks")) {
+				if (event.hasBank("TimeBasedTrkg::TBTracks") && event.hasBank("REC::Event")) {
 
-					DataBank  tbtBank = event.getBank("TimeBasedTrkg::TBTracks");
-					
-					if (event.hasBank("RUN::config")) {
-						DataBank  configBank = event.getBank("RUN::config");
-						paddle.TRIGGER_BIT = configBank.getLong("trigger", 0);
-					}
+					DataBank  tbtBank = event.getBank("TimeBasedTrkg::TBTracks");					
 					
 					// get the RF time from REC::Event
 					double trf = 0.0; 
@@ -218,12 +223,11 @@ public class DataProvider {
 
 					// Identify electrons and store path length etc for time walk
 					int trkId = hitsBank.getShort("trackid", hitIndex);
-					double energy = hitsBank.getFloat("energy", hitIndex);
 					
 					//System.out.println("trkId energy trf "+trkId+" "+energy+" "+trf);
 
 					// only use hit with associated track and a minimum energy
-					if (trkId!=-1 && energy>TOFCalibration.minE) {
+					if (trkId!=-1 && paddle.ENERGY>TOFCalibration.minE) {
 						
 						double c3x  = tbtBank.getFloat("c3_x",trkId-1);
 						double c3y  = tbtBank.getFloat("c3_y",trkId-1);
@@ -245,7 +249,6 @@ public class DataProvider {
 						paddle.TRACK_ID = trkId;
 						paddle.VERTEX_Z = tbtBank.getFloat("Vtx0_z", trkId-1);
 						paddle.CHARGE = tbtBank.getInt("q", trkId-1);
-						paddle.ENERGY = energy;
 						
 						if (TOFCalibration.maxRcs != 0.0) {
 							paddle.TRACK_REDCHI2 = tbtBank.getFloat("chi2", trkId-1)/tbtBank.getShort("ndf", trkId-1);

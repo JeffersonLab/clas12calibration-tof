@@ -5,6 +5,7 @@ import org.jlab.calib.services.ctof.CTOFCalibrationEngine;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.geom.base.ConstantProvider;
 
 /**
  *
@@ -15,8 +16,10 @@ public class TOFPaddle {
 	private static final int LEFT = 0;
 	private static final int RIGHT = 1;
 	public static String tof = "FTOF";
-	public static CalibrationConstants jitConsts;   
-	public static int currentRun = 0;
+	public static CalibrationConstants jitConsts = null;   
+	public static CalibrationConstants lgtConsts = null;   
+        public static DatabaseConstantProvider dcp = null;
+        public static int currentRun = 0;
 
 	private DetectorDescriptor desc = new DetectorDescriptor();
 
@@ -27,6 +30,7 @@ public class TOFPaddle {
 	public double ENERGY = 0;
 	public float ADC_TIMEL = 0;
 	public float ADC_TIMER = 0;
+        public double LENGTH = 0;
 	public double XPOS = 0.0;
 	public double YPOS = 0.0;
 	public double ZPOS = 0.0;
@@ -42,6 +46,7 @@ public class TOFPaddle {
 	public long TRIGGER_BIT = 0;
 	// public double TOF_TIME = 0.0;
 	public double RECON_TIME = 0.0;
+        public double JITTER = 0.0;
 	public int PARTICLE_ID = 0;
 	public int RUN = 0;
 	public long TIMESTAMP = 0;
@@ -53,7 +58,58 @@ public class TOFPaddle {
 
 	public TOFPaddle(int sector, int layer, int paddle) {
 		this.desc.setSectorLayerComponent(sector, layer, paddle);
-	}
+        }
+        
+        public void setRun(int run, long triggerbit, long timestamp) {
+            // Get the TDC jitter parameters when runNo changes
+            // Get the paddle lengths
+            this.RUN = run;
+            this.TRIGGER_BIT = triggerbit;
+            this.TIMESTAMP = timestamp;
+            
+            if (RUN != currentRun && RUN!=0) {
+                dcp = new DatabaseConstantProvider(RUN, "default");
+                if (tof == "FTOF") {
+                    jitConsts = dcp.readConstants("/calibration/ftof/time_jitter");
+                    dcp.loadTable("/geometry/ftof/panel1a/paddles");        
+                    dcp.loadTable("/geometry/ftof/panel1b/paddles");
+                    dcp.loadTable("/geometry/ftof/panel2/paddles");
+                }
+                else {
+                    jitConsts = dcp.readConstants("/calibration/ctof/time_jitter");
+                    lgtConsts = dcp.readConstants("/geometry/ctof/ctof");
+                }
+                dcp.disconnect();
+                currentRun = RUN;
+            }
+            
+            
+            if (tof == "FTOF") {
+                if(dcp != null) {
+                    if(this.getDescriptor().getLayer() == 1) {
+                       this.LENGTH = dcp.getDouble("/geometry/ftof/panel1a/paddles/Length", this.getDescriptor().getComponent()-1);
+                    }
+                    else if(this.getDescriptor().getLayer() == 2) {
+                       this.LENGTH = dcp.getDouble("/geometry/ftof/panel1b/paddles/Length", this.getDescriptor().getComponent()-1);
+                    }
+                    else if(this.getDescriptor().getLayer() == 3) {
+                       this.LENGTH = dcp.getDouble("/geometry/ftof/panel2/paddles/Length", this.getDescriptor().getComponent()-1);
+                    }
+                }
+            }
+            else {
+               if(lgtConsts!=null) {
+                    this.LENGTH = lgtConsts.getDoubleValue("length", this.getDescriptor().getSector(),this.getDescriptor().getLayer(),this.getDescriptor().getComponent());
+                }
+            }
+            
+            if(jitConsts!=null) {
+                double period = jitConsts.getDoubleValue("period", 0,0,0);
+                int    phase  = jitConsts.getIntValue("phase", 0,0,0);
+                int cycles = jitConsts.getIntValue("cycles", 0,0,0);
+                if(cycles > 0) this.JITTER=period*((TIMESTAMP+phase)%cycles);	    
+            }
+        }
 
 	public void setAdcTdc(int adcL, int adcR, int tdcL, int tdcR) {
 		this.ADCL = adcL;
@@ -91,7 +147,7 @@ public class TOFPaddle {
 	public double thickness() {
 		double t = 0.0;
 		if (tof=="FTOF") {
-			t = 5.0;
+			t = 5.08;
 			if (this.getDescriptor().getLayer() == 2) {
 				t = 6.0;
 			}
@@ -274,25 +330,6 @@ public class TOFPaddle {
 		return p2p;
 	}
 
-	public double getCTOFJitter() {
-		
-		// Get the TDC jitter parameters when runNo changes
-		if (RUN != currentRun) {
-		    DatabaseConstantProvider dcp = new DatabaseConstantProvider(RUN, "default");
-		    jitConsts = dcp.readConstants("/calibration/ctof/time_jitter");
-		    dcp.disconnect();
-		    currentRun = RUN;
-		}
-	    double period = jitConsts.getDoubleValue("period", 0,0,0);
-	    int    phase  = jitConsts.getIntValue("phase", 0,0,0);
-	    int cycles = jitConsts.getIntValue("cycles", 0,0,0);
-	    double triggerphase=0;
-	    if(cycles > 0) triggerphase=period*((TIMESTAMP+phase)%cycles);
-	    //System.out.println(period + " " + phase + " " + cycles + " " + TIMESTAMP + " " + triggerphase);
-		return triggerphase;
-		
-	}
-
 	
 	private double mass() {
 		double mass = 0.0;
@@ -323,7 +360,6 @@ public class TOFPaddle {
 
 	public double startTime() {
 		double startTime = 0.0;
-
 		double beta = 1.0;
 		if (beta() != 0.0) {
 			beta = beta();
@@ -364,9 +400,9 @@ public class TOFPaddle {
 	public double averageHitTimeNoTW() {
 
 		double lr = leftRightAdjustment();
-		double tL = tdcToTimeL(TDCL) - (lr / 2) - ((0.5 * paddleLength() + paddleY()) / this.veff());
+		double tL = tdcToTimeL(TDCL) - (lr / 2) - ((0.5 * this.LENGTH + paddleY()) / this.veff());
 
-		double tR = tdcToTimeL(TDCR) + (lr / 2) - ((0.5 * paddleLength() - paddleY()) / this.veff());
+		double tR = tdcToTimeL(TDCR) + (lr / 2) - ((0.5 * this.LENGTH - paddleY()) / this.veff());
 
 		return (tL + tR) / 2.0;
 
@@ -375,9 +411,9 @@ public class TOFPaddle {
 	public double averageHitTime() {
 
 		double lr = leftRightAdjustment();
-		double tL = timeLeftAfterTW() - (lr / 2) - ((0.5 * paddleLength() + paddleY()) / this.veff());
+		double tL = timeLeftAfterTW() - (lr / 2) - ((0.5 * this.LENGTH + paddleY()) / this.veff());
 
-		double tR = timeRightAfterTW() + (lr / 2) - ((0.5 * paddleLength() - paddleY()) / this.veff());
+		double tR = timeRightAfterTW() + (lr / 2) - ((0.5 * this.LENGTH - paddleY()) / this.veff());
 
 		return (tL + tR) / 2.0;
 
@@ -422,7 +458,11 @@ public class TOFPaddle {
 		return refSTTime() - rfpad() - HPosCorr();
 	}
 
-	public double refSTTimeRFCorr() {
+	public double TimeCorr() {
+		return averageHitTime() + rfpad() + HPosCorr() + TWPosCorr() + p2p();
+	}
+
+        public double refSTTimeRFCorr() {
 		return refSTTime() - rfpad();
 	}
 
@@ -441,7 +481,7 @@ public class TOFPaddle {
 	public double hposA() {
 		double val = 0.0;
 		if (tof == "CTOF") {
-			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposA", desc.getSector(), desc.getLayer(),
+			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposa", desc.getSector(), desc.getLayer(),
 					desc.getComponent());
 		}
 		return val;
@@ -450,13 +490,13 @@ public class TOFPaddle {
 	public double hposB() {
 		double val = 0.0;
 		if (tof == "CTOF") {
-			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposB", desc.getSector(), desc.getLayer(),
+			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposb", desc.getSector(), desc.getLayer(),
 					desc.getComponent());
 		}
 		return val;
 	}
 	
-	private double TWPosCorr() {
+	public double TWPosCorr() {
 		if (tof=="FTOF") {
 			return tw1pos()*paddleY()* paddleY() + tw2pos()*paddleY();
 		} else {
@@ -580,35 +620,35 @@ public class TOFPaddle {
 		return center;
 	}
 	
-	public double paddleLength() {
-
-		double len = 0.0;
-		int paddle = this.getDescriptor().getComponent();
-
-		if (tof == "FTOF") {
-			int layer = this.getDescriptor().getLayer();
-			
-			if (layer == 1 && paddle <= 5) {
-				len = (15.85 * paddle) + 16.43;
-			} else if (layer == 1 && paddle > 5) {
-				len = (15.85 * paddle) + 11.45;
-			} else if (layer == 2) {
-				len = (6.4 * paddle) + 10.84;
-			} else if (layer == 3) {
-				len = (13.73 * paddle) + 357.55;
-			}
-		} else {
-			if (paddle%2==0) {
-				len = 88.0467;
-			}
-			else {
-				len = 88.9328;
-			}
-		}
-
-		return len;
-
-	}
+//	public double paddleLength() {
+//
+//		double len = 0.0;
+//		int paddle = this.getDescriptor().getComponent();
+//
+//		if (tof == "FTOF") {
+//			int layer = this.getDescriptor().getLayer();
+//			
+//			if (layer == 1 && paddle <= 5) {
+//				len = (15.85 * paddle) + 16.43;
+//			} else if (layer == 1 && paddle > 5) {
+//				len = (15.85 * paddle) + 11.45;
+//			} else if (layer == 2) {
+//				len = (6.4 * paddle) + 10.84;
+//			} else if (layer == 3) {
+//				len = (13.73 * paddle) + 357.55;
+//			}
+//		} else {
+//			if (paddle%2==0) {
+//				len = 88.0467;
+//			}
+//			else {
+//				len = 88.9328;
+//			}
+//		}
+//
+//		return len;
+//
+//	}
 
         public double energy() {
             double energyCalc = ENERGY;
@@ -632,11 +672,11 @@ public class TOFPaddle {
 	}
 
 	double tdcToTimeL(double value) {
-		return tdcConvL() * value;
+		return tdcConvL() * value  - this.JITTER;
 	}
 
 	double tdcToTimeR(double value) {
-		return tdcConvR() * value;
+		return tdcConvR() * value  - this.JITTER;
 	}
 
 	public double veffHalfTimeDiff() {
@@ -798,7 +838,7 @@ public class TOFPaddle {
 		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1pos " + tw1pos() + " tw2pos "
 				+ tw2pos() + " lamR " + lamR() + " LR " + leftRightAdjustment()
 				+ " veff " + veff() + " tdcConvL "+ tdcConvL() + " tdcConvR "+ tdcConvR());
-		System.out.println("paddleLength " + paddleLength() + " paddleY " + paddleY() + "ctofCenter "+ctofCenter());
+		System.out.println("paddleLength " + LENGTH + " paddleY " + paddleY() + "ctofCenter "+ctofCenter());
 		System.out.println("timeLeftAfterTW " + timeLeftAfterTW() + " timeRightAfterTW " + timeRightAfterTW());
 		System.out.println("deltaTW " + this.deltaTTW(0.0));
 
