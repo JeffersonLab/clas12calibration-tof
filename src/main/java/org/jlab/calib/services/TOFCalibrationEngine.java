@@ -79,6 +79,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public int fitMinEvents = 0;
 	public double maxGraphError = 0.1;
 	public double fitSliceMaxError = 0.3;
+	public boolean logScale = false;
 
 	// Values from previous calibration
 	// Need to be static as used by all engines
@@ -471,7 +472,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	}
 
 	public void showPlots(int a, int b) {
-
+		
 		JFrame frame = new JFrame(stepName);
 		frame.setSize(1000, 800);
 		frame.setVisible(true);
@@ -496,6 +497,7 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 					fitCanvases[canvasNum].cd(padNum);
 					fitCanvases[canvasNum].getPad(padNum).setTitle("Paddle "+paddleNum);
 					fitCanvases[canvasNum].getPad(padNum).setOptStat(0);
+					fitCanvases[canvasNum].getPad(padNum).getAxisZ().setLog(logScale);
 					drawPlots(sector, layer, paddleNum, fitCanvases[canvasNum]);
 
 					padNum = padNum + 1;
@@ -532,6 +534,10 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
 		// overridden in each step
 		canvas.getPad().setAutoScale();
+    	for (int i=0; i<canvas.getNColumns()*canvas.getNRows(); i++) {
+    		canvas.getPad(i).getAxisZ().setLog(logScale);
+    	}
+
 	}
 
 	public void setOutput(boolean outputOn) {

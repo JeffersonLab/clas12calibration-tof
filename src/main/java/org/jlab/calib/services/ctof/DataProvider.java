@@ -124,10 +124,8 @@ public class DataProvider {
 					CTOFCalibrationEngine.adcRightStatus.add(0, 1, 1, component);
 				}
 			}
-			//// System.out.println("Louise 135");
 		}
 		if (event.hasBank("CTOF::tdc")) {
-			//// System.out.println("Louise 138");
 			DataBank tdcBank = event.getBank("CTOF::tdc");
 
 			for (int i = 0; i < tdcBank.rows(); i++) {
@@ -195,9 +193,8 @@ public class DataProvider {
 				paddle.ADC_TIMEL = adcBank.getFloat("time", adcIdx1);
 				paddle.ADC_TIMER = adcBank.getFloat("time", adcIdx2);
 				paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
-                                paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
+        paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
 				
-				// System.out.println("Louise 207");
 				if (event.hasBank("CVTRec::Tracks") && event.hasBank("RUN::rf")) {
 
 					DataBank trkBank = event.getBank("CVTRec::Tracks");

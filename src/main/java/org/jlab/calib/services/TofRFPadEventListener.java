@@ -311,6 +311,16 @@ public class TofRFPadEventListener extends TOFCalibrationEngine {
 			ex.printStackTrace();
 		}	
 		fineHist.setFunction(null);
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[OFFSET_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			fineFunc.setParameter(1, consts[OFFSET_OVERRIDE]);
+		}
+		if (consts[OFFSET_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			fineFunc.setParameter(2, consts[SIGMA_OVERRIDE]);
+		}
+		
 
 	}
 

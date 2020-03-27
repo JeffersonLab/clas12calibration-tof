@@ -317,6 +317,16 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
             System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
             e.printStackTrace();
         }
+        
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[VEFF_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			veffFunc.setParameter(1, 1.0/consts[VEFF_OVERRIDE]);
+		}
+		if (consts[VEFF_LR_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			veffFunc.setParameter(0, consts[VEFF_LR_OVERRIDE]/2.0);
+		}		
+
     }
 
     public void customFit(int sector, int layer, int paddle){

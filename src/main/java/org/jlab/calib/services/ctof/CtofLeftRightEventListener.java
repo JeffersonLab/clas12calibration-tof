@@ -281,7 +281,12 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
 			}
 		}
 		lrHist.setFunction(null);
-    	
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[LEFTRIGHT_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			lrFunc.setParameter(1, consts[LEFTRIGHT_OVERRIDE]);
+		}
     	
     	// centroid of time difference distribution method
     	H1F leftRightHist = dataGroups.getItem(sector,layer,paddle).getH1F("tdc_left_right");

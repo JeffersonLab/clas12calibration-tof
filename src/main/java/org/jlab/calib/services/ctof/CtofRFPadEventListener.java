@@ -278,6 +278,12 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 		}
 		fineHist.setFunction(null);
 		//System.out.println("RFPad 270 SLC "+paddle);
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[OFFSET_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			fineFunc.setParameter(1, consts[OFFSET_OVERRIDE]);
+		}
 
 	}
 

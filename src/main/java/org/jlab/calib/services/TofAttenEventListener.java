@@ -251,33 +251,21 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 		attenFunc.setParLimits(0, -5.0, 5.0);
 		attenFunc.setParLimits(1, 2.0/500.0, 2.0/10.0);
 		if (sector==1 && layer==1 &&paddle==8) {
-			//System.out.println("SLC "+sector+layer+paddle);
 			DataFitter.fit(attenFunc, meanGraph, "RNQ");
-//			System.out.println("Param 0 is "+attenFunc.getParameter(0));
-//			System.out.println("Param 0 error is "+attenFunc.parameter(0).error());
-//			System.out.println("Param 1 is "+attenFunc.getParameter(1));
-//			System.out.println("Param 1 error is "+attenFunc.parameter(1).error());
-//			System.out.println("exp attlen is "+expectedAttlen(sector,layer,paddle));
-//			System.out.println("2/exp attlen is "+2/expectedAttlen(sector,layer,paddle));
-//			System.out.println("par 1 lower limit "+2.0/500.0);
-//			System.out.println("par 1 upper limit "+2.0/10.0);
 
 		}
 		else {
 			DataFitter.fit(attenFunc, meanGraph, "RNQ");
 		}
-
-
-		//		if (sector==1 && layer==1 && paddle==10) {
-		//			TCanvas c1 = new TCanvas("c1",1,1);
-		//			c1.draw(meanGraph);
-		//			c1.draw(attenFunc,"same");
-		//
-		//			System.out.println("SLC "+sector+layer+paddle);
-		//			System.out.println("Param 1 is "+ attenFunc.getParameter(1));
-		//			System.out.println("Param 1 error is "+ attenFunc.parameter(1).error());
-		//
-		//		}
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[ATTEN_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			attenFunc.setParameter(1, 2.0/consts[ATTEN_OVERRIDE]);
+		}
+		if (consts[OFFSET_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			attenFunc.setParameter(0, consts[OFFSET_OVERRIDE]);
+		}
 
 	}
 

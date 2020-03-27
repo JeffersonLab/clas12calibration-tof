@@ -80,6 +80,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 		calib.setName("/calibration/ftof/time_walk");
 		calib.setPrecision(4);
+		logScale = true;
 		
 		for (int i=0; i<3; i++) {
 
@@ -420,7 +421,19 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-				
+		
+		// LC Mar 2020 Set function parameters to override value	
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[TW0_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			twLFunc.setParameter(1, consts[TW0_OVERRIDE]);
+		}
+		if (consts[TW1_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			twLFunc.setParameter(2, consts[TW1_OVERRIDE]);
+		}
+		if (consts[TW2_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			twLFunc.setParameter(3, consts[TW2_OVERRIDE]);
+		}
+
 	}
 		
 	public void writeSlicesFile(int sector, int layer, int paddle) {
@@ -656,8 +669,6 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			//graph.setTitleY("");
 			canvas.draw(graph);
 			canvas.draw(dataGroups.getItem(sector,layer,paddle).getF1D("trFunc"), "same");
-                        canvas.getPad(0).getAxisZ().setLog(true);
-                        canvas.getPad(1).getAxisZ().setLog(true);
 		}
 
 	}
@@ -674,17 +685,15 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		//hist.setTitleY("");
 		canvas.draw(hist);    
 		canvas.draw(func, "same");
-                canvas.getPad().getAxisZ().setLog(true);
-		//canvas.draw(smfunc, "same");
 	}
 
-	@Override
-	public void showPlots(int sector, int layer) {
-
-		stepName = "Time walk";
-		super.showPlots(sector, layer);
-
-	}
+//	@Override
+//	public void showPlots(int sector, int layer) {
+//
+//		stepName = "Time walk";
+//		super.showPlots(sector, layer);
+//
+//	}
 	
 	public void showSlices(int sector, int layer, int component) {
 

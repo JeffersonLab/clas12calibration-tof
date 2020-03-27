@@ -277,6 +277,12 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 		}
 		lrHist.setFunction(null);
 		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[LEFTRIGHT_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			lrFunc.setParameter(1, consts[LEFTRIGHT_OVERRIDE]);
+		}
+		
 	}
 
 	public void tdc_fit(int sector, int layer, int paddle,

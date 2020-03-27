@@ -186,10 +186,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 //    public final static int USE_PID = 3;
    
     JComboBox<String> trackChargeList = new JComboBox<String>();
-    public static int trackCharge = 2;
-    public final static int TRACK_BOTH = 0;
-    public final static int TRACK_NEG = 1;
-    public final static int TRACK_POS = 2;
+    public static int trackCharge = 1;
     JComboBox<Double> trfList = new JComboBox<Double>();
     JComboBox<String> pidList = new JComboBox<String>();
     private JTextField triggerText = new JTextField(10);
@@ -567,8 +564,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 			// effective velocity
 			//engines[VEFF].writeFile("CTOF_CALIB_EFFECTIVE_VELOCITY.txt");
 			// tres
-			//CtofRFPadEventListener rfpadEng = (CtofRFPadEventListener) engines[RFPAD];
-			//rfpadEng.writeSigmaFile("CTOF_CALIB_TRES.txt");
+			CtofRFPadEventListener rfpadEng = (CtofRFPadEventListener) engines[RFPAD];
+			rfpadEng.writeSigmaFile("CTOF_CALIB_TRES.txt");
 			// time offsets
 			writeTimeOffsets("CTOF_CALIB_TIME_OFFSETS.txt", panel.stepOptions);
 			// TDC conv
@@ -980,9 +977,9 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         c.gridx = 0;
         c.gridy = y;
         trPanel.add(new JLabel("Track charge:"),c);
+        trackChargeList.addItem("Both");
         trackChargeList.addItem("Negative");
         trackChargeList.addItem("Positive");
-        trackChargeList.addItem("Both");
         trackChargeList.setSelectedIndex(TOFCalibration.TRACK_NEG);
         trackChargeList.addActionListener(this);
         c.gridx = 1;

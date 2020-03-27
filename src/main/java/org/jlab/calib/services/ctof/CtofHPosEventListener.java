@@ -316,6 +316,16 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
 			e.printStackTrace();
 		}
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[HPOSA_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			hposFunc.setParameter(0, consts[HPOSA_OVERRIDE]);
+		}
+		if (consts[HPOSB_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			hposFunc.setParameter(1, consts[HPOSB_OVERRIDE]);
+		}
+
 	}
 
 	public void customFit(int sector, int layer, int paddle){

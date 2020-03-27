@@ -371,6 +371,16 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
 			e.printStackTrace();
 		}
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[OVERRIDE_LEFT] != UNDEFINED_OVERRIDE) {
+			convFuncLeft.setParameter(1, EXPECTED_CONV- consts[OVERRIDE_LEFT]);
+		}
+		if (consts[OVERRIDE_RIGHT] != UNDEFINED_OVERRIDE) {
+			convFuncRight.setParameter(1, EXPECTED_CONV - consts[OVERRIDE_RIGHT]);
+		}
+
 
 	}
 
@@ -568,6 +578,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 
 		canvas.getPad(2).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
 		canvas.getPad(3).setAxisRange(TDC_MIN, TDC_MAX, -BEAM_BUCKET*0.5, BEAM_BUCKET*0.5);
+		super.rescaleGraphs(canvas, sector, layer, paddle);
 
 	}
 

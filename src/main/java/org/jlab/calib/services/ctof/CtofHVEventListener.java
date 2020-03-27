@@ -293,6 +293,12 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
 			e.printStackTrace();
 		}		
+		
+		// LC Mar 2020 Set function parameters to override value
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[GEOMEAN_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			gmFunc.setParameter(1, consts[GEOMEAN_OVERRIDE]);
+		}
 	}
 
 	public void fitLogRatio(int sector, int layer, int paddle,

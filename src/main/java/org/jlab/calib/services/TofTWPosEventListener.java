@@ -314,6 +314,15 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
 			e.printStackTrace();
 		}
+		
+		// LC Mar 2020 Set function parameters to override value	
+		Double[] consts = constants.getItem(sector, layer, paddle);
+		if (consts[TW1_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			twposFunc.setParameter(0, consts[TW1_OVERRIDE]);
+		}
+		if (consts[TW2_OVERRIDE] != UNDEFINED_OVERRIDE) {
+			twposFunc.setParameter(1, consts[TW2_OVERRIDE]);
+		}
 	}
 
 	public void customFit(int sector, int layer, int paddle){
