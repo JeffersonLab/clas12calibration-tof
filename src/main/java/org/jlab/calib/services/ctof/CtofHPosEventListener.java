@@ -66,7 +66,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		filename = nextFileName();
 
 		calib = new CalibrationConstants(3,
-				"hposA/F:hposB/F:hposC/F:hposD/F:hposE/F");
+				"hposa/F:hposb/F:hposc/F:hposd/F:hpose/F");
 		calib.setName("/calibration/ctof/hpos");
 		calib.setPrecision(7);
 
@@ -110,13 +110,13 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 					
 					hposValues.addEntry(sector, layer, paddle);
 					hposValues.setDoubleValue(hposA,
-							"hposA", sector, layer, paddle);
+							"hposa", sector, layer, paddle);
 					hposValues.setDoubleValue(hposB,
-							"hposB", sector, layer, paddle);
+							"hposb", sector, layer, paddle);
 					hposValues.setDoubleValue(hposC,
-							"hposC", sector, layer, paddle);
+							"hposc", sector, layer, paddle);
 					hposValues.setDoubleValue(hposD,
-							"hposD", sector, layer, paddle);
+							"hposd", sector, layer, paddle);
 					
 					line = bufferedReader.readLine();
 				}
@@ -141,13 +141,13 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 			for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 				hposValues.addEntry(1, 1, paddle);
 				hposValues.setDoubleValue(0.0,
-						"hposA", 1, 1, paddle);
+						"hposa", 1, 1, paddle);
 				hposValues.setDoubleValue(0.0,
-						"hposB", 1, 1, paddle);
+						"hposb", 1, 1, paddle);
 				hposValues.setDoubleValue(0.0,
-						"hposC", 1, 1, paddle);
+						"hposc", 1, 1, paddle);
 				hposValues.setDoubleValue(0.0,
-						"hposD", 1, 1, paddle);
+						"hposd", 1, 1, paddle);
 						
 			}			
 		}
@@ -303,8 +303,8 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		F1D hposFunc = dataGroups.getItem(sector,layer,paddle).getF1D("hposFunc");
 		hposFunc.setRange(lowLimit, highLimit);
 
-		double hposA = CTOFCalibrationEngine.hposValues.getDoubleValue("hposA",1, 1, paddle);
-		double hposB = CTOFCalibrationEngine.hposValues.getDoubleValue("hposB",1, 1, paddle);
+		double hposA = CTOFCalibrationEngine.hposValues.getDoubleValue("hposa",1, 1, paddle);
+		double hposB = CTOFCalibrationEngine.hposValues.getDoubleValue("hposb",1, 1, paddle);
 		hposFunc.setParameter(0, 0.005); //hposA);
 		hposFunc.setParameter(1, 0.1); //hposB
 		hposFunc.setParameter(2, 0.0);
@@ -407,15 +407,15 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 	@Override
 	public void saveRow(int sector, int layer, int paddle) {
 		calib.setDoubleValue(getHPOSA(sector,layer,paddle),
-				"hposA", sector, layer, paddle);
+				"hposa", sector, layer, paddle);
 		calib.setDoubleValue(getHPOSB(sector,layer,paddle),
-				"hposB", sector, layer, paddle);
+				"hposb", sector, layer, paddle);
 		calib.setDoubleValue(0.0,
-				"hposC", sector, layer, paddle);
+				"hposc", sector, layer, paddle);
 		calib.setDoubleValue(0.0,
-				"hposD", sector, layer, paddle);
+				"hposd", sector, layer, paddle);
 		calib.setDoubleValue(0.0,
-				"hposE", sector, layer, paddle);
+				"hpose", sector, layer, paddle);
 
 	}
 

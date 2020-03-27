@@ -108,7 +108,7 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         rfpadValues =    new CalibrationConstants(3,
                 "rfpad/F");
         hposValues =    new CalibrationConstants(3,
-                "hposA/F:hposB/F");        
+                "hposa/F:hposb/F");        
 
     }
     

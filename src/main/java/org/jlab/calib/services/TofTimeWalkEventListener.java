@@ -35,9 +35,9 @@ import org.jlab.utils.groups.IndexedList;
 public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 	// indices for constants
-	public final int TW0_OVERRIDE = 0;
-	public final int TW1_OVERRIDE = 1;
-	public final int TW2_OVERRIDE = 2;
+	public final int TW1_OVERRIDE = 0;
+	public final int TW2_OVERRIDE = 1;
+	public final int TW3_OVERRIDE = 2;
 	
 	
 	// Preferred ranges
@@ -47,17 +47,18 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	private final double[]        ENERGY_MAX = {0.0, 50.0, 50.0, 50.0};
 	
 	// Expected values for colour coding
-	private final double[] EXPECTED_TW0 = {1.5, 1.5, 1.5};
-	private final double[] EXPECTED_TW1 = {-0.03, -0.03, -0.03};
-	private final double[] EXPECTED_TW2 = {3.8, 3.8, 3.8};
+	private final double[] EXPECTED_TW1 = {1.5, 1.5, 1.5};
+	private final double[] EXPECTED_TW2 = {-0.03, -0.03, -0.03};
+	private final double[] EXPECTED_TW3 = {3.8, 3.8, 3.8};
 	
 	// Preferred bins
 	private int[] xbins = {0, 166, 87, 166};
 	private int ybins = 40;
 
-	final double fitTW0 = 1.5;  // default values for the constants
+	final double fitTW0 = 1.8;  // default values for the constants
 	final double fitTW1 = -0.03;
 	final double fitTW2 = 3.8;
+        final double fitTW0range = 0.5;
 	
 	private IndexedList<H2F> offsetHists = new IndexedList<H2F>(4);  // indexed by s,l,c, offset (in beam bucket multiples)
 	private int NUM_OFFSET_HISTS = 20;
@@ -75,7 +76,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		filename = nextFileName();
 
 		calib = new CalibrationConstants(3,
-				"tw0_left/F:tw1_left/F:tw2_left");
+				"tw1/F:tw2/F:tw3");
 
 		calib.setName("/calibration/ftof/time_walk");
 		calib.setPrecision(4);
@@ -128,27 +129,30 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					int sector = Integer.parseInt(lineValues[0]);
 					int layer = Integer.parseInt(lineValues[1]);
 					int paddle = Integer.parseInt(lineValues[2]);
-					double tw0L = Double.parseDouble(lineValues[4]);
-					double tw1L = Double.parseDouble(lineValues[5]);
-					double tw2L = Double.parseDouble(lineValues[6]);
-					double tw0R = Double.parseDouble(lineValues[7]);
-					double tw1R = Double.parseDouble(lineValues[8]);
-					double tw2R = Double.parseDouble(lineValues[9]);
+					double tw0 = Double.parseDouble(lineValues[3]);
+					double tw1 = Double.parseDouble(lineValues[4]);
+					double tw2 = Double.parseDouble(lineValues[5]);
+					double tw3 = Double.parseDouble(lineValues[6]);
+					double tw4 = Double.parseDouble(lineValues[7]);
+					double tw5 = Double.parseDouble(lineValues[8]);
+					double tw6 = Double.parseDouble(lineValues[9]);
 
 					timeWalkValues.addEntry(sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw0L,
-							"tw0_left", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw1L,
-							"tw1_left", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw2L,
-							"tw2_left", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw0R,
-							"tw0_right", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw1R,
-							"tw1_right", sector, layer, paddle);
-					timeWalkValues.setDoubleValue(tw2R,
-							"tw2_right", sector, layer, paddle);
-					
+					timeWalkValues.setDoubleValue(tw0,
+							"tw0", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw1,
+							"tw1", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw2,
+							"tw2", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw3,
+							"tw3", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw4,
+							"tw4", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw5,
+							"tw5", sector, layer, paddle);
+					timeWalkValues.setDoubleValue(tw6,
+							"tw6", sector, layer, paddle);
+					System.out.println(timeWalkValues.getDoubleValue("tw1", sector, layer, paddle));
 					line = bufferedReader.readLine();
 				}
 
@@ -174,18 +178,20 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					int layer_index = layer - 1;
 					for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 						timeWalkValues.addEntry(sector, layer, paddle);
+						timeWalkValues.setDoubleValue(1.0,
+								"tw0", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(fitTW0,
-								"tw0_left", sector, layer, paddle);
+								"tw1", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(fitTW1,
-								"tw1_left", sector, layer, paddle);
+								"tw2", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(fitTW2,
-								"tw2_left", sector, layer, paddle);
+								"tw3", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(0.0,
-								"tw0_right", sector, layer, paddle);
+								"tw4", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(0.0,
-								"tw1_right", sector, layer, paddle);
+								"tw5", sector, layer, paddle);
 						timeWalkValues.setDoubleValue(0.0,
-								"tw2_right", sector, layer, paddle);
+								"tw6", sector, layer, paddle);
 					}
 				}
 			}			
@@ -193,7 +199,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			timeWalkValues = dcp.readConstants("/calibration/ftof/time_walk");
+			timeWalkValues = dcp.readConstants("/calibration/ftof/time_walk_exp");
 			dcp.disconnect();
 		}
 		prevCalRead = true;
@@ -228,15 +234,15 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					dg.addDataSet(trHist, 0);
 					
 					// create all the functions and graphs
-					double tw0 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_left",
+					double tw1 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1",
 											sector, layer, paddle);
-					double tw1 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1_left",
+					double tw2 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2",
 							sector, layer, paddle);
-					double tw2 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2_left",
+					double tw3 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw3",
 							sector, layer, paddle);
 					// the fit function is the difference between the new model and the old
 					// so that it fits within a beam bucket window without wrapping 
-					String funcText = "[a]+([b]*exp([c]*x)+[d]/x) - ("+tw0+"*exp("+tw1+"*x)+"+tw2+"/x)";
+					String funcText = "[a]+([b]*exp([c]*x)+[d]/x) - ("+tw1+"*exp("+tw2+"*x)+"+tw3+"/x)";
 					//System.out.println("funcText "+funcText);
 					
 					F1D trFunc = new F1D("trFunc", funcText, FIT_MIN[layer], FIT_MAX[layer]);
@@ -404,10 +410,11 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		// fit function to the graph of means
 		F1D twLFunc = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc");
 		twLFunc.setRange(startChannelForFit, endChannelForFit);
-		twLFunc.setParameter(1, 0.0);
+		twLFunc.setParameter(0, 0.0);
 		twLFunc.setParameter(1, fitTW0);
 		twLFunc.setParameter(2, fitTW1);
 		twLFunc.setParameter(3, fitTW2);
+                twLFunc.setParLimits(1, fitTW0-fitTW0range, fitTW0+fitTW0range);
 		try {
 			DataFitter.fit(twLFunc, twLGraph, fitOption);
 		}
@@ -536,9 +543,9 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 				for (int p=minP; p<=maxP; p++) {
 					// save the override values
 					Double[] consts = constants.getItem(s, layer, p);
-					consts[TW0_OVERRIDE] = overrideTW0;
-					consts[TW1_OVERRIDE] = overrideTW1;
-					consts[TW2_OVERRIDE] = overrideTW2;
+					consts[TW1_OVERRIDE] = overrideTW0;
+					consts[TW2_OVERRIDE] = overrideTW1;
+					consts[TW3_OVERRIDE] = overrideTW2;
 
 					fit(s, layer, p, minRange, maxRange);
 
@@ -551,20 +558,6 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		}     
 	}
 
-	public Double getTW0(int sector, int layer, int paddle) {
-
-		double tw0 = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[TW0_OVERRIDE];
-
-		if (overrideVal != UNDEFINED_OVERRIDE) {
-			tw0 = overrideVal;
-		}
-		else {
-			tw0 = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc").getParameter(1);
-		}
-		return tw0;
-	}     
-
 	public Double getTW1(int sector, int layer, int paddle) {
 
 		double tw1 = 0.0;
@@ -574,11 +567,11 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			tw1 = overrideVal;
 		}
 		else {
-			tw1 = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc").getParameter(2);
+			tw1 = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc").getParameter(1);
 		}
 		return tw1;
 	}     
-	
+
 	public Double getTW2(int sector, int layer, int paddle) {
 
 		double tw2 = 0.0;
@@ -588,21 +581,35 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			tw2 = overrideVal;
 		}
 		else {
-			tw2 = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc").getParameter(3);
+			tw2 = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc").getParameter(2);
 		}
 		return tw2;
+	}     
+	
+	public Double getTW3(int sector, int layer, int paddle) {
+
+		double tw3 = 0.0;
+		double overrideVal = constants.getItem(sector, layer, paddle)[TW3_OVERRIDE];
+
+		if (overrideVal != UNDEFINED_OVERRIDE) {
+			tw3 = overrideVal;
+		}
+		else {
+			tw3 = dataGroups.getItem(sector,layer,paddle).getF1D("trFunc").getParameter(3);
+		}
+		return tw3;
 	}     
 	
 
 	@Override
 	public void saveRow(int sector, int layer, int paddle) {
 
-		calib.setDoubleValue(getTW0(sector,layer,paddle),
-				"tw0_left", sector, layer, paddle);
 		calib.setDoubleValue(getTW1(sector,layer,paddle),
-				"tw1_left", sector, layer, paddle);
+				"tw1", sector, layer, paddle);
 		calib.setDoubleValue(getTW2(sector,layer,paddle),
-				"tw2_left", sector, layer, paddle);
+				"tw2", sector, layer, paddle);
+		calib.setDoubleValue(getTW3(sector,layer,paddle),
+				"tw3", sector, layer, paddle);
 		
 	}
 	
@@ -622,9 +629,9 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 						String line = new String();
 						line = sector+" "+layer+" "+paddle+" " + "1" +  " "
-								+new DecimalFormat("0.000").format(getTW0(sector,layer,paddle))+" "
 								+new DecimalFormat("0.000").format(getTW1(sector,layer,paddle))+" "
 								+new DecimalFormat("0.000").format(getTW2(sector,layer,paddle))+" "
+								+new DecimalFormat("0.000").format(getTW3(sector,layer,paddle))+" "
 								+"0.000"+" 0.000"+" 0.000";
 						outputBw.write(line);
 						outputBw.newLine();
@@ -813,50 +820,50 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		int layer_index = layer-1;
 		double[] paddleNumbers = new double[NUM_PADDLES[layer_index]];
 		double[] paddleUncs = new double[NUM_PADDLES[layer_index]];
-		double[] TW0s = new double[NUM_PADDLES[layer_index]];
-		double[] zeroUncs = new double[NUM_PADDLES[layer_index]];
 		double[] TW1s = new double[NUM_PADDLES[layer_index]];
+		double[] zeroUncs = new double[NUM_PADDLES[layer_index]];
 		double[] TW2s = new double[NUM_PADDLES[layer_index]];
+		double[] TW3s = new double[NUM_PADDLES[layer_index]];
 
 		for (int p = 1; p <= NUM_PADDLES[layer_index]; p++) {
 
 			paddleNumbers[p - 1] = (double) p;
 			paddleUncs[p - 1] = 0.0;
-			TW0s[p - 1] = getTW0(sector, layer, p);
 			TW1s[p - 1] = getTW1(sector, layer, p);
 			TW2s[p - 1] = getTW2(sector, layer, p);
+			TW3s[p - 1] = getTW3(sector, layer, p);
 			zeroUncs[p - 1] = 0.0;
 		}
 
-		GraphErrors tw0Summ = new GraphErrors("TW0Summ", paddleNumbers,
-				TW0s, paddleUncs, zeroUncs);
-
-		tw0Summ.setTitleX("Paddle Number");
-		tw0Summ.setTitleY("TW0");
-		tw0Summ.setMarkerSize(MARKER_SIZE);
-		tw0Summ.setLineThickness(MARKER_LINE_WIDTH);
-
-		GraphErrors tw1Summ = new GraphErrors("TW1Summ", paddleNumbers,
+		GraphErrors tw1Summ = new GraphErrors("TW0Summ", paddleNumbers,
 				TW1s, paddleUncs, zeroUncs);
 
 		tw1Summ.setTitleX("Paddle Number");
-		tw1Summ.setTitleY("TW1");
+		tw1Summ.setTitleY("TW0");
 		tw1Summ.setMarkerSize(MARKER_SIZE);
 		tw1Summ.setLineThickness(MARKER_LINE_WIDTH);
 
-		GraphErrors tw2Summ = new GraphErrors("TW2Summ", paddleNumbers,
+		GraphErrors tw2Summ = new GraphErrors("TW1Summ", paddleNumbers,
 				TW2s, paddleUncs, zeroUncs);
 
 		tw2Summ.setTitleX("Paddle Number");
-		tw2Summ.setTitleY("TW2");
+		tw2Summ.setTitleY("TW1");
 		tw2Summ.setMarkerSize(MARKER_SIZE);
 		tw2Summ.setLineThickness(MARKER_LINE_WIDTH);
 
+		GraphErrors tw3Summ = new GraphErrors("TW2Summ", paddleNumbers,
+				TW3s, paddleUncs, zeroUncs);
+
+		tw3Summ.setTitleX("Paddle Number");
+		tw3Summ.setTitleY("TW2");
+		tw3Summ.setMarkerSize(MARKER_SIZE);
+		tw3Summ.setLineThickness(MARKER_LINE_WIDTH);
+
 
 		DataGroup dg = new DataGroup(3,1);
-		dg.addDataSet(tw0Summ, 0);
-		dg.addDataSet(tw1Summ, 1);
-		dg.addDataSet(tw2Summ, 2);
+		dg.addDataSet(tw1Summ, 0);
+		dg.addDataSet(tw2Summ, 1);
+		dg.addDataSet(tw3Summ, 2);
 
 		return dg;
 

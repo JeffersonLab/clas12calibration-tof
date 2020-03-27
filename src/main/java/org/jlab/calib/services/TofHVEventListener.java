@@ -1,8 +1,11 @@
 package org.jlab.calib.services;
 
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -14,9 +17,14 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
+import static org.jlab.calib.services.TOFCalibrationEngine.CAL_DB;
+import static org.jlab.calib.services.TOFCalibrationEngine.CAL_DEFAULT;
+import static org.jlab.calib.services.TOFCalibrationEngine.CAL_FILE;
+import static org.jlab.calib.services.TOFCalibrationEngine.NUM_PADDLES;
 
 import org.jlab.detector.calib.tasks.CalibrationEngine;
 import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.groot.data.GraphErrors;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.fitter.DataFitter;
@@ -109,7 +117,78 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 
 	@Override
 	public void populatePrevCalib() {
+		System.out.println("Populating "+stepName+" previous calibration values");
+		if (calDBSource==CAL_FILE) {
+
+			System.out.println("File: "+prevCalFilename);
+			// read in the values from the text file			
+			String line = null;
+			try { 
+
+				// Open the file
+				FileReader fileReader = 
+						new FileReader(prevCalFilename);
+
+				// Always wrap FileReader in BufferedReader
+				BufferedReader bufferedReader = 
+						new BufferedReader(fileReader);            
+
+				line = bufferedReader.readLine();
+
+				while (line != null) {
+
+					String[] lineValues;
+					lineValues = line.split(" ");
+
+					int sector = Integer.parseInt(lineValues[0]);
+					int layer = Integer.parseInt(lineValues[1]);
+					int paddle = Integer.parseInt(lineValues[2]);
+					double mipa = Double.parseDouble(lineValues[3]);
+
+					gainValues.addEntry(sector, layer, paddle);
+					gainValues.setDoubleValue(mipa,
+							"mipa_left", sector, layer, paddle);
+					
+					line = bufferedReader.readLine();
+				}
+
+				bufferedReader.close();            
+			}
+			catch(FileNotFoundException ex) {
+				System.out.println(
+						"Unable to open file '" + 
+								prevCalFilename + "'");
+				return;
+			}
+			catch(IOException ex) {
+				System.out.println(
+						"Error reading file '" 
+								+ prevCalFilename + "'");
+				return;
+			}			
+		}
+		else if (calDBSource==CAL_DEFAULT) {
+			System.out.println("Default");
+			for (int sector = 1; sector <= 6; sector++) {
+				for (int layer = 1; layer <= 3; layer++) {
+					int layer_index = layer - 1;
+					for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
+						gainValues.addEntry(sector, layer, paddle);
+                                                gainValues.setDoubleValue(0.0,
+								"mipa_left", sector, layer, paddle);
+						
+					}
+				}
+			}			
+		}
+		else if (calDBSource==CAL_DB) {
+			System.out.println("Database Run No: "+prevCalRunNo);
+			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
+			gainValues = dcp.readConstants("/calibration/ftof/gain_balance");
+			dcp.disconnect();
+		}
 		prevCalRead = true;
+		System.out.println(stepName+" previous calibration values populated successfully");
 	}
 
 	@Override

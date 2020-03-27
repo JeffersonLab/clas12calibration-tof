@@ -142,13 +142,18 @@ public class DataProvider {
 		}
 
 		// iterate through hits bank getting corresponding adc and tdc
-		if (event.hasBank("CTOF::hits")) {
+		if (event.hasBank("CTOF::hits") && event.hasBank("RUN::config")) {
 			
 			// Only continue if we have adc and tdc banks
 			if (!event.hasBank("CTOF::adc") || !event.hasBank("CTOF::tdc")) {
 				return paddleList;
 			}
 			
+                        DataBank  configBank = event.getBank("RUN::config");
+                        long triggerBit = configBank.getLong("trigger", 0);
+                        int  run        = configBank.getInt("run", 0);
+                        long timeStamp  = configBank.getLong("timestamp", 0);
+                        			
 			DataBank adcBank = event.getBank("CTOF::adc");
 			DataBank tdcBank = event.getBank("CTOF::tdc");
 			
@@ -162,6 +167,8 @@ public class DataProvider {
 
 				int component = (int) hitsBank.getShort("component", hitIndex);
 				TOFPaddle paddle = new TOFPaddle(1, 1, component);
+                                
+                                paddle.setRun(run, triggerBit, timeStamp);
 
 				int adcIdx1 = getIdx(adcBank, 0, component);
 				int adcIdx2 = getIdx(adcBank, 1, component);
@@ -186,25 +193,17 @@ public class DataProvider {
 				paddle.ADC_TIMEL = adcBank.getFloat("time", adcIdx1);
 				paddle.ADC_TIMER = adcBank.getFloat("time", adcIdx2);
 				paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
-
+        paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
+				
 				if (event.hasBank("CVTRec::Tracks") && event.hasBank("RUN::rf")) {
 
 					DataBank trkBank = event.getBank("CVTRec::Tracks");
 					DataBank rfBank = event.getBank("RUN::rf");
 
-					if (event.hasBank("RUN::config")) {
-						DataBank configBank = event.getBank("RUN::config");
-						paddle.TRIGGER_BIT = configBank.getLong("trigger", 0);
-						paddle.RUN = configBank.getInt("run", 0);
-						paddle.TIMESTAMP = configBank.getLong("timestamp", 0);
-					}
-					
 					int trkId = hitsBank.getShort("trkID", hitIndex);
 					// Get track
-					double energy = hitsBank.getFloat("energy", hitIndex);
-
 					// only use hit with associated track and a minimum energy
-					if (trkId != -1 && energy > 0.5) {
+					if (trkId != -1 && paddle.ENERGY > 0.5) {
 						
 						// Find the matching CVTRec::Tracks bank
 						int trkIdx = -1;
