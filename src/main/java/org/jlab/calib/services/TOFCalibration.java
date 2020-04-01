@@ -100,6 +100,7 @@ ChangeListener {
 			new TofTWPosEventListener(),
 			new TofRFPadEventListener(),
 			new TofP2PEventListener(),
+			new TofFadcEventListener(),
 			new TofCheckEventListener()};
 
 	// engine indices
@@ -112,7 +113,8 @@ ChangeListener {
 	public final int TWPOS = 6;
 	public final int RFPAD = 7;
 	public final int P2P = 8;
-	public final int CHECK = 9;
+	public final int FADC = 9;
+	public final int CHECK = 10;
 
 	String[] dirs = {"/calibration/ftof/gain_balance",
 			"/calibration/ftof/attenuation",
@@ -123,6 +125,7 @@ ChangeListener {
 			"/calibration/ftof/time_walk_pos",
 			"/calibration/ftof/timing_offset/rfpad",
 			"/calibration/ftof/timing_offset/P2P",
+			"/calibration/ftof/fadc_offset",
 			"/calibration/ftof/timing_offset/check"};
 
 	String selectedDir = "None";
@@ -137,16 +140,8 @@ ChangeListener {
 	public final int ADJUST_HV = 2;
 	public final int WRITE = 3;
 
-	// test histograms
-	//    public static H1F trackRCS = new H1F("red_chi_sq","Reduced chi^2 for tracks", 
-	//            200, 0.0, 200.0);
-	//    public static H1F trackRCS2 = new H1F("red_chi_sq2","Reduced chi^2 for tracks", 
-	//            100, 0.0, 40.0);
-	//    public static H1F vertexHist = new H1F("vertex_hist","Vertex z", 
-	//            160, -40.0, 40.0);
-
 	// configuration settings
-	JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(),
+	JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(),
 			new JCheckBox(),new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(), new JCheckBox()}; 
 	
 	// Target GMEAN channel
@@ -324,6 +319,8 @@ ChangeListener {
 			engine = engines[RFPAD];
 		} else if (selectedDir == dirs[P2P]) {
 			engine = engines[P2P];
+		} else if (selectedDir == dirs[FADC]) {
+			engine = engines[FADC];
         } else if (selectedDir == dirs[CHECK]) {
             engine = engines[CHECK];
         } else if (selectedDir == dirs[TWPOS]) {
@@ -794,36 +791,6 @@ ChangeListener {
 		}
 	}
 
-	//    public void showTestHists() {
-	//        JFrame frame = new JFrame("Track Reduced Chi Squared");
-	//        frame.setSize(1000, 800);
-	//        EmbeddedCanvas canvas = new EmbeddedCanvas();
-	//        canvas.cd(0);
-	//        canvas.draw(trackRCS);
-	//        frame.add(canvas);
-	//        frame.setVisible(true);
-	//        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-	//        
-	//        JFrame frame2 = new JFrame("Track Reduced Chi Squared");
-	//        frame2.setSize(1000, 800);
-	//        EmbeddedCanvas canvas2 = new EmbeddedCanvas();
-	//        canvas2.cd(0);
-	//        canvas2.draw(trackRCS2);
-	//        frame2.add(canvas2);
-	//        frame2.setVisible(true);
-	//        frame2.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-	//        
-	//        JFrame frame3 = new JFrame("Vertex z");
-	//        frame3.setSize(1000, 800);
-	//        EmbeddedCanvas canvas3 = new EmbeddedCanvas();
-	//        canvas3.cd(0);
-	//        canvas3.draw(vertexHist);
-	//        frame3.add(canvas3);
-	//        frame3.setVisible(true);
-	//        frame3.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-	//
-	//    }
-
 	public void configure() {
 
 		configFrame.setSize(900, 900);
@@ -864,12 +831,12 @@ ChangeListener {
 				new TofPrevConfigPanel(new TOFCalibrationEngine())};
 
                 int j=0;
-		for (int i=0; i< engines.length-1; i++) {  // skip HV, TDC, check
-                    if(i!=1 && i!=2) {
-			engPanels[j] = new TofPrevConfigPanel(engines[i]);
-			confPanel.add(engPanels[j]);
-                        j++;
-                    }
+		for (int i=0; i< engines.length-2; i++) {  // skip HV, TDC, FADC, check
+            if(i!=1 && i!=2) {
+            	engPanels[j] = new TofPrevConfigPanel(engines[i]);
+            	confPanel.add(engPanels[j]);
+                j++;
+            }
 		}
 //		// add TDC Conv at the end
 //		engPanels[engPanels.length-1] = new TofPrevConfigPanel(engines[TDC_CONV]);

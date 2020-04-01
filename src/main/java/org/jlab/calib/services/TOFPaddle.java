@@ -400,9 +400,9 @@ public class TOFPaddle {
 	public double averageHitTimeNoTW() {
 
 		double lr = leftRightAdjustment();
-		double tL = tdcToTimeL(TDCL) - (lr / 2) - ((0.5 * this.LENGTH + paddleY()) / this.veff());
+		double tL = tdcToTimeL() - (lr / 2) - ((0.5 * this.LENGTH + paddleY()) / this.veff());
 
-		double tR = tdcToTimeL(TDCR) + (lr / 2) - ((0.5 * this.LENGTH - paddleY()) / this.veff());
+		double tR = tdcToTimeR() + (lr / 2) - ((0.5 * this.LENGTH - paddleY()) / this.veff());
 
 		return (tL + tR) / 2.0;
 
@@ -524,18 +524,18 @@ public class TOFPaddle {
 	public double timeLeftAfterTW() {
 		if (tof == "FTOF") {
 			// return tdcToTime(TDCL) - (lamL() / Math.pow(ADCL, 0.5));
-			return tdcToTimeL(TDCL) - TWCorr();
+			return tdcToTimeL() - TWCorr();
 		} else {
-			return tdcToTimeL(TDCL);
+			return tdcToTimeL();
 		}
 	}
 
 	public double timeRightAfterTW() {
 		if (tof == "FTOF") {
 			// return tdcToTime(TDCR) - (lamR() / Math.pow(ADCR, 0.5));
-			return tdcToTimeR(TDCR) - TWCorr();
+			return tdcToTimeR() - TWCorr();
 		} else {
-			return tdcToTimeR(TDCR);
+			return tdcToTimeR();
 		}
 	}	
 	
@@ -668,15 +668,20 @@ public class TOFPaddle {
 	}
 
 	public boolean isValidLeftRight() {
-		return (tdcToTimeL(TDCL) != tdcToTimeR(TDCR));
+		return (tdcToTimeL() != tdcToTimeR());
 	}
 
-	double tdcToTimeL(double value) {
-		return tdcConvL() * value  - this.JITTER;
+	double tdcToTimeL() {
+		return tdcConvL() * TDCL  - this.JITTER;
 	}
 
-	double tdcToTimeR(double value) {
-		return tdcConvR() * value  - this.JITTER;
+	double tdcToTimeR() {
+		return tdcConvR() * TDCR  - this.JITTER;
+	}
+	
+	int triggerPhaseTOF() {
+       int phase_offset = 3;
+       return ((int)(TIMESTAMP+phase_offset)%6); // TI derived phase correction due to TDC and FADC clock differences
 	}
 
 	public double veffHalfTimeDiff() {
