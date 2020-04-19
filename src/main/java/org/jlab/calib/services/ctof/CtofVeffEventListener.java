@@ -172,7 +172,7 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
                             "veff",
                             numBins, min, max, 
                             //200, -15.0, 15.0);
-                            100, -12.0, -5.0);
+                            100, -15.0, -8.0);
 
             hist.setName("veff");
             hist.setTitle("Half Time Diff vs Position : Paddle "+paddle);
