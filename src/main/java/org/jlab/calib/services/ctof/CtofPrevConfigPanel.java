@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import org.jlab.calib.services.TOFCalibration;
 import org.jlab.detector.calib.tasks.CalibrationEngine;
 
 public class CtofPrevConfigPanel extends JPanel 
@@ -107,6 +108,11 @@ implements ActionListener, FocusListener {
 				engine.prevCalFilename = fc.getSelectedFile().getAbsolutePath();
 				fileDisp.setText("Selected file: "+ fc.getSelectedFile().getAbsolutePath());
 				fileRad.setSelected(true);
+
+				// Set all the working directories to the one just selected
+				for (int i=0; i<CTOFCalibration.engPanels.length; i++) {
+					CTOFCalibration.engPanels[i].fc.setCurrentDirectory(fc.getSelectedFile());
+				}
 
 			}
 		}

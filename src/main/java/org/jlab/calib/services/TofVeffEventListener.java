@@ -183,7 +183,7 @@ public class TofVeffEventListener extends TOFCalibrationEngine {
 							new H2F("veff",
 									histTitle(sector,layer,paddle),
 									numBins, min, max, 
-									100, -15.0, 15.0);
+									400, -15.0, 15.0);
 //									100, 0.0, 30.0);
 
 					hist.setName("veff");

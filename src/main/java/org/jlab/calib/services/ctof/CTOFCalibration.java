@@ -51,6 +51,7 @@ import org.jlab.calib.services.TOFCalibration;
 import org.jlab.calib.services.TOFCustomFitPanel;
 import org.jlab.calib.services.TOFPaddle;
 import org.jlab.calib.services.TofCheckEventListener;
+import org.jlab.calib.services.TofFadcEventListener;
 import org.jlab.calib.services.TofPrevConfigPanel;
 import org.jlab.calib.services.TofTimingOptionsPanel;
 import org.jlab.calib.services.configButtonPanel;
@@ -108,7 +109,14 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             new CtofRFPadEventListener(),
             new CtofHPosEventListener(),
             new CtofP2PEventListener(),
+            new CtofFadcEventListener(),
             new CtofCheckEventListener()};
+    
+    public static CtofPrevConfigPanel[] engPanels = {new CtofPrevConfigPanel(new CTOFCalibrationEngine()), 
+            new CtofPrevConfigPanel(new CTOFCalibrationEngine()), 
+            new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
+            new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
+			  new CtofPrevConfigPanel(new CTOFCalibrationEngine())};
     
     // engine indices
     public final int HV = 0;
@@ -119,7 +127,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     public final int RFPAD = 5;
     public final int HPOS = 6;
     public final int P2P = 7;
-    public final int CHECK = 8;
+	public final int FADC = 8;
+    public final int CHECK = 9;
     
     String[] dirs = {"/calibration/ctof/gain_balance",
                      "/calibration/ctof/attenuation",
@@ -129,6 +138,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
                      "/calibration/ctof/time_offsets/rfpad",
                      "/calibration/ctof/hpos",
                      "/calibration/ctof/time_offsets/P2P",
+                     "/calibration/ctof/fadc_offset",
 					 "/calibration/ctof/time_offsets/check"};
     
     String selectedDir = "None";
@@ -153,7 +163,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
     
     // configuration settings
     JCheckBox[] stepChecks = {new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(), new JCheckBox(),
-    						  new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox()};    
+    						  new JCheckBox(),new JCheckBox(),new JCheckBox(), new JCheckBox(), new JCheckBox()};    
 //    private JTextField ctofCenterText = new JTextField(5);
 //    public static double ctofCenter = 0.0;
     
@@ -198,7 +208,12 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 	private JTextField minTDCText = new JTextField(6);
 	private JTextField maxTDCText = new JTextField(6);
     
-    public final static PrintStream oldStdout = System.out;
+	private JTextField minFADCxText = new JTextField(6);
+	private JTextField maxFADCxText = new JTextField(6);
+	private JTextField widthFADCText = new JTextField(6);
+
+	
+	public final static PrintStream oldStdout = System.out;
      
     public CTOFCalibration() {
 
@@ -309,6 +324,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             engine = engines[RFPAD];
         } else if (selectedDir == dirs[HPOS]) {
             engine = engines[HPOS];
+		} else if (selectedDir == dirs[FADC]) {
+			engine = engines[FADC];
         } else if (selectedDir == dirs[P2P]) {
             engine = engines[P2P];
         } else if (selectedDir == dirs[CHECK]) {
@@ -477,6 +494,13 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 			tdcEngine.TDC_MAX = Integer.parseInt(maxTDCText.getText());
 			tdcEngine.FIT_MIN = tdcEngine.TDC_MIN +100;
 			tdcEngine.FIT_MAX = tdcEngine.TDC_MAX -100;
+			
+			// FADC settings
+			CtofFadcEventListener fadcEngine = (CtofFadcEventListener) engines[FADC];
+			fadcEngine.MIN_X = Double.parseDouble(minFADCxText.getText());
+			fadcEngine.MAX_X = Double.parseDouble(maxFADCxText.getText());
+			fadcEngine.WIDTH = Double.parseDouble(widthFADCText.getText());
+
             
             System.out.println("");
             System.out.println("Configuration settings - Tracking/General");
@@ -499,6 +523,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 			System.out.println("Slicefitter mode: "+fitModeList.getSelectedItem());
 			System.out.println("Minimum events per slice: "+minEventsText.getText()); 
 			System.out.println("TDC range: "+minTDCText.getText()+"-"+maxTDCText.getText());
+			System.out.println("FADC x range / width: " + minFADCxText.getText() + "-" + maxFADCxText.getText() + " / "
+					+ widthFADCText.getText());
 			System.out.println("");
         }
         
@@ -825,13 +851,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
         // Previous calibration values
         JPanel confOuterPanel = new JPanel(new BorderLayout());
         Box confPanel = new Box(BoxLayout.Y_AXIS);
-        CtofPrevConfigPanel[] engPanels = {new CtofPrevConfigPanel(new CTOFCalibrationEngine()), 
-                                          new CtofPrevConfigPanel(new CTOFCalibrationEngine()), 
-                                          new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
-                                          new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
-        								  new CtofPrevConfigPanel(new CTOFCalibrationEngine())};
 
-        for (int i=3; i< engines.length-1; i++) {  // skip HV, attenuation, TDC, check
+        for (int i=3; i< engines.length-2; i++) {  // skip HV, attenuation, TDC, FADC, check
             engPanels[i-3] = new CtofPrevConfigPanel(engines[i]);
             confPanel.add(engPanels[i-3]);
         }
@@ -1075,6 +1096,30 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 		c.gridx = 2;
 		c.gridy = y;
 		trPanel.add(new JLabel(""),c);
+		
+		// FADC range and width
+		y++;
+		c.gridx = 0;
+		c.gridy = y;
+		trPanel.add(new JLabel("FADC x range / width:"), c);
+		c.gridx = 1;
+		c.gridy = y;
+		JPanel fadcPanel = new JPanel();
+		minFADCxText.addActionListener(this);
+		minFADCxText.setText("-10.0");
+		fadcPanel.add(minFADCxText);
+		fadcPanel.add(new JLabel(" - "));
+		maxFADCxText.addActionListener(this);
+		maxFADCxText.setText("60.0");
+		fadcPanel.add(maxFADCxText);
+		widthFADCText.addActionListener(this);
+		widthFADCText.setText("10.0");
+		fadcPanel.add(widthFADCText);
+		trPanel.add(fadcPanel, c);
+		c.gridx = 2;
+		c.gridy = y;
+		trPanel.add(new JLabel(""), c);
+		
         
         JPanel butPage3 = new configButtonPanel(this, true, "Finish");
         trOuterPanel.add(butPage3, BorderLayout.SOUTH);

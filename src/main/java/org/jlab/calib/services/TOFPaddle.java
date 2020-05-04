@@ -671,19 +671,14 @@ public class TOFPaddle {
 		return (tdcToTimeL() != tdcToTimeR());
 	}
 
-	double tdcToTimeL() {
+	public double tdcToTimeL() {
 		return tdcConvL() * TDCL  - this.JITTER;
 	}
 
-	double tdcToTimeR() {
+	public double tdcToTimeR() {
 		return tdcConvR() * TDCR  - this.JITTER;
 	}
 	
-	int triggerPhaseTOF() {
-       int phase_offset = 3;
-       return ((int)(TIMESTAMP+phase_offset)%6); // TI derived phase correction due to TDC and FADC clock differences
-	}
-
 	public double veffHalfTimeDiff() {
 
 		double timeL = timeLeftAfterTW();

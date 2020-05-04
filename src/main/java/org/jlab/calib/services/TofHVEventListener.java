@@ -57,6 +57,9 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 	private final double 		LR_THRESHOLD_FRACTION = 0.2;
 	private final int			GM_REBIN_THRESHOLD = 50000;
 
+	private final double[]        FIT_MIN = {300.0, 0.0, 300.0};
+	private final double[]        FIT_MAX = {1500.0, 0.0, 1500.0};
+
 	public int[]		EXPECTED_MIP_CHANNEL = {800, 2000, 800};
 	public int[]		NEWHV_MIP_CHANNEL = {800, 2000, 800};
 	public final int		ALLOWED_MIP_DIFF = 50;
@@ -363,13 +366,23 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 		// adjust the range now that the max has been found
 		// unless it's been set to custom value
 		if (minRange == UNDEFINED_OVERRIDE) {
-			startChannelForFit = maxPos*0.7;
+			if (FIT_MIN[layer_index] != 0.0) {
+				startChannelForFit = FIT_MIN[layer_index];
+			}
+			else {
+				startChannelForFit = maxPos*0.7;				
+			}
 		}
 		if (maxRange == UNDEFINED_OVERRIDE) {
-			endChannelForFit = maxPos+GM_HIST_MAX[layer_index]*0.35;
-			if (endChannelForFit > 0.9*GM_HIST_MAX[layer_index]) {
-				endChannelForFit = 0.9*GM_HIST_MAX[layer_index];
-			}	
+			if (FIT_MAX[layer_index] != 0.0) {
+				endChannelForFit = FIT_MAX[layer_index];
+			}
+			else {
+				endChannelForFit = maxPos+GM_HIST_MAX[layer_index]*0.35;
+				if (endChannelForFit > 0.9*GM_HIST_MAX[layer_index]) {
+					endChannelForFit = 0.9*GM_HIST_MAX[layer_index];
+				}
+			}
 		}
 
 		F1D gmFunc = dataGroups.getItem(sector,layer,paddle).getF1D("gmFunc");

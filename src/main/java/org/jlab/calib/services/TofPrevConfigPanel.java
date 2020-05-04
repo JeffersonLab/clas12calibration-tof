@@ -30,7 +30,7 @@ implements ActionListener, FocusListener {
 	TOFCalibrationEngine engine;
 	JTextField fileDisp = new JTextField(20); 
 	JTextField runText = new JTextField(5);
-	JFileChooser fc = new JFileChooser();
+	public JFileChooser fc = new JFileChooser();
 	
 	JRadioButton defaultRad = new JRadioButton("DEFAULT");
 	JRadioButton fileRad = new JRadioButton("FILE");
@@ -102,6 +102,11 @@ implements ActionListener, FocusListener {
 				engine.prevCalFilename = fc.getSelectedFile().getAbsolutePath();
 				fileDisp.setText("Selected file: "+ fc.getSelectedFile().getAbsolutePath());
 				fileRad.setSelected(true);
+				
+				// Set all the working directories to the one just selected
+				for (int i=0; i<TOFCalibration.engPanels.length; i++) {
+					TOFCalibration.engPanels[i].fc.setCurrentDirectory(fc.getSelectedFile());
+				}
 
 			}
 		}
