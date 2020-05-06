@@ -183,6 +183,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 	// Vertex time correction setting
 	JComboBox<String> vertexCorrList = new JComboBox<String>();
     
+	private JTextField targetPosText = new JTextField(5);
+	
     private JTextField minPText = new JTextField(5);
     public static double minP = 0.0;
     private JTextField maxPText = new JTextField(5);
@@ -217,6 +219,8 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
      
     public CTOFCalibration() {
 
+    	TOFPaddle.tof = "CTOF";
+    	
 		GStyle.getAxisAttributesX().setLabelFontName("Avenir");
         GStyle.getAxisAttributesY().setLabelFontName("Avenir");
         GStyle.getAxisAttributesZ().setLabelFontName("Avenir");
@@ -454,6 +458,10 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             }   
             TOFCalibration.vertexCorr = vertexCorrList.getSelectedIndex();
 			
+            if (targetPosText.getText().compareTo("") != 0) {
+                TOFCalibration.targetPos = Double.parseDouble(targetPosText.getText());
+            }
+            
             if (minPText.getText().compareTo("") != 0) {
                 minP = Double.parseDouble(minPText.getText());
             }
@@ -512,6 +520,7 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
             System.out.println("Minimum vertex z: "+minV);
             System.out.println("Maximum vertex z: "+maxV);
             System.out.println("Vertex time correction?: "+vertexCorrList.getItemAt(TOFCalibration.vertexCorr));
+			System.out.println("Target position (cm): "+TOFCalibration.targetPos);
 			System.out.println("Minimum momentum from tracking (GeV): "+minP);
 			System.out.println("Maximum momentum from tracking (GeV): "+maxP);
             System.out.println("Mass assumption for beta calculation: "+massAssList.getItemAt(TOFCalibration.massAss));
@@ -959,6 +968,16 @@ public class CTOFCalibration implements IDataEventListener, ActionListener,
 		c.gridx = 2;
 		c.gridy = y;
 		trPanel.add(new JLabel(""),c);
+		// Target position
+		y++;
+		c.gridx = 0;
+		c.gridy = y;
+		trPanel.add(new JLabel("Target position (cm):"), c);
+		targetPosText.addActionListener(this);
+		targetPosText.setText("-3.0");
+		c.gridx = 1;
+		c.gridy = y;
+		trPanel.add(targetPosText, c);
         // p min
         y++;
         c.gridx = 0;

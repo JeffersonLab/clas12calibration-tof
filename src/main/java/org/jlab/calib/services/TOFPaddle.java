@@ -421,8 +421,7 @@ public class TOFPaddle {
 
 	public double vertexCorr() {
 		if (TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES) {
-			double targetPos = -3.0;
-			return (VERTEX_Z - targetPos) / 29.98;
+			return (VERTEX_Z - TOFCalibration.targetPos) / 29.98;
 		} else {
 			return 0.0;
 		}
@@ -609,13 +608,12 @@ public class TOFPaddle {
 	
 	public double ctofCenter() {
 		double center = 0.0;
-		double targetPos = -3.0;
 		int paddle = this.getDescriptor().getComponent();
 		if (paddle%2==0) {
-			center = -8.5031 + targetPos;
+			center = -8.5031 + TOFCalibration.targetPos;
 		}
 		else {
-			center = -8.9874 + targetPos;
+			center = -8.9874 + TOFCalibration.targetPos;
 		}
 		return center;
 	}
