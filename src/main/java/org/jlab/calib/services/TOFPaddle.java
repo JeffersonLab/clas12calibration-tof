@@ -81,6 +81,7 @@ public class TOFPaddle {
                 }
                 dcp.disconnect();
                 currentRun = RUN;
+                System.out.println("RUN = "+RUN);
             }
             
             
@@ -107,7 +108,7 @@ public class TOFPaddle {
                 double period = jitConsts.getDoubleValue("period", 0,0,0);
                 int    phase  = jitConsts.getIntValue("phase", 0,0,0);
                 int cycles = jitConsts.getIntValue("cycles", 0,0,0);
-                if(cycles > 0) this.JITTER=period*((TIMESTAMP+phase)%cycles);	    
+                if(cycles > 0) this.JITTER=period*((TIMESTAMP+phase)%cycles);
             }
         }
 

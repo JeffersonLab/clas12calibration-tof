@@ -53,6 +53,7 @@ import org.jlab.detector.calib.tasks.CalibrationEngineView;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.CalibrationConstantsListener;
 import org.jlab.detector.calib.utils.CalibrationConstantsView;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.view.DetectorListener;
 import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
@@ -545,9 +546,10 @@ public class TOFCalibration
 			System.out.println("Slicefitter mode: " + fitModeList.getSelectedItem());
 			System.out.println("Minimum events per slice: " + minEventsText.getText());
 			System.out.println("TDC range: " + minTDCText.getText() + "-" + maxTDCText.getText());
-			System.out.println("FADC x range / width: " + minFADCxText.getText() + "-" + maxFADCxText.getText() + " / "
+			System.out.println("FADC x range / width: " + minFADCxText.getText() + " - " + maxFADCxText.getText() + " / "
 					+ widthFADCText.getText());
 			System.out.println("");
+						
 		}
 	}
 

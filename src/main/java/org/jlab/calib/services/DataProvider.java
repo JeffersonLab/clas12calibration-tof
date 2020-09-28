@@ -157,7 +157,7 @@ public class DataProvider {
 		}
 		
 		// Only continue if we have adc and tdc banks
-		if (!event.hasBank("FTOF::adc") || !event.hasBank("FTOF::tdc")) {
+		if (!event.hasBank("FTOF::adc") || !event.hasBank("FTOF::tdc") || !event.hasBank("RUN::config")) {
 			return paddleList;
 		}
 
@@ -174,18 +174,17 @@ public class DataProvider {
 //				
 //			}
 //		}
+
+        DataBank  configBank = event.getBank("RUN::config");
+        long triggerBit = configBank.getLong("trigger", 0);
+        int  run        = configBank.getInt("run", 0);
+        long timeStamp  = configBank.getLong("timestamp", 0);
 		
 		// iterate through hits bank getting corresponding adc and tdc
 		if (event.hasBank("FTOF::hits") && event.hasBank("RUN::config")) {
 			DataBank  hitsBank = event.getBank("FTOF::hits");
-
-                        DataBank  configBank = event.getBank("RUN::config");
-                        long triggerBit = configBank.getLong("trigger", 0);
-                        int  run        = configBank.getInt("run", 0);
-                        long timeStamp  = configBank.getLong("timestamp", 0);
-                        			
-                        
-                        for (int hitIndex=0; hitIndex<hitsBank.rows(); hitIndex++) {
+                
+                for (int hitIndex=0; hitIndex<hitsBank.rows(); hitIndex++) {
 
 				double tx     = hitsBank.getFloat("tx", hitIndex);
 				double ty     = hitsBank.getFloat("ty", hitIndex);
@@ -196,8 +195,8 @@ public class DataProvider {
 						(int) hitsBank.getByte("sector", hitIndex),
 						(int) hitsBank.getByte("layer", hitIndex),
 						(int) hitsBank.getShort("component", hitIndex));
-                                
-                                paddle.setRun(run, triggerBit, timeStamp);
+                    
+                paddle.setRun(run, triggerBit, timeStamp);
                                 
 				paddle.setAdcTdc(
 						adcBank.getInt("ADC", hitsBank.getShort("adc_idx1", hitIndex)),
@@ -319,7 +318,7 @@ public class DataProvider {
 		}
 		else {
 			// no hits bank, so just use adc and tdc
-
+			
 			// based on cosmic data
 			// am getting entry for every PMT in ADC bank
 			// ADC R two indices after ADC L (will assume right is always after left)
@@ -414,6 +413,7 @@ public class DataProvider {
 								System.out.println("Adding paddle "+sector+layer+component);
 								System.out.println(adcL + " "+adcR+" "+tdcL+" "+tdcR);
 							}
+							paddle.setRun(run, triggerBit, timeStamp);
 							paddleList.add(paddle);							
 						}
 					}
