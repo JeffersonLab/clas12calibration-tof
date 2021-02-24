@@ -2,9 +2,13 @@ package org.jlab.calib.services.ctof;
 
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,13 +54,11 @@ import org.jlab.utils.groups.IndexedList;
 
 public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
-	public final int HPOSA_OVERRIDE = 0;
-	public final int HPOSB_OVERRIDE = 1;
-	public final int HPOSC_OVERRIDE = 2;
 	
 	private String fitOption = "RQ";
 	int backgroundSF = -1;
 	boolean showSlices = false;
+	IndexedList<Double[]> calibValues = new IndexedList<Double[]>(3);
 
 	public CtofHPosEventListener() {
 
@@ -66,11 +68,9 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		filename = nextFileName();
 
 		calib = new CalibrationConstants(3,
-				"hposa/F:hposb/F:hposc/F:hposd/F:hpose/F");
+				"bin1/F:bin25/F:bin50/F:bin75/F:bin100/F");
 		calib.setName("/calibration/ctof/hpos");
-		calib.setPrecision(7);
-
-		// assign constraints to all paddles
+		calib.setPrecision(3);
 
 	}
 	
@@ -103,20 +103,12 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 					int sector = Integer.parseInt(lineValues[0]);
 					int layer = Integer.parseInt(lineValues[1]);
 					int paddle = Integer.parseInt(lineValues[2]);
-					double hposA = Double.parseDouble(lineValues[3]);
-					double hposB = Double.parseDouble(lineValues[4]);
-					double hposC = Double.parseDouble(lineValues[5]);
-					double hposD = Double.parseDouble(lineValues[6]);
 					
-					hposValues.addEntry(sector, layer, paddle);
-					hposValues.setDoubleValue(hposA,
-							"hposa", sector, layer, paddle);
-					hposValues.setDoubleValue(hposB,
-							"hposb", sector, layer, paddle);
-					hposValues.setDoubleValue(hposC,
-							"hposc", sector, layer, paddle);
-					hposValues.setDoubleValue(hposD,
-							"hposd", sector, layer, paddle);
+					Double[] vals = new Double[100];
+					for (int i=0; i<100; i++) {
+						vals[i] = Double.parseDouble(lineValues[i+3]);
+					}
+					hposValues.add(vals, sector, layer, paddle);
 					
 					line = bufferedReader.readLine();
 				}
@@ -139,22 +131,17 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		else if (calDBSource==CAL_DEFAULT) {
 			System.out.println("Default");
 			for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
-				hposValues.addEntry(1, 1, paddle);
-				hposValues.setDoubleValue(0.0,
-						"hposa", 1, 1, paddle);
-				hposValues.setDoubleValue(0.0,
-						"hposb", 1, 1, paddle);
-				hposValues.setDoubleValue(0.0,
-						"hposc", 1, 1, paddle);
-				hposValues.setDoubleValue(0.0,
-						"hposd", 1, 1, paddle);
-						
+				Double[] vals = new Double[100];
+				for (int i=0; i<100; i++) {
+					vals[i] = 0.0;
+				}
+				hposValues.add(vals, 1, 1, paddle);
 			}			
 		}
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			hposValues = dcp.readConstants("/calibration/ctof/hpos");
+			//hposValues = dcp.readConstants("/calibration/ctof/hpos");
 			dcp.disconnect();
 		}
 		prevCalRead = true;
@@ -178,34 +165,19 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 			hposHist.setTitleX("hit position (cm)");
 			hposHist.setTitleY("delta T (ns)");
 
-			// create all the functions and graphs
-		
-			String funcText = "([a]*exp([b]*x))+[c]";
-			// create all the functions
-			F1D hposFunc = new F1D("hposFunc", funcText, -50.0, 50.0);
-			
 			GraphErrors hposGraph = new GraphErrors("hposGraph");
 			hposGraph.setName("hposGraph");
 			hposGraph.setTitle("HPOS P"+paddle);
-			hposFunc.setLineColor(FUNC_COLOUR);
-			hposFunc.setLineWidth(FUNC_LINE_WIDTH);
 			hposGraph.setMarkerSize(MARKER_SIZE);
 			hposGraph.setLineThickness(MARKER_LINE_WIDTH);
 
 			DataGroup dg = new DataGroup(2,1);
 			dg.addDataSet(hposHist, 0);
 			dg.addDataSet(hposGraph, 1);
-			dg.addDataSet(hposFunc, 1);
 			dataGroups.add(dg, 1,1,paddle);
 
 			setPlotTitle(1,1,paddle);
-
-			// initialize the constants array
-			Double[] consts = {UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE, UNDEFINED_OVERRIDE};
-			// override values
-
-			constants.add(consts, 1, 1, paddle);
-
+			
 		}
 	}
 
@@ -231,7 +203,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 				dataGroups.getItem(sector,layer,component).getH2F("hposHist").fill(
 						 paddle.paddleY(),
 						 (paddle.refSTTimeRFCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
-				
+				//System.out.println("Louise 203");
 			}
 		}
 	}
@@ -247,32 +219,9 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 	}	
 
 	@Override
-	public void fit(int sector, int layer, int paddle,
-			double minRange, double maxRange) {
+	public void fit(int sector, int layer, int paddle) {
 
 		H2F hposHist = dataGroups.getItem(sector,layer,paddle).getH2F("hposHist");
-
-		// find the range for the fit
-		double lowLimit;
-		double highLimit;
-
-		if (minRange != UNDEFINED_OVERRIDE) {
-			// use custom values for fit
-			lowLimit = minRange;
-		}
-		else {
-			lowLimit = paddleLength(sector,layer,paddle) * -0.3;
-		}
-
-		if (maxRange != UNDEFINED_OVERRIDE) {
-			// use custom values for fit
-			highLimit = maxRange;
-		}
-		else {
-			highLimit = paddleLength(sector,layer,paddle) * 0.4;
-		}
-
-		// fit function to the graph of means
 		GraphErrors hposGraph = (GraphErrors) dataGroups.getItem(sector,layer,paddle).getData("hposGraph");
 		
 		if (fitMethod==FIT_METHOD_SF) {
@@ -299,58 +248,35 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		else {
 			hposGraph.copy(hposHist.getProfileX());
 		}
-				
-		F1D hposFunc = dataGroups.getItem(sector,layer,paddle).getF1D("hposFunc");
-		hposFunc.setRange(lowLimit, highLimit);
 
-		double hposA = CTOFCalibrationEngine.hposValues.getDoubleValue("hposa",1, 1, paddle);
-		double hposB = CTOFCalibrationEngine.hposValues.getDoubleValue("hposb",1, 1, paddle);
-		hposFunc.setParameter(0, 0.005); //hposA);
-		hposFunc.setParameter(1, 0.1); //hposB
-		hposFunc.setParameter(2, 0.0);
-
-		try {
-			DataFitter.fit(hposFunc, hposGraph, fitOption);
-
-		} catch (Exception e) {
-			System.out.println("Fit error with sector "+sector+" layer "+layer+" paddle "+paddle);
-			e.printStackTrace();
+		// initialise the calib table (so that missing graph points have value 0.0)
+		Double[] vals = new Double[100];
+		for (int i=0; i<100; i++) {
+			vals[i] = 0.0;
 		}
 		
-		// LC Mar 2020 Set function parameters to override value
-		Double[] consts = constants.getItem(sector, layer, paddle);
-		if (consts[HPOSA_OVERRIDE] != UNDEFINED_OVERRIDE) {
-			hposFunc.setParameter(0, consts[HPOSA_OVERRIDE]);
+		// Set the constants equal to the offset for each bin
+		for (int i=0; i<hposGraph.getDataSize(0); i++) {
+			int sliceNum = (int) Math.floor(hposGraph.getDataX(i)) + 50;
+			vals[sliceNum] =hposGraph.getDataY(i);
+			//System.out.println("Paddle "+paddle+" dataX "+ hposGraph.getDataX(i) + " sliceNum "+sliceNum
+			//				+" dataY "+hposGraph.getDataY(i));
 		}
-		if (consts[HPOSB_OVERRIDE] != UNDEFINED_OVERRIDE) {
-			hposFunc.setParameter(1, consts[HPOSB_OVERRIDE]);
-		}
-
+		calibValues.add(vals, 1, 1, paddle);
 	}
 
 	public void customFit(int sector, int layer, int paddle){
 
-		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
-				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
-				"Override hposA:", "Override hposB:"};
+		String[] fields = { "Slice number:", "Override value:"};
 
 		TOFCustomFitPanel panel = new TOFCustomFitPanel(fields,sector,layer);
 
 		int result = JOptionPane.showConfirmDialog(null, panel, 
 				"Adjust Fit / Override for paddle "+paddle, JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
-
-			double minRange = toDouble(panel.textFields[0].getText());
-			double maxRange = toDouble(panel.textFields[1].getText());
-			if (panel.textFields[2].getText().compareTo("") !=0) {
-				fitMinEvents = Integer.parseInt(panel.textFields[2].getText());
-			}
-			if (panel.textFields[3].getText().compareTo("") !=0) {
-				backgroundSF = Integer.parseInt(panel.textFields[3].getText());
-			}
 			
-			double overrideA = toDouble(panel.textFields[4].getText());
-			double overrideB = toDouble(panel.textFields[5].getText());
+			int sliceNum = Integer.parseInt(panel.textFields[4].getText());
+			double sliceOverride = toDouble(panel.textFields[5].getText());
 			
 			int minP = paddle;
 			int maxP = paddle;
@@ -366,57 +292,32 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 				
 			for (int p=minP; p<=maxP; p++) {
 				// save the override values
-				Double[] consts = constants.getItem(sector, layer, p);
-				consts[HPOSA_OVERRIDE] = overrideA;
-				consts[HPOSB_OVERRIDE] = overrideB;
-
-				fit(sector, layer, p, minRange, maxRange);
 
 				// update the table
-				saveRow(sector,layer,p);
 			}
 			calib.fireTableDataChanged();
 
 		}	 
 	}
 
-	public Double getHPOSA(int sector, int layer, int paddle) {
-
-		return getHPOS(sector, layer, paddle, 0);
+	public Double getHPOS(int sector, int layer, int paddle, int sliceNum) {
+		
+		return calibValues.getItem(sector,layer,paddle)[sliceNum];
 	}
-	
-	public Double getHPOSB(int sector, int layer, int paddle) {
-
-		return getHPOS(sector, layer, paddle, 1);
-	}
-
-	public Double getHPOS(int sector, int layer, int paddle, int param) {
-
-		double val = 0.0;
-		double overrideVal = constants.getItem(sector, layer, paddle)[param];
-
-		if (overrideVal != UNDEFINED_OVERRIDE) {
-			val = overrideVal;
-		}
-		else {
-			val = dataGroups.getItem(sector,layer,paddle).getF1D("hposFunc").getParameter(param);
-		}
-		return val;
-	}
-	
+		
 	@Override
 	public void saveRow(int sector, int layer, int paddle) {
-		calib.setDoubleValue(getHPOSA(sector,layer,paddle),
-				"hposa", sector, layer, paddle);
-		calib.setDoubleValue(getHPOSB(sector,layer,paddle),
-				"hposb", sector, layer, paddle);
-		calib.setDoubleValue(0.0,
-				"hposc", sector, layer, paddle);
-		calib.setDoubleValue(0.0,
-				"hposd", sector, layer, paddle);
-		calib.setDoubleValue(0.0,
-				"hpose", sector, layer, paddle);
-
+		Double[] vals = calibValues.getItem(1,1,paddle);
+		calib.setDoubleValue(vals[0],
+				"bin1", sector, layer, paddle);
+		calib.setDoubleValue(vals[24],
+				"bin25", sector, layer, paddle);
+		calib.setDoubleValue(vals[49],
+				"bin50", sector, layer, paddle);
+		calib.setDoubleValue(vals[74],
+				"bin75", sector, layer, paddle);
+		calib.setDoubleValue(vals[99],
+				"bin100", sector, layer, paddle);
 	}
 
 	@Override
@@ -435,11 +336,48 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 	public void drawPlots(int sector, int layer, int paddle, EmbeddedCanvas canvas) {
 
 		H2F hist = dataGroups.getItem(sector,layer,paddle).getH2F("hposHist");
-		F1D func = dataGroups.getItem(sector,layer,paddle).getF1D("hposFunc");
 
 		canvas.draw(hist);    
-		canvas.draw(func, "same");
 	}
+	
+	@Override
+    public void writeFile(String filename) {
+
+        try { 
+
+            // Open the output file
+            File outputFile = new File(filename);
+            FileWriter outputFw = new FileWriter(outputFile.getAbsoluteFile());
+            BufferedWriter outputBw = new BufferedWriter(outputFw);
+
+			for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
+
+				String line = 1+" "+1+" "+paddle;
+				Double[] vals = calibValues.getItem(1,1,paddle);
+				for (int i=0; i<100; i++) {
+					Double val = 0.0;
+					if (vals[i] != null) {
+						val = vals[i];
+					}
+					line = line + " " + new DecimalFormat("0.000").format(val);
+					//line = line + " " + vals[i];
+				}
+				outputBw.write(line);
+				outputBw.newLine();
+
+			}
+            outputBw.close();
+        }
+        catch(IOException ex) {
+            System.out.println(
+                    "Error reading file '" 
+                            + filename + "'");                   
+            // Or we could just do this: 
+            ex.printStackTrace();
+        }
+
+    }
+	
 	
 	@Override
 	public DataGroup getSummary(int sector, int layer) {
@@ -455,8 +393,8 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
 			paddleNumbers[p - 1] = (double) p;
 			paddleUncs[p - 1] = 0.0;
-			hposas[p - 1] = getHPOSA(sector, layer, p);
-			hposbs[p - 1] = getHPOSB(sector, layer, p);
+			hposas[p - 1] = 0.0;
+			hposbs[p - 1] = 0.0;
 			zeroUncs[p - 1] = 0.0;
 		}
 
@@ -480,6 +418,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		dg.addDataSet(aSumm, 0);
 		dg.addDataSet(bSumm, 1);
 
+		System.out.println("Louise 364");
 		return dg;
 
 	}

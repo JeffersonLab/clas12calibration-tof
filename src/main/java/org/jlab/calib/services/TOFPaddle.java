@@ -462,7 +462,7 @@ public class TOFPaddle {
 		return averageHitTime() + rfpad() + HPosCorr() + TWPosCorr() + p2p();
 	}
 
-        public double refSTTimeRFCorr() {
+    public double refSTTimeRFCorr() {
 		return refSTTime() - rfpad();
 	}
 
@@ -470,28 +470,39 @@ public class TOFPaddle {
 		return refSTTime() - HPosCorr();
 	}
 	
-	private double HPosCorr() {
+	private double HPosCorrOld() {
 		if (tof=="CTOF") {
-			return hposA()*Math.exp(hposB()*paddleY());
+			return hposAOld()*Math.exp(hposBOld()*paddleY());
 		} else {
 			return 0.0;
 		}
 	}
 	
-	public double hposA() {
+	private double HPosCorr() {
 		double val = 0.0;
 		if (tof == "CTOF") {
-			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposa", desc.getSector(), desc.getLayer(),
-					desc.getComponent());
+			Double[] vals = new Double[100];
+			int sliceNum = (int) Math.floor(paddleY()) + 50;
+			vals = CTOFCalibrationEngine.hposValues.getItem(desc.getSector(), desc.getLayer(), desc.getComponent());
+			val = vals[sliceNum];
+		}
+		return val;
+	}
+	
+	public double hposAOld() {
+		double val = 0.0;
+		if (tof == "CTOF") {
+			//val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposa", desc.getSector(), desc.getLayer(),
+			//		desc.getComponent());
 		}
 		return val;
 	}
 
-	public double hposB() {
+	public double hposBOld() {
 		double val = 0.0;
 		if (tof == "CTOF") {
-			val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposb", desc.getSector(), desc.getLayer(),
-					desc.getComponent());
+			//val = CTOFCalibrationEngine.hposValues.getDoubleValue("hposb", desc.getSector(), desc.getLayer(),
+			//		desc.getComponent());
 		}
 		return val;
 	}
@@ -832,7 +843,7 @@ public class TOFPaddle {
 		System.out.println("refTime " + refTime() + " startTime " + startTime() + " averageHitTime "
 				+ averageHitTime() + " vertexCorr " + vertexCorr());
 		System.out.println("refSTTime " + refSTTime() + " refSTTimeRFCorr "+ refSTTimeRFCorr() + " refSTTimeHPosCorr "+ refSTTimeHPosCorr() + " refSTTimeCorr "+ refSTTimeCorr());
-		System.out.println("hposA " + hposA() + "hposB " + hposB());
+		System.out.println("hposA " + hposAOld() + "hposB " + hposBOld());
 		System.out.println("startTimeP2PCorr " + startTimeP2PCorr());
 		System.out.println("rfpad " + rfpad() + " p2p " + p2p() + " lamL " + lamL() + " tw1pos " + tw1pos() + " tw2pos "
 				+ tw2pos() + " lamR " + lamR() + " LR " + leftRightAdjustment()

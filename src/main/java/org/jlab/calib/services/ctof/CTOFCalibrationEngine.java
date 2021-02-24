@@ -86,14 +86,14 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
     public static CalibrationConstants p2pValues;
     public static CalibrationConstants veffValues;
     public static CalibrationConstants rfpadValues;
-    public static CalibrationConstants hposValues;
-
+    
     // Calculated counter status values
     public static IndexedList<Integer> adcLeftStatus = new IndexedList<Integer>(3);
     public static IndexedList<Integer> adcRightStatus = new IndexedList<Integer>(3);
     public static IndexedList<Integer> tdcLeftStatus = new IndexedList<Integer>(3);
     public static IndexedList<Integer> tdcRightStatus = new IndexedList<Integer>(3);
-
+    public static IndexedList<Double[]> hposValues = new IndexedList<Double[]>(3);
+    
     public CTOFCalibrationEngine() {
         // controlled by calibration step class
         //TOFPaddle.tof = "CTOF";
@@ -107,8 +107,6 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
                         "paddle2paddle/F");
         rfpadValues =    new CalibrationConstants(3,
                 "rfpad/F");
-        hposValues =    new CalibrationConstants(3,
-                "hposa/F:hposb/F");        
 
     }
     
