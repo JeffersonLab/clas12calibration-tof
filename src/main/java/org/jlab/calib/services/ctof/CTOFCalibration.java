@@ -100,14 +100,13 @@ public class CTOFCalibration
 
 	CTOFCalibrationEngine[] engines = { new CtofHVEventListener(), new CtofAttenEventListener(),
 			new CtofTdcConvEventListener(), new CtofLeftRightEventListener(), new CtofVeffEventListener(),
-			new CtofRFPadEventListener(), new CtofHPosEventListener(), new CtofP2PEventListener(),
-			new CtofFadcEventListener(), new CtofCheckEventListener() };
+			new CtofRFPadEventListener(), new CtofHPosEventListener(), new CtofHposBinEventListener(),
+			new CtofP2PEventListener(), new CtofFadcEventListener(), new CtofCheckEventListener() };
 
 	public static CtofPrevConfigPanel[] engPanels = { new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
 			new CtofPrevConfigPanel(new CTOFCalibrationEngine()), new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
-			new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
-			new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
-			new CtofPrevConfigPanel(new CTOFCalibrationEngine())};
+			new CtofPrevConfigPanel(new CTOFCalibrationEngine()), new CtofPrevConfigPanel(new CTOFCalibrationEngine()),
+			new CtofPrevConfigPanel(new CTOFCalibrationEngine()) };
 
 	// engine indices
 	public final int HV = 0;
@@ -117,14 +116,16 @@ public class CTOFCalibration
 	public final int VEFF = 4;
 	public final int RFPAD = 5;
 	public final int HPOS = 6;
-	public final int P2P = 7;
-	public final int FADC = 8;
-	public final int CHECK = 9;
+	public final int HPOSBIN = 7;
+	public final int P2P = 8;
+	public final int FADC = 9;
+	public final int CHECK = 10;
 
 	String[] dirs = { "/calibration/ctof/gain_balance", "/calibration/ctof/attenuation", "/calibration/ctof/tdc_conv",
 			"/calibration/ctof/time_offsets/upstream_downstream", "/calibration/ctof/effective_velocity",
-			"/calibration/ctof/time_offsets/rfpad", "/calibration/ctof/hpos", "/calibration/ctof/time_offsets/P2P",
-			"/calibration/ctof/fadc_offset", "/calibration/ctof/time_offsets/check" };
+			"/calibration/ctof/time_offsets/rfpad", "/calibration/ctof/hpos", "/calibration/ctof/hposbin",
+			"/calibration/ctof/time_offsets/P2P", "/calibration/ctof/fadc_offset",
+			"/calibration/ctof/time_offsets/check" };
 
 	String selectedDir = "None";
 	int selectedSector = 1;
@@ -149,7 +150,7 @@ public class CTOFCalibration
 
 	// configuration settings
 	JCheckBox[] stepChecks = { new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(),
-			new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox() };
+			new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox(), new JCheckBox() };
 	// private JTextField ctofCenterText = new JTextField(5);
 	// public static double ctofCenter = 0.0;
 
@@ -315,6 +316,8 @@ public class CTOFCalibration
 			engine = engines[RFPAD];
 		} else if (selectedDir == dirs[HPOS]) {
 			engine = engines[HPOS];
+		} else if (selectedDir == dirs[HPOSBIN]) {
+			engine = engines[HPOSBIN];
 		} else if (selectedDir == dirs[FADC]) {
 			engine = engines[FADC];
 		} else if (selectedDir == dirs[P2P]) {
@@ -478,6 +481,11 @@ public class CTOFCalibration
 			engines[HPOS].fitMode = (String) fitModeList.getSelectedItem();
 			if (minEventsText.getText().compareTo("") != 0) {
 				engines[HPOS].fitMinEvents = Integer.parseInt(minEventsText.getText());
+			}
+			engines[HPOSBIN].fitMethod = fitList.getSelectedIndex();
+			engines[HPOSBIN].fitMode = (String) fitModeList.getSelectedItem();
+			if (minEventsText.getText().compareTo("") != 0) {
+				engines[HPOSBIN].fitMinEvents = Integer.parseInt(minEventsText.getText());
 			}
 
 			// min and max TDC
@@ -839,8 +847,8 @@ public class CTOFCalibration
 			confPanel.add(engPanels[i - 3]);
 		}
 		// add TDC Conv at the end
-		engPanels[engPanels.length - 1] = new CtofPrevConfigPanel(engines[TDC_CONV]);
-		confPanel.add(engPanels[engPanels.length - 1]);
+		// engPanels[engPanels.length - 1] = new CtofPrevConfigPanel(engines[TDC_CONV]);
+		// confPanel.add(engPanels[engPanels.length - 1]);
 
 		JPanel butPage2 = new configButtonPanel(this, false, "Next");
 		confOuterPanel.add(confPanel, BorderLayout.NORTH);

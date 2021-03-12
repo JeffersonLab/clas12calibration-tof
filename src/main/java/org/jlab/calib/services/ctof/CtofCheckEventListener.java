@@ -92,7 +92,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 
 			H2F hitHist = 
 					new H2F("hitHist","Paddle "+paddle,
-							100, -40.0, 40.0,
+							100, -paddleLength(1,1,paddle)*0.55, paddleLength(1,1,paddle)*0.55,
 							bins, -bb*0.5, bb*0.5);
 			hitHist.setTitleX("hit position (cm)");
 			hitHist.setTitleY("delta T (ns)");
