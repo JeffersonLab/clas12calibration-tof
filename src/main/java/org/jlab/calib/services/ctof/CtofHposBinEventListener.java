@@ -59,6 +59,7 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 	int backgroundSF = -1;
 	boolean showSlices = false;
 	IndexedList<Double[]> calibValues = new IndexedList<Double[]>(3);
+	public static int xBins = 100;
 
 	public CtofHposBinEventListener() {
 
@@ -67,8 +68,18 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 		// get file name here so that each timer update overwrites it
 		filename = nextFileName();
 
+		int[] binSamples = new int[5];
+		for (int i=0; i<5; i++) {
+			binSamples[i] = (int) (Math.floor(xBins*0.25*i));
+		}
+		binSamples[0] = 1;
+
 		calib = new CalibrationConstants(3,
-				"bin1/F:bin25/F:bin50/F:bin75/F:bin100/F");
+				"bin"+binSamples[0]+"/F:bin"
+					 +binSamples[1]+"/F:bin"
+					 +binSamples[2]+"/F:bin"
+					 +binSamples[3]+"/F:bin"
+					 +binSamples[4]+"/F");
 		calib.setName("/calibration/ctof/hposbin");
 		calib.setPrecision(3);
 
@@ -104,8 +115,8 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 					int layer = Integer.parseInt(lineValues[1]);
 					int paddle = Integer.parseInt(lineValues[2]);
 					
-					Double[] vals = new Double[100];
-					for (int i=0; i<100; i++) {
+					Double[] vals = new Double[xBins];
+					for (int i=0; i<xBins; i++) {
 						vals[i] = Double.parseDouble(lineValues[i+3]);
 					}
 					hposBinValues.add(vals, sector, layer, paddle);
@@ -131,8 +142,8 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 		else if (calDBSource==CAL_DEFAULT) {
 			System.out.println("Default");
 			for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
-				Double[] vals = new Double[100];
-				for (int i=0; i<100; i++) {
+				Double[] vals = new Double[xBins];
+				for (int i=0; i<xBins; i++) {
 					vals[i] = 0.0;
 				}
 				hposBinValues.add(vals, 1, 1, paddle);
@@ -153,15 +164,20 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 
 		// perform init processing
     	double bb = BEAM_BUCKET;
-		int bins = (int) (bb/2.004)*160;
+    	double yBinWidth = 0.010;
+		int yBins = (int)((bb/2.004)*(2.0/yBinWidth)) +1;
+		double yLimit = (yBins/2.0)*yBinWidth;
+		
+		System.out.println("yBins "+yBins+" yLimit "+yLimit);
+		System.out.println("xBins "+xBins);
 		
 		for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 
 			// create all the histograms
 			H2F hposBinHist = 
 					new H2F("hposBinHist","HPOSBIN P"+paddle,
-							100, -paddleLength(1,1,paddle)*0.55, paddleLength(1,1,paddle)*0.55,
-							bins, -bb*0.5, bb*0.5);
+							xBins, -50.0, 50.0,
+							yBins, -yLimit, yLimit);
 			hposBinHist.setTitleX("hit position (cm)");
 			hposBinHist.setTitleY("delta T (ns)");
 
@@ -202,8 +218,19 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 				
 				dataGroups.getItem(sector,layer,component).getH2F("hposBinHist").fill(
 						 paddle.paddleY(),
-						 (paddle.refSTTimeHPosFuncCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
-				//System.out.println("Louise 203");
+						 //(paddle.refSTTimeHPosFuncCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+				 		 // use HPosBinCorr so we can check if all corrections go to zero
+						 // output value accounts for this
+						 (paddle.refSTTimeHPosBinCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+				
+//				if (component==6 && paddle.paddleY() > -12.0 && paddle.paddleY() < -11.0) {
+//					System.out.println("paddleY "+paddle.paddleY()+
+//									   " refSTTimeCorr "+ paddle.refSTTimeCorr()+
+//									   " HPosCorr " + paddle.HPosCorr()+
+//									   " HPosCorrBin " + paddle.HPosCorrBin()+
+//									   " HPosCorrFunc " + paddle.HPosCorrFunc());
+//				}
+				
 			}
 		}
 	}
@@ -217,6 +244,12 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 		save();
 		calib.fireTableDataChanged();
 	}	
+	
+	public static int sliceNumber(double xPos) {
+		int binWidth = 100/xBins;
+		int sliceNum = (int) Math.floor(xPos/binWidth) + 50/binWidth;
+		return sliceNum;
+	}
 
 	@Override
 	public void fit(int sector, int layer, int paddle) {
@@ -243,24 +276,37 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 		}
 		else if (fitMethod==FIT_METHOD_MAX) {
 			maxGraphError = 0.3;
-			hposBinGraph.copy(maxGraph(hposBinHist, "hposBinGraph"));
+			//hposBinGraph.copy(maxGraph(hposBinHist, "hposBinGraph"));
+			hposBinGraph.copy(meanGraph(hposBinHist, "hposBinGraph"));
 		}
 		else {
 			hposBinGraph.copy(hposBinHist.getProfileX());
 		}
 
 		// initialise the calib table (so that missing graph points have value 0.0)
-		Double[] vals = new Double[100];
-		for (int i=0; i<100; i++) {
+		Double[] vals = new Double[xBins];
+		for (int i=0; i<xBins; i++) {
 			vals[i] = 0.0;
 		}
 		
+		// get previous calibration values
+		Double[] calibvals = new Double[xBins];
+		calibvals = CTOFCalibrationEngine.hposBinValues.getItem(1, 1, paddle);
+		
 		// Set the constants equal to the offset for each bin
+		//int binWidth = 100/xBins;
 		for (int i=0; i<hposBinGraph.getDataSize(0); i++) {
-			int sliceNum = (int) Math.floor(hposBinGraph.getDataX(i)) + 50;
-			vals[sliceNum] =hposBinGraph.getDataY(i);
-			//System.out.println("Paddle "+paddle+" dataX "+ hposGraph.getDataX(i) + " sliceNum "+sliceNum
-			//				+" dataY "+hposGraph.getDataY(i));
+			//int sliceNum = (int) Math.floor(hposBinGraph.getDataX(i)/binWidth) + 50/binWidth;
+			int sliceNum = sliceNumber(hposBinGraph.getDataX(i));
+			vals[sliceNum] =hposBinGraph.getDataY(i)+calibvals[sliceNum];
+//			if (paddle==1 || paddle==2) {
+//				System.out.println("Paddle "+paddle+" dataX "+ hposBinGraph.getDataX(i) + " sliceNum "+sliceNum
+//								+" dataY "+hposBinGraph.getDataY(i));
+//				Double[] calibvals = new Double[100];
+//				calibvals = CTOFCalibrationEngine.hposBinValues.getItem(1, 1, paddle);
+//				System.out.println("sliceNum is "+sliceNum+" HPOS corr is "+calibvals[sliceNum]);
+//								
+//			}
 		}
 		calibValues.add(vals, 1, 1, paddle);
 	}
@@ -309,15 +355,12 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 	public void saveRow(int sector, int layer, int paddle) {
 		Double[] vals = calibValues.getItem(1,1,paddle);
 		calib.setDoubleValue(vals[0],
-				"bin1", sector, layer, paddle);
-		calib.setDoubleValue(vals[24],
-				"bin25", sector, layer, paddle);
-		calib.setDoubleValue(vals[49],
-				"bin50", sector, layer, paddle);
-		calib.setDoubleValue(vals[74],
-				"bin75", sector, layer, paddle);
-		calib.setDoubleValue(vals[99],
-				"bin100", sector, layer, paddle);
+				"bin1", sector, layer, paddle);		
+		for (int i=1; i<5; i++) {
+			int nextBin = (int) Math.floor(xBins*0.25*i);
+			calib.setDoubleValue(vals[nextBin-1],
+					"bin"+nextBin, sector, layer, paddle);	
+		}
 	}
 
 	@Override
@@ -354,7 +397,7 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 
 				String line = 1+" "+1+" "+paddle;
 				Double[] vals = calibValues.getItem(1,1,paddle);
-				for (int i=0; i<100; i++) {
+				for (int i=0; i<xBins; i++) {
 					Double val = 0.0;
 					if (vals[i] != null) {
 						val = vals[i];

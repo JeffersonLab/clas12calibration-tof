@@ -180,7 +180,8 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
 			// create all the functions and graphs
 		
-			String funcText = "([a]*exp([b]*x))+[c]";
+			//String funcText = "([a]*exp([b]*x))+[c]"; // Original hpos function
+			String funcText = "[a]*x*x+[b]*x+[c]"; // New function for correction after bin level corrections
 			// create all the functions
 			F1D hposFunc = new F1D("hposFunc", funcText, -50.0, 50.0);
 			
@@ -230,7 +231,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 				
 				dataGroups.getItem(sector,layer,component).getH2F("hposHist").fill(
 						 paddle.paddleY(),
-						 (paddle.refSTTimeRFCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						 (paddle.refSTTimeHPosBinCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				
 			}
 		}
@@ -303,9 +304,9 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 		F1D hposFunc = dataGroups.getItem(sector,layer,paddle).getF1D("hposFunc");
 		hposFunc.setRange(lowLimit, highLimit);
 
-		hposFunc.setParameter(0, 0.005); //hposA);
-		hposFunc.setParameter(1, 0.1); //hposB
-		hposFunc.setParameter(2, 0.0);
+		hposFunc.setParameter(0, 0.005); // hposA
+		hposFunc.setParameter(1, 0.1); // hposB
+		hposFunc.setParameter(2, 0.0); //hposC
 
 		try {
 			DataFitter.fit(hposFunc, hposGraph, fitOption);
@@ -387,6 +388,11 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
 		return getHPOS(sector, layer, paddle, 1);
 	}
+	
+	public Double getHPOSC(int sector, int layer, int paddle) {
+
+		return getHPOS(sector, layer, paddle, 2);
+	}	
 
 	public Double getHPOS(int sector, int layer, int paddle, int param) {
 
@@ -408,7 +414,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 				"hposa", sector, layer, paddle);
 		calib.setDoubleValue(getHPOSB(sector,layer,paddle),
 				"hposb", sector, layer, paddle);
-		calib.setDoubleValue(0.0,
+		calib.setDoubleValue(getHPOSC(sector,layer,paddle),
 				"hposc", sector, layer, paddle);
 		calib.setDoubleValue(0.0,
 				"hposd", sector, layer, paddle);

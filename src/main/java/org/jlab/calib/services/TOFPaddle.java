@@ -2,6 +2,7 @@ package org.jlab.calib.services;
 
 import org.jlab.calib.services.ctof.CTOFCalibration;
 import org.jlab.calib.services.ctof.CTOFCalibrationEngine;
+import org.jlab.calib.services.ctof.CtofHposBinEventListener;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
@@ -473,8 +474,13 @@ public class TOFPaddle {
 	public double refSTTimeHPosFuncCorr() {
 		return refSTTime() - rfpad() - HPosCorrFunc();
 	}
+
+	public double refSTTimeHPosBinCorr() {
+		return refSTTime() - rfpad() - HPosCorrBin();
+	}
 	
-	private double HPosCorr() {
+	
+	public double HPosCorr() {
 		if (tof=="CTOF") {
 			return HPosCorrFunc() + HPosCorrBin();
 		} else {
@@ -482,19 +488,20 @@ public class TOFPaddle {
 		}
 	}	
 	
-	private double HPosCorrFunc() {
+	public double HPosCorrFunc() {
 		if (tof=="CTOF") {
-			return hposA()*Math.exp(hposB()*paddleY());
+			//return hposA()*Math.exp(hposB()*paddleY()); // original hpos function
+			return (hposA()*paddleY()*paddleY()+hposB()*paddleY()); // New function for correction after bin level corrections
 		} else {
 			return 0.0;
 		}
 	}
 	
-	private double HPosCorrBin() {
+	public double HPosCorrBin() {
 		double val = 0.0;
 		if (tof == "CTOF") {
-			Double[] vals = new Double[100];
-			int sliceNum = (int) Math.floor(paddleY()) + 50;
+			Double[] vals = new Double[CtofHposBinEventListener.xBins];
+			int sliceNum = CtofHposBinEventListener.sliceNumber(paddleY());
 			vals = CTOFCalibrationEngine.hposBinValues.getItem(desc.getSector(), desc.getLayer(), desc.getComponent());
 			val = vals[sliceNum];
 		}

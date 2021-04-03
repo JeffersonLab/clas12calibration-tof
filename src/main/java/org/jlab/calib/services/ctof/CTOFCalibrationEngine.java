@@ -313,7 +313,50 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         return maxGraph;
         
     }
-    
+
+    public GraphErrors meanGraph(H2F hist, String graphName) {
+        
+        ArrayList<H1F> slices = hist.getSlicesX();
+        int nBins = hist.getXAxis().getNBins();
+        int nBinsGraph = 0;
+        
+        // Get the nBins to include in graph
+        for (int i=0; i<nBins; i++) {
+        	int maxBin = slices.get(i).getMaximumBin();
+            if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
+        		nBinsGraph++;
+        	}
+        }
+        if (nBinsGraph==0) {
+        	nBinsGraph=nBins; // avoid exception when no bins to include
+        }
+        
+        double[] sliceMean = new double[nBinsGraph];
+        double[] maxErrs = new double[nBinsGraph];
+        double[] xVals = new double[nBinsGraph];
+        double[] xErrs = new double[nBinsGraph];
+        
+        int j=0;
+        for (int i=0; i<nBins; i++) {
+            
+            int maxBin = slices.get(i).getMaximumBin();
+            if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
+                sliceMean[j] = slices.get(i).getMean();
+                maxErrs[j] = slices.get(i).getRMS()/Math.sqrt(slices.get(i).getBinContent(maxBin));
+
+                xVals[j] = hist.getXAxis().getBinCenter(i);
+                xErrs[j] = hist.getXAxis().getBinWidth(i)/2.0;
+                j++;
+            }
+        }
+        
+        GraphErrors meanGraph = new GraphErrors(graphName, xVals, sliceMean, xErrs, maxErrs);
+        meanGraph.setName(graphName);
+        
+        return meanGraph;
+        
+    }
+
     public GraphErrors fixGraph(GraphErrors graphIn, String graphName) {
 
         int n = graphIn.getDataSize(0);
