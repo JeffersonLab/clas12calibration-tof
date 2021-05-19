@@ -314,10 +314,11 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         
     }
 
-    public GraphErrors meanGraph(H2F hist, String graphName) {
+    public GraphErrors meanGraph(H2F hist, String graphName, double interval) {
         
         ArrayList<H1F> slices = hist.getSlicesX();
         int nBins = hist.getXAxis().getNBins();
+        int nBinsY = hist.getYAxis().getNBins();
         int nBinsGraph = 0;
         
         // Get the nBins to include in graph
@@ -340,14 +341,52 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         for (int i=0; i<nBins; i++) {
             
             int maxBin = slices.get(i).getMaximumBin();
+            double maxBinCenter = slices.get(i).getXaxis().getBinCenter(maxBin);
             if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
-                sliceMean[j] = slices.get(i).getMean();
+                //System.out.println("maxBinCenter "+maxBinCenter);
+                
+                // LC May 21 Get the mean in a region around the max
+                if (interval > 0.0) {
+                	double intervalSum = 0.0;
+                	double intervalN = 0.0;
+                    for (int binIdx=0; binIdx<nBinsY; binIdx++) {
+                    	double currentBinCenter = slices.get(i).getXaxis().getBinCenter(binIdx);
+                    	//System.out.println("binIdx "+binIdx);
+                    	//System.out.println("currentBinCenter "+currentBinCenter);
+                    	double min = maxBinCenter - interval;
+                    	double max = maxBinCenter + interval;
+                    	//System.out.println("min "+min);     
+                    	//System.out.println("max "+max);
+                    	if (currentBinCenter >= (maxBinCenter - interval) &&
+                    		currentBinCenter <= (maxBinCenter + interval)) {
+                    		intervalSum = intervalSum + 
+                    						(slices.get(i).getBinContent(binIdx) * currentBinCenter);
+                    		intervalN = intervalN + slices.get(i).getBinContent(binIdx);
+                    		//System.out.println("intervalSum "+intervalSum);
+                    		//System.out.println("intervalN "+intervalN);
+                    		//System.out.println("slices.get(i).getBinContent(binIdx) "+slices.get(i).getBinContent(binIdx));
+                    	}
+                    }
+                    sliceMean[j] = intervalSum / intervalN;
+                    //System.out.println("intervalSum "+intervalSum);
+                    //System.out.println("intervalN "+intervalN);
+                }
+                else {
+                    sliceMean[j] = slices.get(i).getMean();                	
+                }
+                
+                //System.out.println("sliceMean with interval "+sliceMean[j]);
+                //System.out.println("sliceMean full hist "+slices.get(i).getMean());
+                //System.out.println("i "+i);
+                //System.out.println("j "+j);
+                
                 maxErrs[j] = slices.get(i).getRMS()/Math.sqrt(slices.get(i).getBinContent(maxBin));
 
                 xVals[j] = hist.getXAxis().getBinCenter(i);
                 xErrs[j] = hist.getXAxis().getBinWidth(i)/2.0;
                 j++;
             }
+            
         }
         
         GraphErrors meanGraph = new GraphErrors(graphName, xVals, sliceMean, xErrs, maxErrs);

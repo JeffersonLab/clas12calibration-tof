@@ -277,7 +277,8 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 		else if (fitMethod==FIT_METHOD_MAX) {
 			maxGraphError = 0.3;
 			//hposBinGraph.copy(maxGraph(hposBinHist, "hposBinGraph"));
-			hposBinGraph.copy(meanGraph(hposBinHist, "hposBinGraph"));
+			//System.out.println("paddle "+paddle);
+			hposBinGraph.copy(meanGraph(hposBinHist, "hposBinGraph", 0.3));
 		}
 		else {
 			hposBinGraph.copy(hposBinHist.getProfileX());
