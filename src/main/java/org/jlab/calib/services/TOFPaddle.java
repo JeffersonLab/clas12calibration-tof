@@ -491,7 +491,8 @@ public class TOFPaddle {
 	public double HPosCorrFunc() {
 		if (tof=="CTOF") {
 			//return hposA()*Math.exp(hposB()*paddleY()); // original hpos function
-			return (hposA()*paddleY()*paddleY()+hposB()*paddleY()); // New function for correction after bin level corrections
+			//return (hposA()*paddleY()*paddleY()+hposB()*paddleY()); // New function for correction after bin level corrections
+			return (hposA()*paddleY()*paddleY()+hposB()*paddleY()+hposC()); // New function for correction after bin level corrections
 		} else {
 			return 0.0;
 		}
@@ -525,6 +526,15 @@ public class TOFPaddle {
 		}
 		return val;
 	}
+	
+	public double hposC() {
+		double val = 0.0;
+		if (tof == "CTOF") {
+			val = CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposc", desc.getSector(), desc.getLayer(),
+					desc.getComponent());
+		}
+		return val;
+	}	
 	
 	public double TWPosCorr() {
 		if (tof=="FTOF") {
