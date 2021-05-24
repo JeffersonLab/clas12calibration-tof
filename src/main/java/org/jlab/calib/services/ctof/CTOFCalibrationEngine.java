@@ -314,7 +314,7 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         
     }
 
-    public GraphErrors meanGraph(H2F hist, String graphName, double interval) {
+    public GraphErrors meanGraph(H2F hist, String graphName, double interval, double xmin, double xmax) {
         
         ArrayList<H1F> slices = hist.getSlicesX();
         int nBins = hist.getXAxis().getNBins();
@@ -344,35 +344,40 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
             double maxBinCenter = slices.get(i).getXaxis().getBinCenter(maxBin);
             if (slices.get(i).getBinContent(maxBin) > fitMinEvents) {
                 //System.out.println("maxBinCenter "+maxBinCenter);
-                
-                // LC May 21 Get the mean in a region around the max
-                if (interval > 0.0) {
-                	double intervalSum = 0.0;
-                	double intervalN = 0.0;
-                    for (int binIdx=0; binIdx<nBinsY; binIdx++) {
-                    	double currentBinCenter = slices.get(i).getXaxis().getBinCenter(binIdx);
-                    	//System.out.println("binIdx "+binIdx);
-                    	//System.out.println("currentBinCenter "+currentBinCenter);
-                    	double min = maxBinCenter - interval;
-                    	double max = maxBinCenter + interval;
-                    	//System.out.println("min "+min);     
-                    	//System.out.println("max "+max);
-                    	if (currentBinCenter >= (maxBinCenter - interval) &&
-                    		currentBinCenter <= (maxBinCenter + interval)) {
-                    		intervalSum = intervalSum + 
-                    						(slices.get(i).getBinContent(binIdx) * currentBinCenter);
-                    		intervalN = intervalN + slices.get(i).getBinContent(binIdx);
-                    		//System.out.println("intervalSum "+intervalSum);
-                    		//System.out.println("intervalN "+intervalN);
-                    		//System.out.println("slices.get(i).getBinContent(binIdx) "+slices.get(i).getBinContent(binIdx));
-                    	}
-                    }
-                    sliceMean[j] = intervalSum / intervalN;
-                    //System.out.println("intervalSum "+intervalSum);
-                    //System.out.println("intervalN "+intervalN);
+                if (hist.getXAxis().getBinCenter(i) >= xmin && hist.getXAxis().getBinCenter(i) <=xmax) {
+                	
+	                // LC May 21 Get the mean in a region around the max
+	                if (interval > 0.0) {
+	                	double intervalSum = 0.0;
+	                	double intervalN = 0.0;
+	                    for (int binIdx=0; binIdx<nBinsY; binIdx++) {
+	                    	double currentBinCenter = slices.get(i).getXaxis().getBinCenter(binIdx);
+	                    	//System.out.println("binIdx "+binIdx);
+	                    	//System.out.println("currentBinCenter "+currentBinCenter);
+	                    	double min = maxBinCenter - interval;
+	                    	double max = maxBinCenter + interval;
+	                    	//System.out.println("min "+min);     
+	                    	//System.out.println("max "+max);
+	                    	if (currentBinCenter >= (maxBinCenter - interval) &&
+	                    		currentBinCenter <= (maxBinCenter + interval)) {
+	                    		intervalSum = intervalSum + 
+	                    						(slices.get(i).getBinContent(binIdx) * currentBinCenter);
+	                    		intervalN = intervalN + slices.get(i).getBinContent(binIdx);
+	                    		//System.out.println("intervalSum "+intervalSum);
+	                    		//System.out.println("intervalN "+intervalN);
+	                    		//System.out.println("slices.get(i).getBinContent(binIdx) "+slices.get(i).getBinContent(binIdx));
+	                    	}
+	                    }
+	                    sliceMean[j] = intervalSum / intervalN;
+	                    //System.out.println("intervalSum "+intervalSum);
+	                    //System.out.println("intervalN "+intervalN);
+	                }
+	                else {
+	                    sliceMean[j] = slices.get(i).getMean();                	
+	                }
                 }
                 else {
-                    sliceMean[j] = slices.get(i).getMean();                	
+                	sliceMean[j] = 0.0; 
                 }
                 
                 //System.out.println("sliceMean with interval "+sliceMean[j]);

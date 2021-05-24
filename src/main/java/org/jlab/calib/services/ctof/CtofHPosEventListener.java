@@ -180,8 +180,8 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 
 			// create all the functions and graphs
 		
-			//String funcText = "([a]*exp([b]*x))+[c]"; // Original hpos function
-			String funcText = "[a]*x*x+[b]*x+[c]"; // New function for correction after bin level corrections
+			String funcText = "([a]*exp([b]*x))+[c]"; // Original hpos function
+			//String funcText = "[a]*x*x+[b]*x+[c]"; // New function for correction after bin level corrections
 			// create all the functions
 			F1D hposFunc = new F1D("hposFunc", funcText, -50.0, 50.0);
 			
@@ -231,7 +231,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 				
 				dataGroups.getItem(sector,layer,component).getH2F("hposHist").fill(
 						 paddle.paddleY(),
-						 (paddle.refSTTimeHPosBinCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						 (paddle.refSTTimeRFCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				
 			}
 		}

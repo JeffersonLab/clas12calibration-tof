@@ -221,7 +221,7 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 						 //(paddle.refSTTimeHPosFuncCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				 		 // use HPosBinCorr so we can check if all corrections go to zero
 						 // output value accounts for this
-						 (paddle.refSTTimeHPosBinCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						 (paddle.refSTTimeHPosRFCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				
 //				if (component==6 && paddle.paddleY() > -12.0 && paddle.paddleY() < -11.0) {
 //					System.out.println("paddleY "+paddle.paddleY()+
@@ -278,7 +278,7 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 			maxGraphError = 0.3;
 			//hposBinGraph.copy(maxGraph(hposBinHist, "hposBinGraph"));
 			//System.out.println("paddle "+paddle);
-			hposBinGraph.copy(meanGraph(hposBinHist, "hposBinGraph", 0.3));
+			hposBinGraph.copy(meanGraph(hposBinHist, "hposBinGraph", 0.3, 25.0, 35.0));
 		}
 		else {
 			hposBinGraph.copy(hposBinHist.getProfileX());
