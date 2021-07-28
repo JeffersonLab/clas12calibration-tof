@@ -7,7 +7,7 @@ import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.base.ConstantProvider;
-
+ 
 /**
  *
  * @author louiseclark

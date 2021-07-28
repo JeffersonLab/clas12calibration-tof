@@ -55,7 +55,7 @@ import org.jlab.utils.groups.IndexedList;
 public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 
 	// recommit HPOS BIN method (BIN followed by polynomial FUNC)
-	
+ 	
 	private String fitOption = "RQ";
 	int backgroundSF = -1;
 	boolean showSlices = false;
