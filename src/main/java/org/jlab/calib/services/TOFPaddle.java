@@ -471,10 +471,6 @@ public class TOFPaddle {
 		return refSTTime() - HPosCorr();
 	}
 
-	public double refSTTimeHPosRFCorr() {
-		return refSTTime() - rfpad() - HPosCorr();
-	}
-
 	public double refSTTimeHPosFuncCorr() {
 		return refSTTime() - rfpad() - HPosCorrFunc();
 	}
@@ -494,9 +490,9 @@ public class TOFPaddle {
 	
 	public double HPosCorrFunc() {
 		if (tof=="CTOF") {
-			return hposA()*Math.exp(hposB()*paddleY()); // original hpos function
+			//return hposA()*Math.exp(hposB()*paddleY()); // original hpos function
 			//return (hposA()*paddleY()*paddleY()+hposB()*paddleY()); // New function for correction after bin level corrections
-			//return (hposA()*paddleY()*paddleY()+hposB()*paddleY()+hposC()); // New function for correction after bin level corrections
+			return (hposA()*paddleY()*paddleY()+hposB()*paddleY()+hposC()); // New function for correction after bin level corrections
 		} else {
 			return 0.0;
 		}
