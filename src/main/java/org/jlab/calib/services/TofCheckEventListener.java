@@ -187,7 +187,7 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 //						 pad.ADCR,
 //						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				dataGroups.getItem(sector,layer,component).getH2F("energyHist").fill(
-						 pad.ENERGY,
+						 pad.energy(),
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				
 			}

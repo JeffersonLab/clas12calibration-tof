@@ -153,13 +153,28 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 		else if (calDBSource==CAL_DB) {
 			System.out.println("Database Run No: "+prevCalRunNo);
 			DatabaseConstantProvider dcp = new DatabaseConstantProvider(prevCalRunNo, "default");
-			//hposValues = dcp.readConstants("/calibration/ctof/hpos");
+			hposBinCCDBValues = dcp.readConstants("/calibration/ctof/hposbin");
 			dcp.disconnect();
+			
+			for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
+				Double[] vals = new Double[xBins];
+				for (int i=0; i<xBins; i++) {
+					int bin = i+1;
+					vals[i] = hposBinCCDBValues.getDoubleValue("bin"+bin, 1, 1, paddle);
+				}
+				hposBinValues.add(vals, 1, 1, paddle);
+			}			
 		}
 		prevCalRead = true;
 		System.out.println(stepName+" previous calibration values populated successfully");
+//		for (int i=0; i<xBins; i++) {
+//			System.out.println("Paddle 1 bin "+i+" = "+hposBinValues.getItem(1,1,1)[i]);
+//		}
+//		for (int i=0; i<xBins; i++) {
+//			System.out.println("Paddle 2 bin "+i+" = "+hposBinValues.getItem(1,1,2)[i]);
+//		}
 	}
-
+	
 	@Override
 	public void resetEventListener() {
 

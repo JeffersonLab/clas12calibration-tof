@@ -199,8 +199,11 @@ public class TOFPaddle {
 		if (tof == "FTOF") {
 			mipa = TOFCalibrationEngine.gainValues.getDoubleValue("mipa_left", desc.getSector(), desc.getLayer(),
 					desc.getComponent());
-		} 
-                return mipa;
+		}
+		else { // take from target MIP channel for CTOF
+			mipa = CTOFCalibration.expectedMipChannel;
+		}
+        return mipa;
 	}
 
         public double veff() {

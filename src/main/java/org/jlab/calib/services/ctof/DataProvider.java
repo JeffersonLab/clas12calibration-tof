@@ -209,7 +209,7 @@ public class DataProvider {
 						int trkId = hitsBank.getShort("trkID", hitIndex);
 						// Get track
 						// only use hit with associated track and a minimum energy
-						if (trkId != -1 && paddle.ENERGY > 0.5) {
+						if (trkId != -1 && paddle.energy() > 0.5) {
 							
 							// Find the matching CVTRec::Tracks bank
 							int trkIdx = -1;

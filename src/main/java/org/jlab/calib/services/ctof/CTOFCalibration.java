@@ -156,6 +156,7 @@ public class CTOFCalibration
 
 	// Target GMEAN channel
 	private JTextField targetGMean = new JTextField(6);
+	public static double expectedMipChannel;
 
 	// Path length normalisation setting
 	JComboBox<String> pathNormList = new JComboBox<String>();
@@ -428,7 +429,7 @@ public class CTOFCalibration
 			// ctofCenter = Double.parseDouble(ctofCenterText.getText());
 			// }
 			CtofHVEventListener hvEngine = (CtofHVEventListener) engines[HV];
-			hvEngine.EXPECTED_MIP_CHANNEL = Integer.parseInt(targetGMean.getText());
+			expectedMipChannel = Integer.parseInt(targetGMean.getText());
 			hvEngine.NEWHV_MIP_CHANNEL = Integer.parseInt(targetGMean.getText());
 			hvEngine.setConstraints();
 

@@ -101,7 +101,7 @@ public class CtofHVAdjustPanel 	extends JPanel
 			if (returnValue == JFileChooser.APPROVE_OPTION) {
 				
 				// Desired MIP peak
-				hv.EXPECTED_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
+				CTOFCalibration.expectedMipChannel = Integer.parseInt(mipPeakText.getText());
 				hv.NEWHV_MIP_CHANNEL = Integer.parseInt(mipPeakText.getText());
 				hv.MAX_DELTA_V = Double.parseDouble(maxHVChange.getText());
 				

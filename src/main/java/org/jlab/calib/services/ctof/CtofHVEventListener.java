@@ -52,7 +52,6 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 	private final double         LR_THRESHOLD_FRACTION = 0.2;
 	private final int            GM_REBIN_THRESHOLD = 50000;
 
-	public int        EXPECTED_MIP_CHANNEL = 2000;
 	public int		  NEWHV_MIP_CHANNEL = 2000;
 	public final int        ALLOWED_MIP_DIFF = 50;
 	public final double[]    ALPHA = {4.0};
@@ -91,10 +90,10 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 
 	public void setConstraints() {
 
-		calib.addConstraint(3, EXPECTED_MIP_CHANNEL-ALLOWED_MIP_DIFF, 
-				EXPECTED_MIP_CHANNEL+ALLOWED_MIP_DIFF);
-		calib.addConstraint(4, EXPECTED_MIP_CHANNEL-ALLOWED_MIP_DIFF, 
-				EXPECTED_MIP_CHANNEL+ALLOWED_MIP_DIFF);
+		calib.addConstraint(3, CTOFCalibration.expectedMipChannel-ALLOWED_MIP_DIFF, 
+				CTOFCalibration.expectedMipChannel+ALLOWED_MIP_DIFF);
+		calib.addConstraint(4, CTOFCalibration.expectedMipChannel-ALLOWED_MIP_DIFF, 
+				CTOFCalibration.expectedMipChannel+ALLOWED_MIP_DIFF);
 	}
 
 	@Override
@@ -169,7 +168,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			int layer = paddle.getDescriptor().getLayer();
 			int component = paddle.getDescriptor().getComponent();
 		
-			if (paddle.isValidGeoMean() && paddle.geometricMean() > EXPECTED_MIP_CHANNEL * 0.25) {
+			if (paddle.isValidGeoMean() && paddle.geometricMean() > CTOFCalibration.expectedMipChannel * 0.25) {
 
 				if (TOFCalibration.pathNorm == TOFCalibration.PATH_NORM_NO) {
 					dataGroups.getItem(sector,layer,component).getH1F("geomean").fill(paddle.geometricMean());
@@ -233,7 +232,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		double endChannelForFit = 0.0;
 		if (minRange==UNDEFINED_OVERRIDE) {
 			// default value
-			startChannelForFit = EXPECTED_MIP_CHANNEL * 0.5;
+			startChannelForFit = CTOFCalibration.expectedMipChannel * 0.5;
 		}
 		else {
 			// custom value
@@ -723,9 +722,9 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 	@Override
 	public boolean isGoodPaddle(int sector, int layer, int paddle) {
 
-		return (getMipChannel(sector,layer,paddle) >= EXPECTED_MIP_CHANNEL-ALLOWED_MIP_DIFF
+		return (getMipChannel(sector,layer,paddle) >= CTOFCalibration.expectedMipChannel-ALLOWED_MIP_DIFF
 				&&
-				getMipChannel(sector,layer,paddle) <= EXPECTED_MIP_CHANNEL+ALLOWED_MIP_DIFF);
+				getMipChannel(sector,layer,paddle) <= CTOFCalibration.expectedMipChannel+ALLOWED_MIP_DIFF);
 
 	}
 

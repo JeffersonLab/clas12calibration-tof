@@ -87,6 +87,7 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
     public static CalibrationConstants veffValues;
     public static CalibrationConstants rfpadValues;
     public static CalibrationConstants hposFuncValues;
+    public static CalibrationConstants hposBinCCDBValues;
     
     // Calculated counter status values
     public static IndexedList<Integer> adcLeftStatus = new IndexedList<Integer>(3);

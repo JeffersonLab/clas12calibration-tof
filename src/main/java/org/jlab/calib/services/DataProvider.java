@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jlab.calib.services.ctof.CTOFCalibration;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
@@ -226,7 +227,7 @@ public class DataProvider {
 					//System.out.println("trkId energy trf "+trkId+" "+energy+" "+trf);
 
 					// only use hit with associated track and a minimum energy
-					if (trkId!=-1 && paddle.ENERGY>TOFCalibration.minE) {
+					if (trkId!=-1 && paddle.energy()>TOFCalibration.minE) {
 						
 						double c3x  = tbtBank.getFloat("c3_x",trkId-1);
 						double c3y  = tbtBank.getFloat("c3_y",trkId-1);
