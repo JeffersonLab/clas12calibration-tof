@@ -118,7 +118,8 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 					
 					Double[] vals = new Double[xBins];
 					for (int i=0; i<xBins; i++) {
-						vals[i] = Double.parseDouble(lineValues[i+3]);
+						// Start from i+4 to skip slp and bin0 (flag to indicate method being used)
+						vals[i] = Double.parseDouble(lineValues[i+4]);
 					}
 					hposBinValues.add(vals, sector, layer, paddle);
 					
@@ -412,7 +413,7 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 
 			for (int paddle = 1; paddle <= NUM_PADDLES[0]; paddle++) {
 
-				String line = 1+" "+1+" "+paddle;
+				String line = 1+" "+1+" "+paddle+" 1"; // add flag of 1 to indicate hpos bin method to be used
 				Double[] vals = calibValues.getItem(1,1,paddle);
 				for (int i=0; i<xBins; i++) {
 					Double val = 0.0;
