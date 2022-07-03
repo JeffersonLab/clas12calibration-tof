@@ -174,7 +174,7 @@ public class DataProvider {
 					int component = (int) hitsBank.getShort("component", hitIndex);
 					TOFPaddle paddle = new TOFPaddle(1, 1, component);
 	                                
-	                paddle.setRun(run, triggerBit, timeStamp);
+                                        paddle.setRun(run, triggerBit, timeStamp);
 	
 					int adcIdx1 = getIdx(adcBank, 0, component);
 					int adcIdx2 = getIdx(adcBank, 1, component);
@@ -292,21 +292,20 @@ public class DataProvider {
 							
 							// Get the REC::Track and then the REC::Particle
 							//setOutput(false);
-							if (event.hasBank("REC::Particle") && event.hasBank("REC::Scintillator")) {
-								
-								DataBank  recScinBank = event.getBank("REC::Scintillator");
-								int pIdx = -1;
-								for (int i = 0; i < recScinBank.rows(); i++) {
-									if (recScinBank.getShort("index",i)==hitIndex &&
-											recScinBank.getByte("detector",i)==DetectorType.CTOF.getDetectorId()) {
-										pIdx = recScinBank.getShort("pindex", i);
-										break;
-									}
-								}
-	
-								DataBank  recPartBank = event.getBank("REC::Particle");
-								paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
-							}
+							if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")) {
+							
+                                                                DataBank  recTrkBank = event.getBank("REC::Track");
+                                                                int pIdx = -1;
+                                                                for (int i = 0; i < recTrkBank.rows(); i++) {
+                                                                        if (recTrkBank.getShort("index",i)==trkId-1) {
+                                                                                pIdx = i;
+                                                                                break;
+                                                                        }
+                                                                }
+
+                                                                DataBank  recPartBank = event.getBank("REC::Particle");
+                                                                paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
+                                                        }
 							//setOutput(true);
 	
 						}
