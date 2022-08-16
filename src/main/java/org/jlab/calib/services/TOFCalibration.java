@@ -876,7 +876,7 @@ public class TOFCalibration
 		targetGMean[1].addActionListener(this);
 		targetGMean[2].addActionListener(this);
 		targetGMean[0].setText("650");
-		targetGMean[1].setText("1000");
+		targetGMean[1].setText("700");
 		targetGMean[2].setText("650");
 		tgmPanel.add(targetGMean[0]);
 		tgmPanel.add(targetGMean[1]);

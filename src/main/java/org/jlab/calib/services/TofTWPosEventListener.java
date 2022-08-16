@@ -261,7 +261,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 			lowLimit = minRange;
 		}
 		else {
-			lowLimit = paddleLength(sector,layer,paddle) * -0.35;
+			lowLimit = paddleLength(sector,layer,paddle) * -0.42;
 		}
 
 		if (maxRange != UNDEFINED_OVERRIDE) {
@@ -269,7 +269,7 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 			highLimit = maxRange;
 		}
 		else {
-			highLimit = paddleLength(sector,layer,paddle) * 0.35;
+			highLimit = paddleLength(sector,layer,paddle) * 0.42;
 		}
 
 		// fit function to the graph of means

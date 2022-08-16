@@ -264,7 +264,7 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 		lrFunc.setParameter(0, lrHist.getBinContent(maxBin));
 		lrFunc.setParLimits(0, lrHist.getBinContent(maxBin)*0.7, lrHist.getBinContent(maxBin)*1.2);
 		lrFunc.setParameter(1, maxPos);
-		lrFunc.setParameter(2, 1.0);
+		lrFunc.setParameter(2, 0.2);
 		//lrFunc.setParLimits(2, 0.5, 5.0);
 		
 		if (lrHist.getEntries() > 50) {

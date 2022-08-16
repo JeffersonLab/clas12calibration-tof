@@ -11,13 +11,11 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
-import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.groot.data.GraphErrors;
@@ -31,6 +29,7 @@ import org.jlab.groot.group.DataGroup;
 import org.jlab.groot.math.F1D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.utils.groups.IndexedList;
+import org.jlab.utils.groups.IndexedTable;
 
 public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
@@ -41,8 +40,10 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	
 	
 	// Preferred ranges
-	private final double[]        FIT_MIN = {0.0, 2.0, 2.0, 2.0};
-	private final double[]        FIT_MAX = {0.0, 20.0, 20.0, 20.0};
+	private final int[][]      FIT_PADDLE = {{12,   18,   23  }, {12,   48,   62  }, { 0,    0,    5  }};
+	private final double[][]      FIT_MIN = {{ 3.0,  3.0,  3.0}, { 2.0,  2.0,  2.0}, { 4.0,  4.0,  4.0}};
+	private final double[][]      FIT_MAX = {{50.0, 40.0, 30.0}, {50.0, 35.0, 30.0}, {30.0, 30.0, 30.0}};
+        private IndexedTable        FIT_RANGE = new IndexedTable(2, "min/F:max/F");
 	private final double[]        ENERGY_MIN = {0.0,  0.0,  0.0,  0.0};
 	private final double[]        ENERGY_MAX = {0.0, 50.0, 50.0, 50.0};
 	
@@ -82,9 +83,10 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		calib.setPrecision(4);
 		logScale = true;
 		
-		for (int i=0; i<3; i++) {
+		for (int il=0; il<NUM_LAYERS; il++) {
 
-			int layer = i+1;
+			int layer = il+1;
+                        
 			//calib.addConstraint(3, EXPECTED_TW0[i]*0.9, 
 			//		EXPECTED_TW0[i]*1.1, 1, layer);
 			// calib.addConstraint(calibration column, min value, max value,
@@ -94,6 +96,21 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			//		EXPECTED_TW1[i]*1.1, 1, layer);
 			//calib.addConstraint(5, EXPECTED_TW2[i]*0.9, 
 			//		EXPECTED_TW2[i]*1.1, 1, layer);
+                        for(int ir=0; ir<3; ir++) {
+                            
+                            int ipmin = 0;
+                            if(ir>0) ipmin = FIT_PADDLE[il][ir-1];
+                            int ipmax = FIT_PADDLE[il][ir];
+                            
+                            for(int ip=ipmin; ip<ipmax; ip++) {
+                                
+                                int paddle = ip+1;
+                                
+                                FIT_RANGE.addEntry(layer, paddle);
+                                FIT_RANGE.setDoubleValue(FIT_MIN[il][ir], "min", layer, paddle);
+                                FIT_RANGE.setDoubleValue(FIT_MAX[il][ir], "max", layer, paddle);
+                            }
+                        }
 
 		}
 		
@@ -245,7 +262,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					String funcText = "[a]+([b]*exp([c]*x)+[d]/x) - ("+tw1+"*exp("+tw2+"*x)+"+tw3+"/x)";
 					//System.out.println("funcText "+funcText);
 					
-					F1D trFunc = new F1D("trFunc", funcText, FIT_MIN[layer], FIT_MAX[layer]);
+					F1D trFunc = new F1D("trFunc", funcText, FIT_RANGE.getDoubleValue("min", layer, paddle)
+                                                                               , FIT_RANGE.getDoubleValue("max", layer, paddle));
 										
 					GraphErrors trGraph = new GraphErrors("trGraph");
 					trGraph.setName("trGraph");   
@@ -342,7 +360,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		double endChannelForFit = 0.0;
 		if (minRange==UNDEFINED_OVERRIDE) {
 			// default value
-			startChannelForFit = FIT_MIN[layer];
+			startChannelForFit = FIT_RANGE.getDoubleValue("min", layer, paddle);
 		}
 		else {
 			// custom value
@@ -350,7 +368,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		}
 		if (maxRange==UNDEFINED_OVERRIDE) {
 			//default value
-			endChannelForFit = FIT_MAX[layer];
+			endChannelForFit = FIT_RANGE.getDoubleValue("max", layer, paddle);
 		}
 		else {
 			// custom value
@@ -734,7 +752,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 		// create function for the nominal values
 		//F1D nomFunc = new F1D("nomFunc", "([a]/(x^[b]))", FIT_MIN[layer], FIT_MAX[layer]);
 		//F1D nomFunc = new F1D("nomFunc", "(([a]/(x^[b]))-(40.0/(x^0.5))+[c])", FIT_MIN[layer], FIT_MAX[layer]);
-		F1D nomFunc = new F1D("nomFunc", "(([a]/(x^[b]))-(40.0/(x^0.5)))", FIT_MIN[layer], FIT_MAX[layer]);
+		F1D nomFunc = new F1D("nomFunc", "(([a]/(x^[b]))-(40.0/(x^0.5)))", FIT_RANGE.getDoubleValue("min", layer, component)
+                                                                                 , FIT_RANGE.getDoubleValue("max", layer, component));
 		nomFunc.setParLimits(0, 39.9, 40.1);
 		nomFunc.setParLimits(1, 0.49, 0.51);
 		//nomFunc.setParLimits(2, 0.99, 1.01);
