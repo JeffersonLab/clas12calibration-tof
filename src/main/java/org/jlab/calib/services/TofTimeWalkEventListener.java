@@ -41,7 +41,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 	
 	// Preferred ranges
 	private final int[][]      FIT_PADDLE = {{12,   18,   23  }, {12,   48,   62  }, { 0,    0,    5  }};
-	private final double[][]      FIT_MIN = {{ 2.0,  2.0,  2.0}, { 3.0,  3.0,  3.0}, { 4.0,  4.0,  4.0}};
+	private final double[][]      FIT_MIN = {{ 3.0,  3.0,  3.0}, { 2.0,  2.0,  2.0}, { 4.0,  4.0,  4.0}};
 	private final double[][]      FIT_MAX = {{50.0, 40.0, 30.0}, {50.0, 35.0, 30.0}, {30.0, 30.0, 30.0}};
         private IndexedTable        FIT_RANGE = new IndexedTable(2, "min/F:max/F");
 	private final double[]        ENERGY_MIN = {0.0,  0.0,  0.0,  0.0};
@@ -98,7 +98,11 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			//		EXPECTED_TW2[i]*1.1, 1, layer);
                         for(int ir=0; ir<3; ir++) {
                             
-                            for(int ip=0; ip<FIT_PADDLE[il][ir]; ip++) {
+                            int ipmin = 0;
+                            if(ir>0) ipmin = FIT_PADDLE[il][ir-1];
+                            int ipmax = FIT_PADDLE[il][ir];
+                            
+                            for(int ip=ipmin; ip<ipmax; ip++) {
                                 
                                 int paddle = ip+1;
                                 
