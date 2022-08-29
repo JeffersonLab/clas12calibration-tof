@@ -60,8 +60,8 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 	private final double[]        FIT_MIN = {300.0, 0.0, 300.0};
 	private final double[]        FIT_MAX = {1500.0, 0.0, 1500.0};
 
-	public int[]		EXPECTED_MIP_CHANNEL = {800, 2000, 800};
-	public int[]		NEWHV_MIP_CHANNEL = {800, 2000, 800};
+	public int[]		EXPECTED_MIP_CHANNEL = {650, 700, 650};
+	public int[]		NEWHV_MIP_CHANNEL = {650, 700, 650};
 	public final int		ALLOWED_MIP_DIFF = 50;
 	public final double[]	ALPHA = {13.4, 4.7, 8.6};
 	public final double[]	MAX_VOLTAGE = {2500.0, 2000.0, 2500.0};
