@@ -47,8 +47,8 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 	public final int LOGRATIO_UNC_OVERRIDE = 5;    
 
 	// calibration values
-	private final double        GM_HIST_MAX = 8000.0;
-	private final int            GM_HIST_BINS = 320;
+	private final double        GM_HIST_MAX = 4000.0;
+	private final int            GM_HIST_BINS = 160;
 	private final double         LR_THRESHOLD_FRACTION = 0.2;
 	private final int            GM_REBIN_THRESHOLD = 50000;
 

@@ -882,7 +882,7 @@ public class CTOFCalibration
 		c.gridx = 1;
 		c.gridy = y;
 		targetGMean.addActionListener(this);
-		targetGMean.setText("900");
+		targetGMean.setText("600");
 		trPanel.add(targetGMean, c);
 		c.gridx = 2;
 		c.gridy = y;
