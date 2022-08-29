@@ -52,7 +52,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 	private final double         LR_THRESHOLD_FRACTION = 0.2;
 	private final int            GM_REBIN_THRESHOLD = 50000;
 
-	public int		  NEWHV_MIP_CHANNEL = 2000;
+	public int		  NEWHV_MIP_CHANNEL = 600;
 	public final int        ALLOWED_MIP_DIFF = 50;
 	public final double[]    ALPHA = {4.0};
 	public final double[]    MAX_VOLTAGE = {2500.0};
