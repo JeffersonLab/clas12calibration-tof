@@ -197,7 +197,7 @@ public class DataProvider {
 						(int) hitsBank.getByte("layer", hitIndex),
 						(int) hitsBank.getShort("component", hitIndex));
                     
-                paddle.setRun(run, triggerBit, timeStamp);
+                                paddle.setRun(run, triggerBit, timeStamp);
                                 
 				paddle.setAdcTdc(
 						adcBank.getInt("ADC", hitsBank.getShort("adc_idx1", hitIndex)),
@@ -289,13 +289,20 @@ public class DataProvider {
 						
 						// Get the REC::Track and then the REC::Particle
 						setOutput(false);
-						if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")) {
+						if (event.hasBank("REC::Particle") && event.hasBank("REC::Track") && event.hasBank("REC::Scintillator")) {
 							
 							DataBank  recTrkBank = event.getBank("REC::Track");
+							DataBank  recSciBank = event.getBank("REC::Scintillator");
 							int pIdx = -1;
 							for (int i = 0; i < recTrkBank.rows(); i++) {
 								if (recTrkBank.getShort("index",i)==trkId-1) {
-									pIdx = i;
+									pIdx = recTrkBank.getShort("pindex", i);
+									break;
+								}
+							}
+							for (int i = 0; i < recSciBank.rows(); i++) {
+								if (recSciBank.getShort("pindex",i)==pIdx && recSciBank.getByte("layer", i)==paddle.getDescriptor().getLayer()) {
+									paddle.PATH_LENGTH = recSciBank.getFloat("path", i);
 									break;
 								}
 							}
