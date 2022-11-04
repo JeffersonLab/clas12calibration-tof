@@ -6,7 +6,6 @@ import org.jlab.calib.services.ctof.CtofHposBinEventListener;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
-import org.jlab.geom.base.ConstantProvider;
  
 /**
  *
@@ -425,11 +424,11 @@ public class TOFPaddle {
 	}
 
 	public double vertexCorr() {
-		if (TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES) {
+                if (tof == "FTOF" && TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES) {
 			return (VERTEX_Z - TOFCalibration.targetPos) / 29.98;
 		} else {
 			return 0.0;
-		}
+	        }
 	}
 
 	public double refTime() {
@@ -459,7 +458,7 @@ public class TOFPaddle {
 	}
 
 	public double refSTTimeCorr() {
-		return refSTTime() - rfpad() - HPosCorr();
+		return refSTTime() - rfpad() - HPosCorr() - p2p();
 	}
 
 	public double TimeCorr() {
@@ -805,7 +804,7 @@ public class TOFPaddle {
 			maxP = CTOFCalibration.maxP;
 		}
 
-		return (trackFound() && TRACK_REDCHI2 < maxRcs && VERTEX_Z > minV && VERTEX_Z < maxV 
+                return (trackFound() && TRACK_REDCHI2 < maxRcs && VERTEX_Z > minV && VERTEX_Z < maxV 
 				&& P > minP && P < maxP
 				&& chargeMatch()
 				&& pidMatch()

@@ -145,30 +145,30 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			int component = pad.getDescriptor().getComponent();
 
 			if (pad.goodTrackFound() && pad.includeInCTOFTiming()) {
-
-				dataGroups.getItem(sector,layer,component).getH2F("momHist").fill(
+                                double timeResidual = pad.refSTTimeCorr();
+                                dataGroups.getItem(sector,layer,component).getH2F("momHist").fill(
 						pad.P,
-						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("vzHist").fill(
 						pad.VERTEX_Z,
-						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("hitHist").fill(
 						pad.paddleY(),
-						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("pathHist").fill(
 						pad.PATH_LENGTH,
-						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("adcLHist").fill(
 						pad.ADCL,
-						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("adcRHist").fill(
 						pad.ADCR,
-						(pad.refSTTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
+						timeResidual);
 
 			}
 		}

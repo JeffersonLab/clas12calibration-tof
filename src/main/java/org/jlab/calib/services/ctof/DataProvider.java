@@ -201,10 +201,9 @@ public class DataProvider {
 					paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
 					paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
 					
-					if (event.hasBank("CVTRec::Tracks") && event.hasBank("RUN::rf")) {
+					if (event.hasBank("CVTRec::Tracks")) {
 	
 						DataBank trkBank = event.getBank("CVTRec::Tracks");
-						DataBank rfBank = event.getBank("RUN::rf");
 	
 						int trkId = hitsBank.getShort("trkID", hitIndex);
 						// Get track
@@ -221,7 +220,7 @@ public class DataProvider {
 							}
 							
 							// path length from bank
-							paddle.PATH_LENGTH = hitsBank.getFloat("pathLength", hitIndex);
+							paddle.PATH_LENGTH = trkBank.getFloat("pathlength", trkIdx);
 							paddle.PATH_LENGTH_BAR = hitsBank.getFloat("pathLengthThruBar", hitIndex);
 							// System.out.println("Louise 237");
 	
@@ -238,48 +237,7 @@ public class DataProvider {
 							paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx);
 							// For CTOF vertex z in mm -> convert to cm
 							//paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx) / 10.0;
-	
-							// Get the start time, requiring that first particle in the event is an electron
-							if (event.hasBank("REC::Event") && event.hasBank("REC::Particle")) {
-								DataBank eventBank = event.getBank("REC::Event");
-								DataBank  recPartBank = event.getBank("REC::Particle");
-								String stName = "startTime";
-								if (eventBank.toString().contains("hipo3")) {
-									stName = "STTime";
-								}
 								
-								if (recPartBank.getInt("pid", 0) == 11) {
-									//paddle.ST_TIME = eventBank.getFloat(stName, 0);
-									// LC Jul 2019
-									// get the electron start time from the scintillator bank
-	                                                                double trf = event.getBank("REC::Event").getFloat("RFTime", 0);
-	                                                                paddle.RF_TIME = trf;
-									if (event.hasBank("REC::Scintillator") ) {
-										DataBank scinBank = event.getBank("REC::Scintillator");
-										double elecStartTime = 0.0;
-										for (int i = 0; i < scinBank.rows(); i++) {
-											if (scinBank.getByte("detector",i)==DetectorType.FTOF.getDetectorId()
-													&&
-													scinBank.getByte("layer",i)==2
-													&&
-													scinBank.getShort("pindex",i)==0) {
-												elecStartTime = scinBank.getFloat("time",i) 
-														- (scinBank.getFloat("path", i)/PhysicsConstants.speedOfLight());
-												break;
-											}
-										}
-										paddle.ST_TIME  = elecStartTime + 
-												((- elecStartTime + trf + 1000.5* CTOFCalibrationEngine.BEAM_BUCKET)
-														%CTOFCalibrationEngine.BEAM_BUCKET - CTOFCalibrationEngine.BEAM_BUCKET/2);
-									} else {
-										paddle.ST_TIME = -1000.0;
-									}
-								}
-								else {
-									paddle.ST_TIME = -1000.0;
-								}
-							}
-							
 							paddle.CHARGE = trkBank.getByte("q", trkIdx);
 	
 							if (CTOFCalibration.maxRcs != 0.0) {
@@ -297,7 +255,7 @@ public class DataProvider {
                                                                 DataBank  recTrkBank = event.getBank("REC::Track");
                                                                 int pIdx = -1;
                                                                 for (int i = 0; i < recTrkBank.rows(); i++) {
-                                                                        if (recTrkBank.getShort("index",i)==trkId-1) {
+                                                                        if (recTrkBank.getShort("index",i)==trkId-1 && recTrkBank.getByte("detector",i)==DetectorType.CVT.getDetectorId()) {
                                                                                 pIdx = i;
                                                                                 break;
                                                                         }
@@ -305,6 +263,8 @@ public class DataProvider {
 
                                                                 DataBank  recPartBank = event.getBank("REC::Particle");
                                                                 paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
+                                                                if(recPartBank.getInt("pid", 0) == 11) 
+                                                                    paddle.ST_TIME = recPartBank.getFloat("vt", pIdx);
                                                         }
 							//setOutput(true);
 	
