@@ -449,6 +449,7 @@ public class TofLeftRightEventListener extends TOFCalibrationEngine {
 	public void setPlotTitle(int sector, int layer, int paddle) {
 		// reset hist title as may have been set to null by show all 
 		dataGroups.getItem(sector,layer,paddle).getH1F("left_right").setTitleX("Left right offset (ns)");
+		dataGroups.getItem(sector,layer,paddle).getH1F("tdc_left_right").setTitleX("Left right difference (ns)");
 	}
 
 	@Override
