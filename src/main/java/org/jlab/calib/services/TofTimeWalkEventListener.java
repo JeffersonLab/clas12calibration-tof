@@ -238,17 +238,17 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 				for (int paddle = 1; paddle <= NUM_PADDLES[layer_index]; paddle++) {
 
 					// data group format is
-					DataGroup dg = new DataGroup(1,3);
+					DataGroup dg = new DataGroup(1,2);
 					
 					// create all the histograms
-					H2F trHist = new H2F("trHist",
+					/*H2F trHist = new H2F("trHist",
 							"",
 							xbins[layer], ENERGY_MIN[layer], ENERGY_MAX[layer],
-							ybins, -bb*0.5, bb*0.5);
+							ybins, -bb*0.5, bb*0.5);*/
 
-					trHist.setTitleY("#Delta t");
+					//trHist.setTitleY("#Delta t");
 
-					dg.addDataSet(trHist, 0);
+					//dg.addDataSet(trHist, 0);
 					
 					// create all the functions and graphs
 					double tw1 = TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1",
@@ -276,8 +276,8 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 					trGraph.setMarkerSize(MARKER_SIZE);
 					trGraph.setLineThickness(MARKER_LINE_WIDTH);
 
-					dg.addDataSet(trFunc, 2);
-					dg.addDataSet(trGraph, 2);
+					dg.addDataSet(trGraph, 1);
+					dg.addDataSet(trFunc, 1);
 					
 					dataGroups.add(dg,sector,layer,paddle);
 
@@ -331,7 +331,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 			// fill timeResidual vs Energy
 			if (paddle.goodTrackFound()) {
 			
-				dataGroups.getItem(sector,layer,component).getH2F("trHist").fill(paddle.ENERGY, paddle.deltaTTW(0.0));
+				//dataGroups.getItem(sector,layer,component).getH2F("trHist").fill(paddle.ENERGY, paddle.deltaTTW(0.0));
 				
 				// fill the offset histograms
 				for (int i=0; i<NUM_OFFSET_HISTS; i++) {
@@ -398,11 +398,13 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 
 		// add the correct offset hist to the data group
 		DataGroup dg = dataGroups.getItem(sector,layer,paddle);
-		dg.addDataSet(offsetHists.getItem(sector,layer,paddle,offsetIdxLeft), 1);
+		dg.addDataSet(offsetHists.getItem(sector,layer,paddle,offsetIdxLeft), 0);
 		
 		H2F twL = offsetHists.getItem(sector,layer,paddle,offsetIdxLeft);
 		
 		GraphErrors twLGraph = (GraphErrors) dataGroups.getItem(sector, layer, paddle).getData("trGraph"); 
+		twLGraph.setTitleY("#Delta t");
+		twLGraph.setTitleX("Energy (MeV)");
 		if (fitMethod==FIT_METHOD_SF) {
 			ParallelSliceFitter psfL = new ParallelSliceFitter(twL);
 			psfL.setFitMode(fitMode);
