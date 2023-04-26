@@ -189,6 +189,8 @@ public class TofTWPosEventListener extends TOFCalibrationEngine {
 					twposFunc.setLineWidth(FUNC_LINE_WIDTH);
 					twposGraph.setMarkerSize(MARKER_SIZE);
 					twposGraph.setLineThickness(MARKER_LINE_WIDTH);
+					twposGraph.setTitleX("hit position (cm)");
+					twposGraph.setTitleY("delta T (ns)");
 
 					DataGroup dg = new DataGroup(2,1);
 					dg.addDataSet(twposHist, 0);
