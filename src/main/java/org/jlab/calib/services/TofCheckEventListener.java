@@ -199,25 +199,25 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 		
 		//logScale = true;
 		showPlotType = "CHECK_MOM";
-		stepName = "Momentum vs Vertex Time";
+		stepName = "Vertex Time vs Momentum";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_VZ";
-		stepName = "Vertex z vs Vertex Time";
+		stepName = "Vertex Time vs Vertex z";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_HIT";
-		stepName = "Hit position vs Vertex Time";
+		stepName = "Vertex Time vs Hit position";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_PATH";
-		stepName = "Path length vs Vertex Time";
+		stepName = "Vertex Time vs Path length";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_ADCL";
-		stepName = "ADC Left vs Vertex Time";
+		stepName = "Vertex Time vs ADC Left";
 		super.showPlots(sector, layer);
 //		showPlotType = "CHECK_ADCR";
 //		stepName = "ADC Right vs Vertex Time";
 //		super.showPlots(sector, layer);
 		showPlotType = "CHECK_ENERGY";
-		stepName = "Energy vs Vertex Time";
+		stepName = "Vertex Time vs Energy";
 		super.showPlots(sector, layer);
 
 	}
