@@ -111,15 +111,17 @@ public class CtofAttenEventListener extends CTOFCalibrationEngine {
 					+ paddle, numBins, min, max, 100, -1.5, 1.5);
 
 			hist.setName("atten");
-			hist.setTitle("Log Ratio vs Position :  Paddle "+paddle);
+			//hist.setTitle("Log Ratio vs Position :  Paddle "+paddle);
+			hist.setTitle("ATTEN "+paddle);
 			hist.setTitleX("Position (cm)");
 			hist.setTitleY("ln(ADC D / ADC U)");
 
 			// create all the functions and graphs
-			F1D attenFunc = new F1D("attenFunc", "[a]+[b]*x", -50.0, 50.0);
+			F1D attenFunc = new F1D("attenFunc", "[a]+[b]*x", -45.0, 20.0);
 			attenFunc.setParameter(1, 2.0/expectedAttlen(1,1,paddle));
 			GraphErrors meanGraph = new GraphErrors("meanGraph");
 			meanGraph.setName("meanGraph");
+			meanGraph.setTitle("ATTEN "+paddle);
 			attenFunc.setLineColor(FUNC_COLOUR);
 			attenFunc.setLineWidth(FUNC_LINE_WIDTH);
 			meanGraph.setMarkerSize(MARKER_SIZE);
@@ -201,7 +203,8 @@ public class CtofAttenEventListener extends CTOFCalibrationEngine {
 
 		if (minRange == UNDEFINED_OVERRIDE) {
 			// default value
-			lowLimit = paddleLength(sector,layer,paddle) * -0.3;
+			//lowLimit = paddleLength(sector,layer,paddle) * -0.3;
+			lowLimit = -45;
 		} 
 		else {
 			// custom value
@@ -211,7 +214,8 @@ public class CtofAttenEventListener extends CTOFCalibrationEngine {
 
 		if (maxRange == UNDEFINED_OVERRIDE) {
 			// default value
-			highLimit = paddleLength(sector,layer,paddle) * 0.4;
+			//highLimit = paddleLength(sector,layer,paddle) * 0.4;
+			highLimit = 20;
 		} 
 		else {
 			// custom value
