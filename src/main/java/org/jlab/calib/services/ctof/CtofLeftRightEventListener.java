@@ -173,9 +173,9 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
 
             // create all the histograms
 			H1F hist = new H1F("left_right","Up Down: Paddle "+paddle,
-					1001, -40.05, 0.05);
+					1001, -35, -15);
             H1F tdcHist = new H1F("tdc_left_right","Up Down: Paddle "+paddle, 
-                    2001, -50.05, 50.05);
+                    2001, -40, -10);
 
             hist.setTitle("Up Down  : Paddle "+paddle);
 
@@ -427,6 +427,7 @@ public class CtofLeftRightEventListener extends CTOFCalibrationEngine {
     public void setPlotTitle(int sector, int layer, int paddle) {
         // reset hist title as may have been set to null by show all 
         dataGroups.getItem(sector,layer,paddle).getH1F("left_right").setTitleX("Upstream downstream offset (ns)");
+        dataGroups.getItem(sector,layer,paddle).getH1F("tdc_left_right").setTitleX("Upstream downstream offset (ns)");
     }
 
     @Override
