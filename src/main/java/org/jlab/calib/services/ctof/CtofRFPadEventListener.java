@@ -149,13 +149,13 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 
 			// create all the histograms and functions
 			H1F fineHistRaw = 
-					new H1F("fineHistRaw","Fine offset Paddle "+paddle,
+					new H1F("fineHistRaw","RFPAD "+paddle,
 							bins, -bb, bb);
 			fineHistRaw.setTitleX("ST time - vertex time modulo beam bucket (ns)");
 			dg.addDataSet(fineHistRaw, 0);
 
 			H1F fineHist = 
-					new H1F("fineHist","Fine offset Paddle "+paddle,
+					new H1F("fineHist","RFPAD "+paddle,
 							bins, -bb, bb);
 			fineHist.setTitleX("ST time - vertex time modulo beam bucket (ns)");
 			dg.addDataSet(fineHist, 1);
@@ -412,7 +412,7 @@ public class CtofRFPadEventListener extends CTOFCalibrationEngine {
 			hist = dataGroups.getItem(sector,layer,paddle).getH1F("fineHist");
 			func = dataGroups.getItem(sector,layer,paddle).getF1D("fineFunc");
 			//func.setOptStat(0);
-			hist.setTitle("Paddle "+paddle);
+			hist.setTitle("RFPAD "+paddle);
 			hist.setTitleX("");
 			hist.setTitleY("");
 			canvas.draw(hist); 
