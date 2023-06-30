@@ -250,7 +250,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 	public void drawPlots(int sector, int layer, int paddle, EmbeddedCanvas canvas) {
 
 		H1F hist = dataGroups.getItem(sector,layer,paddle).getH1F("vertexDiffHist");
-		hist.setTitle("Paddle "+paddle);
+		hist.setTitle("P2P "+paddle);
 		hist.setTitleX("");
 		hist.setTitleY("");
 		canvas.draw(hist); 
