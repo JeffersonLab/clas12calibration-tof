@@ -189,6 +189,7 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
             veffFunc.setLineWidth(FUNC_LINE_WIDTH);
             veffGraph.setMarkerSize(MARKER_SIZE);
             veffGraph.setLineThickness(MARKER_LINE_WIDTH);
+            veffGraph.setTitle("VEFF Paddle "+paddle);
 
             DataGroup dg = new DataGroup(2,1);
             dg.addDataSet(hist, 0);
@@ -259,7 +260,8 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
             lowLimit = minRange;
         }
         else {
-            lowLimit = paddleLength(sector,layer,paddle) * -0.4;
+            lowLimit = paddleLength(sector,layer,paddle) * -0.25;
+            //lowLimit = paddleLength(sector,layer,paddle) * -0.4;
             //lowLimit = paddleLength(sector,layer,paddle) * 0.15;
         }
 
@@ -268,7 +270,8 @@ public class CtofVeffEventListener extends CTOFCalibrationEngine {
             highLimit = maxRange;
         }
         else {
-            highLimit = paddleLength(sector,layer,paddle) * 0.4;
+            highLimit = paddleLength(sector,layer,paddle) * 0.25;
+            //highLimit = paddleLength(sector,layer,paddle) * 0.4;
             //highLimit = paddleLength(sector,layer,paddle) * 0.85;
         }
 
