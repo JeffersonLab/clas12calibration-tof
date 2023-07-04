@@ -186,7 +186,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 					bins, -bb*0.5, bb*0.5);
 
 			histL.setName("tdcConvLeft");
-			histL.setTitle("RF offset vs TDC Up : Paddle "+paddle);
+			histL.setTitle("TDC CONV U "+paddle);
 			histL.setTitleX("TDC Up");
 			histL.setTitleY("RF offset (ns)");
 
@@ -194,7 +194,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 					bins, -bb*0.5, bb*0.5);
 
 			histR.setName("tdcConvRight");
-			histR.setTitle("RF offset vs TDC Down : Paddle "+paddle);
+			histR.setTitle("TDC CONV D "+paddle);
 			histR.setTitleX("TDC Down");
 			histR.setTitleY("RF offset (ns)");
 
@@ -278,6 +278,11 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 	@Override
 	public void fit(int sector, int layer, int paddle,
 			double minRange, double maxRange) {
+		fit(sector, layer, paddle, minRange, maxRange, minRange, maxRange);
+	}
+
+	public void fit(int sector, int layer, int paddle,
+			double minRangeU, double maxRangeU, double minRangeD, double maxRangeD) {
 
 		H2F convHistL = dataGroups.getItem(sector,layer,paddle).getH2F("tdcConvLeft");
 		H2F convHistR = dataGroups.getItem(sector,layer,paddle).getH2F("tdcConvRight");
@@ -328,20 +333,20 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 		double lowLimitL, lowLimitR;
 		double highLimitL, highLimitR;
 
-		if (minRange != UNDEFINED_OVERRIDE) {
+		if (minRangeU != UNDEFINED_OVERRIDE && minRangeD != UNDEFINED_OVERRIDE) {
 			// use custom values for fit
-			lowLimitL = minRange;
-			lowLimitR = minRange;
+			lowLimitL = minRangeU;
+			lowLimitR = minRangeD;
 		}
 		else {
 			lowLimitL = FIT_MIN;
 			lowLimitR = FIT_MIN;
 		}
 
-		if (maxRange != UNDEFINED_OVERRIDE) {
+		if (maxRangeU != UNDEFINED_OVERRIDE && maxRangeD != UNDEFINED_OVERRIDE) {
 			// use custom values for fit
-			highLimitL = maxRange;
-			highLimitR = maxRange;
+			highLimitL = maxRangeU;
+			highLimitR = maxRangeD;
 		}
 		else {
 			highLimitL = FIT_MAX;
@@ -386,7 +391,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 
 	public void customFit(int sector, int layer, int paddle){
 
-		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
+		String[] fields = { "Min range for up fit:", "Max range for up fit:", "Min range for down fit:", "Max range for down fit:", "SPACE",
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
 				"Override tdc_conv upstream:", "Override tdc_conv downstream"};
 
@@ -396,16 +401,18 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 				"Adjust Fit / Override for paddle "+paddle, JOptionPane.OK_CANCEL_OPTION);
 		if (result == JOptionPane.OK_OPTION) {
 
-			double minRange = toDouble(panel.textFields[0].getText());
-			double maxRange = toDouble(panel.textFields[1].getText());
-			if (panel.textFields[2].getText().compareTo("") !=0) {
-				fitMinEvents = Integer.parseInt(panel.textFields[2].getText());
+			double minRangeU = toDouble(panel.textFields[0].getText());
+			double maxRangeU = toDouble(panel.textFields[1].getText());
+			double minRangeD = toDouble(panel.textFields[2].getText());
+			double maxRangeD = toDouble(panel.textFields[3].getText());
+			if (panel.textFields[4].getText().compareTo("") !=0) {
+				fitMinEvents = Integer.parseInt(panel.textFields[4].getText());
 			}
-			if (panel.textFields[3].getText().compareTo("") !=0) {
-				backgroundSF = Integer.parseInt(panel.textFields[3].getText());
+			if (panel.textFields[5].getText().compareTo("") !=0) {
+				backgroundSF = Integer.parseInt(panel.textFields[5].getText());
 			}            
-			double overrideValueL = toDouble(panel.textFields[4].getText());
-			double overrideValueR = toDouble(panel.textFields[5].getText());
+			double overrideValueL = toDouble(panel.textFields[6].getText());
+			double overrideValueR = toDouble(panel.textFields[7].getText());
 
 			int minP = paddle;
 			int maxP = paddle;
@@ -424,7 +431,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 				consts[OVERRIDE_LEFT] = overrideValueL;
 				consts[OVERRIDE_RIGHT] = overrideValueR;
 
-				fit(sector, layer, p, minRange, maxRange);
+				fit(sector, layer, p, minRangeU, maxRangeU, minRangeD, maxRangeD);
 
 				// update the table
 				saveRow(sector,layer,p);
@@ -514,7 +521,7 @@ public class CtofTdcConvEventListener extends CTOFCalibrationEngine {
 			func = dataGroups.getItem(sector,layer,paddle).getF1D("convFuncRight");
 		}
 
-		hist.setTitle("Paddle "+paddle);
+		//hist.setTitle("TDC CONV "+paddle);
 		hist.setTitleX("");
 		hist.setTitleY("");
 		canvas.draw(hist);    
