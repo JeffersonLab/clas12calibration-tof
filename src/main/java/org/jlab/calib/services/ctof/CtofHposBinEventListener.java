@@ -197,10 +197,13 @@ public class CtofHposBinEventListener extends CTOFCalibrationEngine {
 							yBins, -yLimit, yLimit);
 			hposBinHist.setTitleX("hit position (cm)");
 			hposBinHist.setTitleY("delta T (ns)");
+			hposBinHist.setTitle("HPOSBIN P"+paddle);
 
 			GraphErrors hposBinGraph = new GraphErrors("hposBinGraph");
 			hposBinGraph.setName("hposBinGraph");
 			hposBinGraph.setTitle("HPOSBIN P"+paddle);
+			hposBinGraph.setTitleX("hit position (cm)");
+			hposBinGraph.setTitleY("delta T (ns)");
 			hposBinGraph.setMarkerSize(MARKER_SIZE);
 			hposBinGraph.setLineThickness(MARKER_LINE_WIDTH);
 
