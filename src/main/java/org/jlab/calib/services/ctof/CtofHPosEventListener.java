@@ -177,6 +177,7 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 							bins, -bb*0.5, bb*0.5);
 			hposHist.setTitleX("hit position (cm)");
 			hposHist.setTitleY("delta T (ns)");
+			hposHist.setTitle("HPOS P"+paddle);
 
 			// create all the functions and graphs
 		
@@ -188,6 +189,8 @@ public class CtofHPosEventListener extends CTOFCalibrationEngine {
 			GraphErrors hposGraph = new GraphErrors("hposGraph");
 			hposGraph.setName("hposGraph");
 			hposGraph.setTitle("HPOS P"+paddle);
+			hposGraph.setTitleX("hit position (cm)");
+			hposGraph.setTitleY("delta T (ns)");
 			hposFunc.setLineColor(FUNC_COLOUR);
 			hposFunc.setLineWidth(FUNC_LINE_WIDTH);
 			hposGraph.setMarkerSize(MARKER_SIZE);
