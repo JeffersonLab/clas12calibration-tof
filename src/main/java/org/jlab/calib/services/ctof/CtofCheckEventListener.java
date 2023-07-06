@@ -110,7 +110,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 					new H2F("adcLHist","Paddle "+paddle,
 							100, ADC_MIN, ADC_MAX,
 							bins, -bb*0.5, bb*0.5);
-			adcLHist.setTitleX("ADC Left");
+			adcLHist.setTitleX("ADC Up");
 			adcLHist.setTitleY("delta T (ns)");
 			dg.addDataSet(adcLHist, 4);
 
@@ -118,7 +118,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 					new H2F("adcRHist","Paddle "+paddle,
 							100, ADC_MIN, ADC_MAX,
 							bins, -bb*0.5, bb*0.5);
-			adcRHist.setTitleX("ADC Right");
+			adcRHist.setTitleX("ADC Down");
 			adcRHist.setTitleY("delta T (ns)");
 			dg.addDataSet(adcRHist, 5);
 
@@ -178,22 +178,22 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 	public void showPlots(int sector, int layer) {
 
 		showPlotType = "CHECK_MOM";
-		stepName = "Momentum vs Vertex Time";
+		stepName = "Vertex Time vs Momentum";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_VZ";
-		stepName = "Vertex z vs Vertex Time";
+		stepName = "Vertex Time vs Vertex z";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_HIT";
-		stepName = "Hit position vs Vertex Time";
+		stepName = "Vertex Time vs Hit position";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_PATH";
-		stepName = "Path length vs Vertex Time";
+		stepName = "Vertex Time vs Path length";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_ADCL";
-		stepName = "ADC Left vs Vertex Time";
+		stepName = "Vertex Time vs ADC Left";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_ADCR";
-		stepName = "ADC Right vs Vertex Time";
+		stepName = "Vertex Time vs ADC Right";
 		super.showPlots(sector, layer);
 
 	}
