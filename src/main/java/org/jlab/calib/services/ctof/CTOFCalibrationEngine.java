@@ -486,7 +486,7 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         for (int paddleNum = 1; paddleNum <= NUM_PADDLES[layer_index]; paddleNum++) {
 
             fitCanvases[canvasNum].cd(padNum);
-            fitCanvases[canvasNum].getPad(padNum).setTitle("Paddle "+paddleNum);
+            //fitCanvases[canvasNum].getPad(padNum).setTitle("Paddle "+paddleNum);
             fitCanvases[canvasNum].getPad(padNum).setOptStat(0);
             fitCanvases[canvasNum].getPad(padNum).getAxisZ().setLog(logScale);
 			drawPlots(sector, layer, paddleNum, fitCanvases[canvasNum]);
