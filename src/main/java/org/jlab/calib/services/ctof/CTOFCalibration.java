@@ -745,7 +745,7 @@ public class CTOFCalibration
 			this.canvas.clear();
 			this.canvas.draw(dataGroup);
 			getSelectedEngine().rescaleGraphs(canvas, selectedSector, selectedLayer, selectedPaddle);
-			canvas.getPad(0).setTitle("Paddle " + selectedPaddle);
+			//canvas.getPad(0).setTitle("Paddle " + selectedPaddle);
 			this.canvas.update();
 		} else {
 			System.out.println(" ERROR: can not find the data group");

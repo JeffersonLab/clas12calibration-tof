@@ -80,6 +80,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 							bins, -bb*0.5, bb*0.5);
 			momHist.setTitleX("p (GeV)");
 			momHist.setTitleY("delta T (ns)");
+			momHist.setTitle("Check p " + paddle);
 			dg.addDataSet(momHist, 0);
 
 			H2F vzHist = 
@@ -88,6 +89,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 							bins, -bb*0.5, bb*0.5);
 			vzHist.setTitleX("vz (cm)");
 			vzHist.setTitleY("delta T (ns)");
+			vzHist.setTitle("Check vz " + paddle);
 			dg.addDataSet(vzHist, 1);
 
 			H2F hitHist = 
@@ -96,6 +98,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 							bins, -bb*0.5, bb*0.5);
 			hitHist.setTitleX("hit position (cm)");
 			hitHist.setTitleY("delta T (ns)");
+			hitHist.setTitle("Check hit " + paddle);
 			dg.addDataSet(hitHist, 2);
 
 			H2F pathHist = 
@@ -104,6 +107,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 							bins, -bb*0.5, bb*0.5);
 			pathHist.setTitleX("path (cm)");
 			pathHist.setTitleY("delta T (ns)");
+			pathHist.setTitle("Check path " + paddle);
 			dg.addDataSet(pathHist, 3);
 
 			H2F adcLHist = 
@@ -112,6 +116,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 							bins, -bb*0.5, bb*0.5);
 			adcLHist.setTitleX("ADC Up");
 			adcLHist.setTitleY("delta T (ns)");
+			adcLHist.setTitle("Check ADC Up " + paddle);
 			dg.addDataSet(adcLHist, 4);
 
 			H2F adcRHist = 
@@ -120,6 +125,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 							bins, -bb*0.5, bb*0.5);
 			adcRHist.setTitleX("ADC Down");
 			adcRHist.setTitleY("delta T (ns)");
+			adcRHist.setTitle("Check ADC Down " + paddle);
 			dg.addDataSet(adcRHist, 5);
 
 			dataGroups.add(dg,1,1,paddle);    
@@ -221,7 +227,7 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			hist = dataGroups.getItem(sector,layer,paddle).getH2F("adcRHist");
 		}
 
-		hist.setTitle("Paddle "+paddle);
+		//hist.setTitle("Paddle "+paddle);
 		hist.setTitleX("");
 		hist.setTitleY("");
 		canvas.draw(hist);    
