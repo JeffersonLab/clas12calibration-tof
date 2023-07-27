@@ -99,13 +99,13 @@ public class TofFadcEventListener extends TOFCalibrationEngine {
 
 					// create all the histograms and functions
 					H1F histL = 
-							new H1F("fadcHistLeft",histTitle(sector, layer, paddle),
+							new H1F("fadcHistLeft","Left " + histTitle(sector, layer, paddle),
 									2000, MIN_X, MAX_X);
 					histL.setTitleX("TDC time - FADC time (ns)");
 					dg.addDataSet(histL, 0);
 
 					H1F histR = 
-							new H1F("fadcHistRight",histTitle(sector, layer, paddle),
+							new H1F("fadcHistRight","Right " + histTitle(sector, layer, paddle),
 									2000, MIN_X, MAX_X);
 					histR.setTitleX("TDC time - FADC time (ns)");
 					dg.addDataSet(histR, 1);

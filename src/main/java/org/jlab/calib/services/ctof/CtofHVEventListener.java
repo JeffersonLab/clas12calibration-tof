@@ -232,7 +232,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		double endChannelForFit = 0.0;
 		if (minRange==UNDEFINED_OVERRIDE) {
 			// default value
-			startChannelForFit = CTOFCalibration.expectedMipChannel * 0.5;
+			startChannelForFit = /*CTOFCalibration.expectedMipChannel * 0.5*/300;
 		}
 		else {
 			// custom value
@@ -240,7 +240,7 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		}
 		if (maxRange==UNDEFINED_OVERRIDE) {
 			//default value
-			endChannelForFit = maxChannel * 0.9;
+			endChannelForFit = /*maxChannel * 0.9*/2500;
 		}
 		else {
 			// custom value
@@ -267,12 +267,12 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 		//        if (minRange == 0.0) {
 		//            startChannelForFit = maxPos*0.5;
 		//        }
-		if (maxRange == UNDEFINED_OVERRIDE) {
+		/*if (maxRange == UNDEFINED_OVERRIDE) {
 			endChannelForFit = maxPos+GM_HIST_MAX*0.4;
 			if (endChannelForFit > 0.9*GM_HIST_MAX) {
 				endChannelForFit = 0.9*GM_HIST_MAX;
 			}    
-		}
+		}*/
 
 		F1D gmFunc = dataGroups.getItem(sector,layer,paddle).getF1D("gmFunc");
 		gmFunc.setRange(startChannelForFit, endChannelForFit);
