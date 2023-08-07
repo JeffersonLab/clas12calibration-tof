@@ -1102,7 +1102,7 @@ public class TOFCalibration
 		c.gridy = y;
 		trPanel.add(new JLabel("Minimum events per slice:"), c);
 		minEventsText.addActionListener(this);
-		minEventsText.setText("5");
+		minEventsText.setText("2");
 		c.gridx = 1;
 		c.gridy = y;
 		trPanel.add(minEventsText, c);
