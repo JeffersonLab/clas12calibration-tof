@@ -57,8 +57,8 @@ public class TofHVEventListener extends TOFCalibrationEngine {
 	private final double 		LR_THRESHOLD_FRACTION = 0.2;
 	private final int			GM_REBIN_THRESHOLD = 50000;
 
-	private final double[]        FIT_MIN = {300.0, 0.0, 300.0};
-	private final double[]        FIT_MAX = {1500.0, 0.0, 1500.0};
+	private final double[]        FIT_MIN = {300.0, 300.0, 150.0};
+	private final double[]        FIT_MAX = {1500.0, 1500.0, 1300.0};
 
 	public int[]		EXPECTED_MIP_CHANNEL = {650, 700, 650};
 	public int[]		NEWHV_MIP_CHANNEL = {650, 700, 650};
