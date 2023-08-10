@@ -196,10 +196,10 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 		stepName = "Vertex Time vs Path length";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_ADCL";
-		stepName = "Vertex Time vs ADC Left";
+		stepName = "Vertex Time vs ADC Up";
 		super.showPlots(sector, layer);
 		showPlotType = "CHECK_ADCR";
-		stepName = "Vertex Time vs ADC Right";
+		stepName = "Vertex Time vs ADC Down";
 		super.showPlots(sector, layer);
 
 	}

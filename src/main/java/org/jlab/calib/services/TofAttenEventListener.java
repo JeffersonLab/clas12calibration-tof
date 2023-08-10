@@ -271,7 +271,7 @@ public class TofAttenEventListener extends TOFCalibrationEngine {
 
 	public void customFit(int sector, int layer, int paddle){
 
-		outputGraph(sector, layer, paddle);
+		//outputGraph(sector, layer, paddle);
 
 		String[] fields = { "Min range for fit:", "Max range for fit:", "SPACE",
 				"Min Events per slice:", "Background order for slicefitter(-1=no background, 0=p0 etc):","SPACE",
