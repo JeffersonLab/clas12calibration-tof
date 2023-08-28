@@ -659,7 +659,14 @@ public class CTOFCalibration
 	}
 
 	public void resetEventListener() {
-
+		for (int i = 0; i < engines.length; i++) {
+			engines[i].resetEventListener();
+		}
+		this.timerUpdate();
+		this.innerConfigFrame = new JFrame("Configure CTOF calibration settings");
+		this.configFrame = new JDialog(innerConfigFrame, "Configure CTOF calibration settings");
+		this.configPane = new JTabbedPane();
+		this.configure();
 	}
 
 	public void timerUpdate() {
