@@ -819,7 +819,7 @@ public class CTOFCalibration
 
 	public void configure() {
 
-		configFrame.setSize(900, 830);
+		configFrame.setSize(900, 900);
 		// configFrame.setSize(1000, 600);
 		configFrame.setLocationRelativeTo(pane);
 		configFrame.setDefaultCloseOperation(configFrame.DO_NOTHING_ON_CLOSE);
