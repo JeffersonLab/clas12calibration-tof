@@ -1,6 +1,7 @@
 package org.jlab.calib.services.ctof;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.jlab.calib.services.TOFPaddle;
@@ -34,7 +36,14 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.utils.groups.IndexedList;
 
-public class CTOFCalibrationEngine extends CalibrationEngine {
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.awt.Graphics2D;
+import javax.swing.JButton;
+
+import java.awt.BorderLayout;
+
+public class CTOFCalibrationEngine extends CalibrationEngine implements ActionListener  {
  
     public final static int[] NUM_PADDLES = { 48 };
     public final static int     NUM_LAYERS = 1;
@@ -95,6 +104,9 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
     public static IndexedList<Integer> tdcLeftStatus = new IndexedList<Integer>(3);
     public static IndexedList<Integer> tdcRightStatus = new IndexedList<Integer>(3);
     public static IndexedList<Double[]> hposBinValues = new IndexedList<Double[]>(3);
+
+    private int saveSector;
+    private int saveLayer;
     
     public CTOFCalibrationEngine() {
         // controlled by calibration step class
@@ -521,6 +533,81 @@ public class CTOFCalibrationEngine extends CalibrationEngine {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
+		JPanel butPanel = new JPanel();
+
+		JButton button = new JButton("Save histograms");
+
+        this.saveLayer = layer;
+
+        this.saveSector = sector;
+
+		button.addActionListener(this);
+
+		butPanel.add(button, BorderLayout.CENTER);
+
+		pane.add("Save",butPanel);
+
+    }
+
+    public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand().compareTo("Save histograms") == 0) {
+            int layer_index = this.saveLayer - 1;
+            EmbeddedCanvas[] fitCanvases;
+            fitCanvases = new EmbeddedCanvas[3];
+            fitCanvases[0] = new EmbeddedCanvas();
+            fitCanvases[0].divide(6, 4);
+
+            int canvasNum = 0;
+            int padNum = 0;
+
+            for (int paddleNum = 1; paddleNum <= NUM_PADDLES[layer_index]; paddleNum++) {
+
+                fitCanvases[canvasNum].cd(padNum);
+                //fitCanvases[canvasNum].getPad(padNum).setTitle("Paddle "+paddleNum);
+                fitCanvases[canvasNum].getPad(padNum).setOptStat(0);
+                fitCanvases[canvasNum].getPad(padNum).getAxisZ().setLog(logScale);
+                drawPlots(this.saveSector, this.saveLayer, paddleNum, fitCanvases[canvasNum]);
+
+                padNum = padNum + 1;
+
+                if ((paddleNum) == 24) {
+                    // new canvas
+                    canvasNum = canvasNum + 1;
+                    padNum = 0;
+
+                    fitCanvases[canvasNum] = new EmbeddedCanvas();
+                    fitCanvases[canvasNum].divide(6, 4);
+
+                }
+
+            }
+
+            for (int i = 0; i <= canvasNum; i++) {
+                String padStr = "";
+
+                padStr = "Paddles " + ((i * 24) + 1) + " to "
+                            + Math.min(((i + 1) * 24), NUM_PADDLES[this.saveLayer - 1]);
+
+                JFrame frame = new JFrame(stepName);
+                frame.setSize(1000, 800);
+                frame.setVisible(true);
+                frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                frame.add(fitCanvases[i]);
+
+                BufferedImage image = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics2D graphics2D = image.createGraphics();
+                frame.paintAll(graphics2D);
+
+                File outputfile = new File(stepName+this.saveLayer+"S"+this.saveSector+padStr+".png");
+                try {
+                    ImageIO.write(image, "png", outputfile);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                frame.dispose();
+            }
+        }
     }
     
     public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {

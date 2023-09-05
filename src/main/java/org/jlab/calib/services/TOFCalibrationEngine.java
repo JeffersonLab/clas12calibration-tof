@@ -1,6 +1,7 @@
 package org.jlab.calib.services;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,9 +17,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
 import org.jlab.detector.calib.tasks.CalibrationEngine;
@@ -34,7 +38,17 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.utils.groups.IndexedList;
 
-public class TOFCalibrationEngine extends CalibrationEngine {
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
+import javafx.stage.WindowEvent;
+
+import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+
+public class TOFCalibrationEngine extends CalibrationEngine implements ActionListener {
 
 	public final static int[] NUM_PADDLES = { 23, 62, 5 };
 	public final static int 	NUM_LAYERS = 3;
@@ -529,6 +543,81 @@ public class TOFCalibrationEngine extends CalibrationEngine {
 			}
 		}
 
+		JPanel butPanel = new JPanel();
+
+		JButton button = new JButton("Save histograms");
+
+		button.addActionListener(this);
+
+		butPanel.add(button, BorderLayout.CENTER);
+
+		pane.add("Save",butPanel);
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand().compareTo("Save histograms") == 0) {
+			for (int layer=1; layer<=3; layer++) {
+				int layer_index = layer - 1;
+
+				for (int sector=1; sector<=6; sector++) {
+
+					EmbeddedCanvas[] fitCanvases;
+					fitCanvases = new EmbeddedCanvas[3];
+					fitCanvases[0] = new EmbeddedCanvas();
+					fitCanvases[0].divide(6, 4);
+
+					int canvasNum = 0;
+					int padNum = 0;
+
+					for (int paddleNum = 1; paddleNum <= NUM_PADDLES[layer_index]; paddleNum++) {
+
+						fitCanvases[canvasNum].cd(padNum);
+						fitCanvases[canvasNum].getPad(padNum).setOptStat(0);
+						fitCanvases[canvasNum].getPad(padNum).getAxisZ().setLog(logScale);
+						drawPlots(sector, layer, paddleNum, fitCanvases[canvasNum]);
+
+						padNum = padNum + 1;
+
+						if ((paddleNum) % 24 == 0) {
+							// new canvas
+							canvasNum = canvasNum + 1;
+							padNum = 0;
+
+							fitCanvases[canvasNum] = new EmbeddedCanvas();
+							fitCanvases[canvasNum].divide(6, 4);
+						}
+
+					}
+
+					for (int i = 0; i <= canvasNum; i++) {
+						String padStr = "";
+						if (layer==2) {
+							padStr=" P" + ((i * 24) + 1) + " to "
+									+ Math.min(((i + 1) * 24), NUM_PADDLES[layer - 1]);
+						}
+
+						JFrame frame = new JFrame(stepName);
+						frame.setSize(1000, 800);
+						frame.setVisible(true);
+						frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+						frame.add(fitCanvases[i]);
+
+						BufferedImage image = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
+						Graphics2D graphics2D = image.createGraphics();
+						frame.paintAll(graphics2D);
+
+						File outputfile = new File(stepName+LAYER_PREFIX[layer]+"S"+sector+padStr+".png");
+						try {
+							ImageIO.write(image, "png", outputfile);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+
+						frame.dispose();
+					}
+				}
+			}
+		}
 	}
 
 	public void rescaleGraphs(EmbeddedCanvas canvas, int sector, int layer, int paddle) {
