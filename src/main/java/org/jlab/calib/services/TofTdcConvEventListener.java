@@ -265,12 +265,12 @@ public class TofTdcConvEventListener extends TOFCalibrationEngine {
             int layer = paddle.getDescriptor().getLayer();
             int component = paddle.getDescriptor().getComponent();
 
-            if (paddle.goodTrackFound() && paddle.TDCL!=0 && paddle.TDCR!=0) {
+            if (paddle.goodTrackFound() && paddle.getTDCL()!=0 && paddle.getTDCR()!=0) {
                 dataGroups.getItem(sector,layer,component).getH2F("tdcConvLeft").fill(
-                         paddle.TDCL, 
+                         paddle.getTDCL(), 
                          (paddle.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
                 dataGroups.getItem(sector,layer,component).getH2F("tdcConvRight").fill(
-                        paddle.TDCR, 
+                        paddle.getTDCR(), 
                         (paddle.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
             }

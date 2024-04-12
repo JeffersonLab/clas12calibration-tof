@@ -205,10 +205,10 @@ public class DataProvider {
 						tdcBank.getInt("TDC", hitsBank.getShort("tdc_idx1", hitIndex)),
 						tdcBank.getInt("TDC", hitsBank.getShort("tdc_idx2", hitIndex)));
 				paddle.setPos(tx,ty,tz); 
-				paddle.ADC_TIMEL = adcBank.getFloat("time", hitsBank.getShort("adc_idx1", hitIndex));
-				paddle.ADC_TIMER = adcBank.getFloat("time", hitsBank.getShort("adc_idx2", hitIndex));
-				paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
-				paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
+				paddle.setADC_TIMEL(adcBank.getFloat("time", hitsBank.getShort("adc_idx1", hitIndex)));
+				paddle.setADC_TIMER(adcBank.getFloat("time", hitsBank.getShort("adc_idx2", hitIndex)));
+				paddle.setRECON_TIME(hitsBank.getFloat("time", hitIndex));
+				paddle.setENERGY(hitsBank.getFloat("energy", hitIndex));
 						
 				//System.out.println("Paddle created "+paddle.getDescriptor().getSector()+paddle.getDescriptor().getLayer()+paddle.getDescriptor().getComponent());
 
@@ -233,9 +233,9 @@ public class DataProvider {
 						double c3y  = tbtBank.getFloat("c3_y",trkId-1);
 						double c3z  = tbtBank.getFloat("c3_z",trkId-1);
 						double path = tbtBank.getFloat("pathlength",trkId-1) + Math.sqrt((tx-c3x)*(tx-c3x)+(ty-c3y)*(ty-c3y)+(tz-c3z)*(tz-c3z));
-						paddle.PATH_LENGTH = path;
-						paddle.PATH_LENGTH_BAR = hitsBank.getFloat("pathLengthThruBar", hitIndex);
-						paddle.RF_TIME = trf;
+						paddle.setPATH_LENGTH(path);
+						paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
+						paddle.setRF_TIME(trf);
 						
 						// Get the momentum and record the beta using the mass assumption
 						double px  = tbtBank.getFloat("p0_x",trkId-1);
@@ -245,16 +245,16 @@ public class DataProvider {
 //						double mass = massList[TOFCalibration.massAss];
 //						double beta = mom/Math.sqrt(mom*mom+mass*mass);
 //						paddle.BETA = beta;
-						paddle.P = mom;
-						paddle.TRACK_ID = trkId;
-						paddle.VERTEX_Z = tbtBank.getFloat("Vtx0_z", trkId-1);
-						paddle.CHARGE = tbtBank.getInt("q", trkId-1);
+						paddle.setP(mom);
+						paddle.setTRACK_ID(trkId);
+						paddle.setVERTEX_Z(tbtBank.getFloat("Vtx0_z", trkId-1));
+						paddle.setCHARGE(tbtBank.getInt("q", trkId-1));
 						
 						if (TOFCalibration.maxRcs != 0.0) {
-							paddle.TRACK_REDCHI2 = tbtBank.getFloat("chi2", trkId-1)/tbtBank.getShort("ndf", trkId-1);
+							paddle.setTRACK_REDCHI2(tbtBank.getFloat("chi2", trkId-1)/tbtBank.getShort("ndf", trkId-1));
 						}
 						else {
-							paddle.TRACK_REDCHI2 = -1.0;
+							paddle.setTRACK_REDCHI2(-1.0);
 						}
 						
 						if (paddle.getDescriptor().getComponent()==13 &&
@@ -302,18 +302,20 @@ public class DataProvider {
 							}
 							for (int i = 0; i < recSciBank.rows(); i++) {
 								if (recSciBank.getShort("pindex",i)==pIdx && recSciBank.getByte("layer", i)==paddle.getDescriptor().getLayer()) {
-									paddle.PATH_LENGTH = recSciBank.getFloat("path", i);
+									paddle.setPATH_LENGTH(recSciBank.getFloat("path", i));
 									break;
 								}
 							}
 							
 							DataBank  recPartBank = event.getBank("REC::Particle");
-							paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
+							paddle.setPARTICLE_ID(recPartBank.getInt("pid", pIdx));
 						}
 						setOutput(true);
 							
 					}
 				}
+
+				paddle.Init();
 				
 				if (paddle.includeInCalib()) {
 					paddleList.add(paddle);
@@ -412,8 +414,10 @@ public class DataProvider {
 								layer,
 								component);
 						paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
-						paddle.ADC_TIMEL = adcTimeL;
-						paddle.ADC_TIMER = adcTimeR;
+						paddle.setADC_TIMEL(adcTimeL);
+						paddle.setADC_TIMER(adcTimeR);
+						paddle.setRun(run, triggerBit, timeStamp);
+						paddle.Init();
 
 						if (paddle.includeInCalib()) {
 
@@ -421,7 +425,6 @@ public class DataProvider {
 								System.out.println("Adding paddle "+sector+layer+component);
 								System.out.println(adcL + " "+adcR+" "+tdcL+" "+tdcR);
 							}
-							paddle.setRun(run, triggerBit, timeStamp);
 							paddleList.add(paddle);							
 						}
 					}

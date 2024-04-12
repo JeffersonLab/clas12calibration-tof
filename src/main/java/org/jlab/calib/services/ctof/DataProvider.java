@@ -196,10 +196,10 @@ public class DataProvider {
 	
 					paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
 					paddle.setPos(tx, ty, tz);
-					paddle.ADC_TIMEL = adcBank.getFloat("time", adcIdx1);
-					paddle.ADC_TIMER = adcBank.getFloat("time", adcIdx2);
-					paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
-					paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
+					paddle.setADC_TIMEL(adcBank.getFloat("time", adcIdx1));
+					paddle.setADC_TIMER(adcBank.getFloat("time", adcIdx2));
+					paddle.setRECON_TIME(hitsBank.getFloat("time", hitIndex));
+					paddle.setENERGY(hitsBank.getFloat("energy", hitIndex));
 					
 					if (event.hasBank("CVTRec::Tracks")) {
 	
@@ -220,8 +220,8 @@ public class DataProvider {
 							}
 							
 							// path length from bank
-							paddle.PATH_LENGTH = trkBank.getFloat("pathlength", trkIdx);
-							paddle.PATH_LENGTH_BAR = hitsBank.getFloat("pathLengthThruBar", hitIndex);
+							paddle.setPATH_LENGTH(trkBank.getFloat("pathlength", trkIdx));
+							paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
 							// System.out.println("Louise 237");
 	
 	                                                // Get the momentum and record the beta (assuming every hit is a pion!)
@@ -230,22 +230,22 @@ public class DataProvider {
 							//double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
 							//double beta = mom / Math.sqrt(mom * mom + mass * mass);
 							//paddle.BETA = beta;
-							paddle.P = mom;
-							paddle.TRACK_ID = trkId;
+							paddle.setP(mom);
+							paddle.setTRACK_ID(trkId);
 							
 							// For CTOF vertex z in cm:
-							paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx);
+							paddle.setVERTEX_Z(trkBank.getFloat("z0", trkIdx));
 							// For CTOF vertex z in mm -> convert to cm
 							//paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx) / 10.0;
 								
-							paddle.CHARGE = trkBank.getByte("q", trkIdx);
+							paddle.setCHARGE(trkBank.getByte("q", trkIdx));
 	
 							if (CTOFCalibration.maxRcs != 0.0) {
 								// paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkIdx);
-								paddle.TRACK_REDCHI2 = trkBank.getFloat("chi2", trkIdx)
-										/ trkBank.getShort("ndf", trkIdx);
+								paddle.setTRACK_REDCHI2(trkBank.getFloat("chi2", trkIdx)
+										/ trkBank.getShort("ndf", trkIdx));
 							} else {
-								paddle.TRACK_REDCHI2 = -1.0;
+								paddle.setTRACK_REDCHI2(-1.0);
 							}
 							
 							// Get the REC::Track and then the REC::Particle
@@ -262,18 +262,19 @@ public class DataProvider {
                                                                 }
 
                                                                 DataBank  recPartBank = event.getBank("REC::Particle");
-                                                                paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
+                                                                paddle.setPARTICLE_ID(recPartBank.getInt("pid", pIdx));
                                                                 if(recPartBank.getInt("pid", 0) == 11) 
-                                                                    paddle.ST_TIME = recPartBank.getFloat("vt", pIdx);
+                                                                    paddle.setST_TIME(recPartBank.getFloat("vt", pIdx));
                                                         }
 							//setOutput(true);
 	
 						}
 					}
+
+					paddle.Init();
 	
 					// System.out.println("Adding paddle to list");
 					if (paddle.includeInCalib()) {
-						
 						paddleList.add(paddle);
 						if (test) paddle.show();
 					}
@@ -365,8 +366,10 @@ public class DataProvider {
 								paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
 								paddle.setRun(run, triggerBit, timeStamp);
 								
-								paddle.ADC_TIMEL = adcTimeL;
-								paddle.ADC_TIMER = adcTimeR;
+								paddle.setADC_TIMEL(adcTimeL);
+								paddle.setADC_TIMER(adcTimeR);
+
+								paddle.Init();
 		
 								// if (paddle.includeInCalib()) {
 		

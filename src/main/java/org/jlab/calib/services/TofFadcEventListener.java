@@ -138,14 +138,14 @@ public class TofFadcEventListener extends TOFCalibrationEngine {
 			int layer = pad.getDescriptor().getLayer();
 			int component = pad.getDescriptor().getComponent();
 			
-			if (pad.ADC_TIMEL>0 && pad.TDCL>0) {
+			if (pad.getADC_TIMEL()>0 && pad.getTDCL()>0) {
 				dataGroups.getItem(sector,layer,component).getH1F("fadcHistLeft").fill(
-				pad.tdcToTimeL() - pad.ADC_TIMEL);
+				pad.tdcToTimeL() - pad.getADC_TIMEL());
 			}
 			
-			if (pad.ADC_TIMER>0 && pad.TDCR>0) {
+			if (pad.getADC_TIMER()>0 && pad.getTDCR()>0) {
 				dataGroups.getItem(sector,layer,component).getH1F("fadcHistRight").fill(
-				pad.tdcToTimeR() - pad.ADC_TIMER);
+				pad.tdcToTimeR() - pad.getADC_TIMER());
 			}
 		}
 	}  

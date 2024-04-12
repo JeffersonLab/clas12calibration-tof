@@ -546,11 +546,11 @@ public class CTOFCalibration
 					engines[i].processPaddleList(paddleList);
 
 				} else if (event.getType() == DataEventType.EVENT_ACCUMULATE) {
-					if (i == P2P) {
+					/*if (i == P2P) {
 						engines[i].processEvent(event);
-					} else {
+					} else {*/
 						engines[i].processPaddleList(paddleList);
-					}
+					//}
 				} else if (event.getType() == DataEventType.EVENT_STOP) {
 					System.setOut(oldStdout);
 					System.out.println("EVENT_STOP for " + engines[i].stepName + " " + todayString());

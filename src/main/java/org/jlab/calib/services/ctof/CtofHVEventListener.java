@@ -167,10 +167,10 @@ public class CtofHVEventListener extends CTOFCalibrationEngine {
 			int sector = paddle.getDescriptor().getSector();
 			int layer = paddle.getDescriptor().getLayer();
 			int component = paddle.getDescriptor().getComponent();
-		
-			if (paddle.isValidGeoMean() && paddle.geometricMean() > CTOFCalibration.expectedMipChannel * 0.25) {
 
+			if (paddle.isValidGeoMean() && paddle.geometricMean() > CTOFCalibration.expectedMipChannel * 0.25) {
 				if (TOFCalibration.pathNorm == TOFCalibration.PATH_NORM_NO) {
+					System.out.println("inside");
 					dataGroups.getItem(sector,layer,component).getH1F("geomean").fill(paddle.geometricMean());
 					hvStatHist.fill(((layer-1)*10)+sector);
 					//System.out.println("Filling with geometricMean "+paddle.geometricMean());
