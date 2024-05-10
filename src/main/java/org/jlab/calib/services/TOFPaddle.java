@@ -496,7 +496,7 @@ public class TOFPaddle {
 	private void set_TWCorr() { //tw1 & 2 & 3 & eneregy
 		TWCorr = tw1*Math.exp(tw2*energy) + tw3/energy;
 }
-	private void set_deltaTTW() { //twcorr (has input offset, but it seems top be 0 at every call)
+	private void set_deltaTTW() { //twcorr (calculate with 0 offset and recalculate later if necessary)
 		final double bb = TOFCalibrationEngine.BEAM_BUCKET;
 		deltaTTW = ((-refTimeNoTW - TWCorr/* + offset*/) + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
 }
@@ -994,7 +994,8 @@ public class TOFPaddle {
 	
 	// LC Sep 19
 	public double deltaTTW(double offset) {
-		return deltaTTW;
+		final double bb = TOFCalibrationEngine.BEAM_BUCKET;
+		return ((offset==0)?deltaTTW:(((-refTimeNoTW - TWCorr + offset) + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb));
 	}
 
 //	public double deltaTLeft(double offset) {
