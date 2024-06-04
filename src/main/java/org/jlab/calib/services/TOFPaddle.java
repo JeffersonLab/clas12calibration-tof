@@ -781,6 +781,9 @@ public class TOFPaddle {
 	}
 
 	public boolean includeInCalib() {
+		if (!isInit) {
+			set_includeInCalib();
+		}
 		return includeInCalib;
 	}
 
