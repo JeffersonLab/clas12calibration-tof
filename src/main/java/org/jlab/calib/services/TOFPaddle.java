@@ -535,7 +535,7 @@ public class TOFPaddle {
 		halfTimeDiff = (timeLeftAfterTW - timeRightAfterTW - leftRightAdjustment) / 2;
 }
 	private void set_leftRightAdjustment() { //no dependence
-		leftRightAdjustment = TOFCalibrationEngine.leftRightValues.getDoubleValue(((tof == "FTOF")?"left_right":"upstream_downstream"), desc.getSector(), desc.getLayer(), desc.getComponent());
+		leftRightAdjustment = ((tof == "FTOF")?(TOFCalibrationEngine.leftRightValues.getDoubleValue("left_right", desc.getSector(), desc.getLayer(), 		desc.getComponent())):(CTOFCalibrationEngine.leftRightValues.getDoubleValue("upstream_downstream", desc.getSector(), desc.getLayer(), desc.getComponent())));
 }
 	private void set_position() { //halftimediff & veff & ctofcenter
 		position = halfTimeDiff * veff + ((tof == "CTOF")?ctofCenter:0.0);
