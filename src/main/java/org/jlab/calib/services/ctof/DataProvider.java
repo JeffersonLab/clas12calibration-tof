@@ -52,7 +52,7 @@ public class DataProvider {
 
 		if (test) {
 			String[] bankList = event.getBankList();
-			for (int bi=0; bi<bankList.length; bi++) {
+			for (int bi = 0; bi < bankList.length; bi++) {
 				System.out.println("Bank : " + bankList[bi]);
 			}
 			event.show();
@@ -88,8 +88,7 @@ public class DataProvider {
 			}
 
 		}
-		
-		
+
 		List<TOFPaddle> paddleList = new ArrayList<TOFPaddle>();
 		paddleList = getPaddleListHipo(event);
 		return paddleList;
@@ -146,156 +145,162 @@ public class DataProvider {
 		}
 
 		if (event.hasBank("RUN::config")) {
-			
-            DataBank  configBank = event.getBank("RUN::config");
-            long triggerBit = configBank.getLong("trigger", 0);
-            int  run        = configBank.getInt("run", 0);
-            long timeStamp  = configBank.getLong("timestamp", 0);
-		
+
+			DataBank configBank = event.getBank("RUN::config");
+			long triggerBit = configBank.getLong("trigger", 0);
+			int run = configBank.getInt("run", 0);
+			long timeStamp = configBank.getLong("timestamp", 0);
+
 			// iterate through hits bank getting corresponding adc and tdc
 			if (event.hasBank("CTOF::hits")) {
-				
+
 				// Only continue if we have adc and tdc banks
 				if (!event.hasBank("CTOF::adc") || !event.hasBank("CTOF::tdc")) {
 					return paddleList;
 				}
-	                        			
+
 				DataBank adcBank = event.getBank("CTOF::adc");
 				DataBank tdcBank = event.getBank("CTOF::tdc");
-				
+
 				DataBank hitsBank = event.getBank("CTOF::hits");
-	
+
 				for (int hitIndex = 0; hitIndex < hitsBank.rows(); hitIndex++) {
-	
-					double tx = hitsBank.getFloat("tx", hitIndex);
-					double ty = hitsBank.getFloat("ty", hitIndex);
-					double tz = hitsBank.getFloat("tz", hitIndex);
-	
-					int component = (int) hitsBank.getShort("component", hitIndex);
-					TOFPaddle paddle = new TOFPaddle(1, 1, component);
-	                                
-                                        paddle.setRun(run, triggerBit, timeStamp);
-	
-					int adcIdx1 = getIdx(adcBank, 0, component);
-					int adcIdx2 = getIdx(adcBank, 1, component);
-					int tdcIdx1 = getIdx(tdcBank, 2, component);
-					int tdcIdx2 = getIdx(tdcBank, 3, component);
-					
-					int adcL = 0;
-					int adcR = 0;
-					int tdcL = 0;
-					int tdcR = 0;
-					if (adcIdx1 != -1)
-						adcL = adcBank.getInt("ADC", adcIdx1);
-					if (adcIdx2 != -1)
-						adcR = adcBank.getInt("ADC", adcIdx2);
-					if (tdcIdx1 != -1)
-						tdcL = tdcBank.getInt("TDC", tdcIdx1);
-					if (tdcIdx2 != -1)
-						tdcR = tdcBank.getInt("TDC", tdcIdx2);
-	
-					paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
-					paddle.setPos(tx, ty, tz);
-					paddle.ADC_TIMEL = adcBank.getFloat("time", adcIdx1);
-					paddle.ADC_TIMER = adcBank.getFloat("time", adcIdx2);
-					paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
-					paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
-					
+
 					if (event.hasBank("CVTRec::Tracks")) {
-	
+
 						DataBank trkBank = event.getBank("CVTRec::Tracks");
-	
+
 						int trkId = hitsBank.getShort("trkID", hitIndex);
 						// Get track
 						// only use hit with associated track and a minimum energy
-						if (trkId != -1 && paddle.energy() > 0.5) {
-							
-							// Find the matching CVTRec::Tracks bank
-							int trkIdx = -1;
-							for (int i = 0; i < trkBank.rows(); i++) {
-								if (trkBank.getShort("ID",i)==trkId) {
-									trkIdx = i;
-									break;
+						if (trkId != -1) {
+
+							double tx = hitsBank.getFloat("tx", hitIndex);
+							double ty = hitsBank.getFloat("ty", hitIndex);
+							double tz = hitsBank.getFloat("tz", hitIndex);
+
+							int component = (int) hitsBank.getShort("component", hitIndex);
+
+							int adcIdx1 = getIdx(adcBank, 0, component);
+							int adcIdx2 = getIdx(adcBank, 1, component);
+							int tdcIdx1 = getIdx(tdcBank, 2, component);
+							int tdcIdx2 = getIdx(tdcBank, 3, component);
+
+							int adcL = 0;
+							int adcR = 0;
+							int tdcL = 0;
+							int tdcR = 0;
+							if (adcIdx1 != -1)
+								adcL = adcBank.getInt("ADC", adcIdx1);
+							if (adcIdx2 != -1)
+								adcR = adcBank.getInt("ADC", adcIdx2);
+							if (tdcIdx1 != -1)
+								tdcL = tdcBank.getInt("TDC", tdcIdx1);
+							if (tdcIdx2 != -1)
+								tdcR = tdcBank.getInt("TDC", tdcIdx2);
+
+							TOFPaddle paddle = new TOFPaddle(1, 1, component);
+
+							paddle.setRun(run, triggerBit, timeStamp);
+
+							paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
+							paddle.setPos(tx, ty, tz);
+							paddle.setADC_TIMEL(adcBank.getFloat("time", adcIdx1));
+							paddle.setADC_TIMER(adcBank.getFloat("time", adcIdx2));
+							paddle.setRECON_TIME(hitsBank.getFloat("time", hitIndex));
+							paddle.setENERGY(hitsBank.getFloat("energy", hitIndex));
+
+							if (paddle.energy() > 0.5) {
+
+								// Find the matching CVTRec::Tracks bank
+								int trkIdx = -1;
+								for (int i = 0; i < trkBank.rows(); i++) {
+									if (trkBank.getShort("ID", i) == trkId) {
+										trkIdx = i;
+										break;
+									}
+								}
+
+								// path length from bank
+								paddle.setPATH_LENGTH(trkBank.getFloat("pathlength", trkIdx));
+								paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
+								// System.out.println("Louise 237");
+
+								// Get the momentum and record the beta (assuming every hit is a pion!)
+								double mom = trkBank.getFloat("p", trkIdx);
+								// double mass = massList[CTOFCalibration.massAss];
+								// double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
+								// double beta = mom / Math.sqrt(mom * mom + mass * mass);
+								// paddle.BETA = beta;
+								paddle.setP(mom);
+								paddle.setTRACK_ID(trkId);
+
+								// For CTOF vertex z in cm:
+								paddle.setVERTEX_Z(trkBank.getFloat("z0", trkIdx));
+								// For CTOF vertex z in mm -> convert to cm
+								// paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx) / 10.0;
+
+								paddle.setCHARGE(trkBank.getByte("q", trkIdx));
+
+								if (CTOFCalibration.maxRcs != 0.0) {
+									// paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkIdx);
+									paddle.setTRACK_REDCHI2(trkBank.getFloat("chi2", trkIdx)
+											/ trkBank.getShort("ndf", trkIdx));
+								} else {
+									paddle.setTRACK_REDCHI2(-1.0);
+								}
+
+								// Get the REC::Track and then the REC::Particle
+								// setOutput(false);
+								if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")) {
+
+									DataBank recTrkBank = event.getBank("REC::Track");
+									int pIdx = -1;
+									for (int i = 0; i < recTrkBank.rows(); i++) {
+										if (recTrkBank.getShort("index", i) == trkId - 1
+												&& recTrkBank.getByte("detector", i) == DetectorType.CVT
+														.getDetectorId()) {
+											pIdx = i;
+											break;
+										}
+									}
+
+									DataBank recPartBank = event.getBank("REC::Particle");
+									paddle.setPARTICLE_ID(recPartBank.getInt("pid", pIdx));
+									if (recPartBank.getInt("pid", 0) == 11)
+										paddle.setST_TIME(recPartBank.getFloat("vt", pIdx));
+								}
+								// setOutput(true);		
+
+								// System.out.println("Adding paddle to list");
+								if (paddle.includeInCalib()) {
+									paddle.Init();
+									paddleList.add(paddle);
+									if (test)
+										paddle.show();
 								}
 							}
-							
-							// path length from bank
-							paddle.PATH_LENGTH = trkBank.getFloat("pathlength", trkIdx);
-							paddle.PATH_LENGTH_BAR = hitsBank.getFloat("pathLengthThruBar", hitIndex);
-							// System.out.println("Louise 237");
-	
-	                                                // Get the momentum and record the beta (assuming every hit is a pion!)
-							double mom = trkBank.getFloat("p", trkIdx);
-							//double mass = massList[CTOFCalibration.massAss];
-							//double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
-							//double beta = mom / Math.sqrt(mom * mom + mass * mass);
-							//paddle.BETA = beta;
-							paddle.P = mom;
-							paddle.TRACK_ID = trkId;
-							
-							// For CTOF vertex z in cm:
-							paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx);
-							// For CTOF vertex z in mm -> convert to cm
-							//paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx) / 10.0;
-								
-							paddle.CHARGE = trkBank.getByte("q", trkIdx);
-	
-							if (CTOFCalibration.maxRcs != 0.0) {
-								// paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkIdx);
-								paddle.TRACK_REDCHI2 = trkBank.getFloat("chi2", trkIdx)
-										/ trkBank.getShort("ndf", trkIdx);
-							} else {
-								paddle.TRACK_REDCHI2 = -1.0;
-							}
-							
-							// Get the REC::Track and then the REC::Particle
-							//setOutput(false);
-							if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")) {
-							
-                                                                DataBank  recTrkBank = event.getBank("REC::Track");
-                                                                int pIdx = -1;
-                                                                for (int i = 0; i < recTrkBank.rows(); i++) {
-                                                                        if (recTrkBank.getShort("index",i)==trkId-1 && recTrkBank.getByte("detector",i)==DetectorType.CVT.getDetectorId()) {
-                                                                                pIdx = i;
-                                                                                break;
-                                                                        }
-                                                                }
-
-                                                                DataBank  recPartBank = event.getBank("REC::Particle");
-                                                                paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
-                                                                if(recPartBank.getInt("pid", 0) == 11) 
-                                                                    paddle.ST_TIME = recPartBank.getFloat("vt", pIdx);
-                                                        }
-							//setOutput(true);
-	
 						}
 					}
-	
-					// System.out.println("Adding paddle to list");
-					if (paddle.includeInCalib()) {
-						
-						paddleList.add(paddle);
-						if (test) paddle.show();
-					}
 				}
-			
+
 			} else {
 				// no hits bank, so just use adc and tdc
-	
+
 				// based on cosmic data
 				// am getting entry for every PMT in ADC bank
 				// ADC R two indices after ADC L (will assume right is always after left)
 				// TDC bank only has actual hits, so can just search the whole bank for matching
 				// SLC
-				
+
 				if (event.hasBank("CTOF::adc")) {
 					DataBank adcBank = event.getBank("CTOF::adc");
-			
+
 					for (int i = 0; i < adcBank.rows(); i++) {
 						int order = adcBank.getByte("order", i);
 						int adc = adcBank.getInt("ADC", i);
 						if (order == 0 && adc != 0) {
-		
+
 							int component = adcBank.getShort("component", i);
 							int adcL = adc;
 							int adcR = 0;
@@ -303,7 +308,7 @@ public class DataProvider {
 							float adcTimeR = 0;
 							int tdcL = 0;
 							int tdcR = 0;
-		
+
 							for (int j = 0; j < adcBank.rows(); j++) {
 								int c = adcBank.getShort("component", j);
 								int o = adcBank.getByte("order", j);
@@ -314,7 +319,7 @@ public class DataProvider {
 									break;
 								}
 							}
-		
+
 							// Now get matching TDCs
 							// can search whole bank as it has fewer rows (only hits)
 							// break when you find so always take the first one found
@@ -339,7 +344,7 @@ public class DataProvider {
 									}
 								}
 							}
-		
+
 							// set status to ok if at least one reading
 							if (adcL != 0) {
 								CTOFCalibrationEngine.adcLeftStatus.add(0, 1, 1, component);
@@ -353,23 +358,25 @@ public class DataProvider {
 							if (tdcR != 0) {
 								CTOFCalibrationEngine.tdcRightStatus.add(0, 1, 1, component);
 							}
-		
+
 							if (test) {
 								System.out.println("Values found " + component);
 								System.out.println(adcL + " " + adcR + " " + tdcL + " " + tdcR);
 							}
-		
+
 							if (adcL > 100 && adcR > 100) {
-		
+
 								TOFPaddle paddle = new TOFPaddle(1, 1, component);
 								paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
 								paddle.setRun(run, triggerBit, timeStamp);
-								
-								paddle.ADC_TIMEL = adcTimeL;
-								paddle.ADC_TIMER = adcTimeR;
-		
+
+								paddle.setADC_TIMEL(adcTimeL);
+								paddle.setADC_TIMER(adcTimeR);
+
+								paddle.Init();
+
 								// if (paddle.includeInCalib()) {
-		
+
 								if (test) {
 									System.out.println("Adding paddle " + component);
 									System.out.println(adcL + " " + adcR + " " + tdcL + " " + tdcR);

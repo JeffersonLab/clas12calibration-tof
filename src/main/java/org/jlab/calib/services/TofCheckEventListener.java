@@ -164,11 +164,11 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 			if (pad.goodTrackFound()) {
 				
 				dataGroups.getItem(sector,layer,component).getH2F("momHist").fill(
-						 pad.P,
+						 pad.getP(),
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 				dataGroups.getItem(sector,layer,component).getH2F("vzHist").fill(
-						 pad.VERTEX_Z,
+						 pad.getVERTEX_Z(),
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 							
 				dataGroups.getItem(sector,layer,component).getH2F("hitHist").fill(
@@ -176,11 +176,11 @@ public class TofCheckEventListener extends TOFCalibrationEngine {
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 				dataGroups.getItem(sector,layer,component).getH2F("pathHist").fill(
-						 pad.PATH_LENGTH,
+						 pad.getPATH_LENGTH(),
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 				
 				dataGroups.getItem(sector,layer,component).getH2F("adcLHist").fill(
-						 pad.ADCL,
+						 pad.getADCL(),
 						(pad.refTimeCorr()+(1000*BEAM_BUCKET) + (0.5*BEAM_BUCKET))%BEAM_BUCKET - 0.5*BEAM_BUCKET);
 
 //				dataGroups.getItem(sector,layer,component).getH2F("adcRHist").fill(

@@ -153,11 +153,11 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 			if (pad.goodTrackFound() && pad.includeInCTOFTiming()) {
                                 double timeResidual = pad.refSTTimeCorr();
                                 dataGroups.getItem(sector,layer,component).getH2F("momHist").fill(
-						pad.P,
+						pad.getP(),
 						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("vzHist").fill(
-						pad.VERTEX_Z,
+						pad.getVERTEX_Z(),
 						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("hitHist").fill(
@@ -165,15 +165,15 @@ public class CtofCheckEventListener extends CTOFCalibrationEngine {
 						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("pathHist").fill(
-						pad.PATH_LENGTH,
+						pad.getPATH_LENGTH(),
 						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("adcLHist").fill(
-						pad.ADCL,
+						pad.getADCL(),
 						timeResidual);
 
 				dataGroups.getItem(sector,layer,component).getH2F("adcRHist").fill(
-						pad.ADCR,
+						pad.getADCR(),
 						timeResidual);
 
 			}
