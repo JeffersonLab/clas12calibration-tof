@@ -1,18 +1,12 @@
 package org.jlab.calib.services;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dialog.ModalityType;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -21,49 +15,35 @@ import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelEvent;
 
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.calib.tasks.CalibrationEngine;
-import org.jlab.detector.calib.tasks.CalibrationEngineView;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.CalibrationConstantsListener;
 import org.jlab.detector.calib.utils.CalibrationConstantsView;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.view.DetectorListener;
 import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
 import org.jlab.groot.base.GStyle;
-import org.jlab.groot.data.H1F;
-import org.jlab.groot.data.H2F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.group.DataGroup;
-import org.jlab.groot.math.F1D;
-import org.jlab.groot.ui.TCanvas;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.io.task.DataSourceProcessorPane;
@@ -84,7 +64,7 @@ public class TOFCalibration
 
 	// event reading panel
 	DataSourceProcessorPane processorPane = null;
-	public final int UPDATE_RATE = 200000;
+	public final int UPDATE_RATE = 2000000;
 
 	// calibration view
 	EmbeddedCanvas canvas = null;
