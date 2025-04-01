@@ -108,6 +108,9 @@ public class DataProvider {
 			if (event.hasBank("REC::Scintillator")) {
 				event.getBank("REC::Scintillator").show();
 			}
+			if (event.hasBank("FTOF::calib")) {
+				event.getBank("FTOF::calib").show();
+			}
 			try {
 				if (event.hasBank("REC::Track")) {
 					event.getBank("REC::Track").show();
@@ -157,14 +160,11 @@ public class DataProvider {
 			}
 		}
 		
-		// Only continue if we have adc and tdc banks
-		if (!event.hasBank("FTOF::adc") || !event.hasBank("FTOF::tdc") || !event.hasBank("RUN::config")) {
+		// Only continue if we have calib banks
+		if (!event.hasBank("FTOF::calib") || !event.hasBank("RUN::config")) {
 			return paddleList;
 		}
 
-		DataBank  adcBank = event.getBank("FTOF::adc");
-		DataBank  tdcBank = event.getBank("FTOF::tdc");
-		
 //		if (event.hasBank("TimeBasedTrkg::TBTracks")) {
 //			DataBank testBank = event.getBank("TimeBasedTrkg::TBTracks");
 //			for (int tbtIdx=0; tbtIdx<testBank.rows(); tbtIdx++) {
@@ -180,10 +180,12 @@ public class DataProvider {
         long triggerBit = configBank.getLong("trigger", 0);
         int  run        = configBank.getInt("run", 0);
         long timeStamp  = configBank.getLong("timestamp", 0);
-		
-		// iterate through hits bank getting corresponding adc and tdc
-		if (event.hasBank("FTOF::hits") && event.hasBank("RUN::config")) {
-			DataBank  hitsBank = event.getBank("FTOF::hits");
+
+        // iterate through hits bank getting corresponding adc and tdc
+		if (event.hasBank("FTOF::calib") && event.hasBank("REC::Event") && event.hasBank("RUN::config")) {
+					DataBank eventBank = event.getBank("REC::Event");
+					double trf = eventBank.getFloat("RFTime",0);
+			DataBank  hitsBank = event.getBank("FTOF::calib");
                 
                 for (int hitIndex=0; hitIndex<hitsBank.rows(); hitIndex++) {
 
@@ -200,78 +202,58 @@ public class DataProvider {
                                 paddle.setRun(run, triggerBit, timeStamp);
                                 
 				paddle.setAdcTdc(
-						adcBank.getInt("ADC", hitsBank.getShort("adc_idx1", hitIndex)),
-						adcBank.getInt("ADC", hitsBank.getShort("adc_idx2", hitIndex)),
-						tdcBank.getInt("TDC", hitsBank.getShort("tdc_idx1", hitIndex)),
-						tdcBank.getInt("TDC", hitsBank.getShort("tdc_idx2", hitIndex)));
+						hitsBank.getInt("adc1", hitIndex),
+						hitsBank.getInt("adc2", hitIndex),
+						hitsBank.getInt("tdc1", hitIndex),
+						hitsBank.getInt("tdc2", hitIndex));
 				paddle.setPos(tx,ty,tz); 
-				paddle.ADC_TIMEL = adcBank.getFloat("time", hitsBank.getShort("adc_idx1", hitIndex));
-				paddle.ADC_TIMER = adcBank.getFloat("time", hitsBank.getShort("adc_idx2", hitIndex));
+//				paddle.ADC_TIMEL = adcBank.getFloat("time", hitsBank.getShort("adc_idx1", hitIndex));
+//				paddle.ADC_TIMER = adcBank.getFloat("time", hitsBank.getShort("adc_idx2", hitIndex));
 				paddle.RECON_TIME = hitsBank.getFloat("time", hitIndex);
 				paddle.ENERGY = hitsBank.getFloat("energy", hitIndex);
 						
 				//System.out.println("Paddle created "+paddle.getDescriptor().getSector()+paddle.getDescriptor().getLayer()+paddle.getDescriptor().getComponent());
 
-				if (event.hasBank("TimeBasedTrkg::TBTracks") && event.hasBank("REC::Event")) {
-
-					DataBank  tbtBank = event.getBank("TimeBasedTrkg::TBTracks");					
-					
-					// get the RF time from REC::Event
-					double trf = 0.0; 
-					DataBank eventBank = event.getBank("REC::Event");
-					trf = eventBank.getFloat("RFTime",0);
-
-					// Identify electrons and store path length etc for time walk
-					int trkId = hitsBank.getShort("trackid", hitIndex);
-					
-					//System.out.println("trkId energy trf "+trkId+" "+energy+" "+trf);
-
-					// only use hit with associated track and a minimum energy
-					if (trkId!=-1 && paddle.energy()>TOFCalibration.minE) {
-						
-						double c3x  = tbtBank.getFloat("c3_x",trkId-1);
-						double c3y  = tbtBank.getFloat("c3_y",trkId-1);
-						double c3z  = tbtBank.getFloat("c3_z",trkId-1);
-						double path = tbtBank.getFloat("pathlength",trkId-1) + Math.sqrt((tx-c3x)*(tx-c3x)+(ty-c3y)*(ty-c3y)+(tz-c3z)*(tz-c3z));
-						paddle.PATH_LENGTH = path;
+						paddle.PATH_LENGTH = hitsBank.getFloat("pathLength", hitIndex);
 						paddle.PATH_LENGTH_BAR = hitsBank.getFloat("pathLengthThruBar", hitIndex);
 						paddle.RF_TIME = trf;
 						
 						// Get the momentum and record the beta using the mass assumption
-						double px  = tbtBank.getFloat("p0_x",trkId-1);
-						double py  = tbtBank.getFloat("p0_y",trkId-1);
-						double pz  = tbtBank.getFloat("p0_z",trkId-1);
-						double mom = Math.sqrt(px*px + py*py + pz*pz);
+//						double px  = tbtBank.getFloat("p0_x",trkId-1);
+//						double py  = tbtBank.getFloat("p0_y",trkId-1);
+//						double pz  = tbtBank.getFloat("p0_z",trkId-1);
+//						double mom = Math.sqrt(px*px + py*py + pz*pz);
 //						double mass = massList[TOFCalibration.massAss];
 //						double beta = mom/Math.sqrt(mom*mom+mass*mass);
 //						paddle.BETA = beta;
-						paddle.P = mom;
-						paddle.TRACK_ID = trkId;
-						paddle.VERTEX_Z = tbtBank.getFloat("Vtx0_z", trkId-1);
-						paddle.CHARGE = tbtBank.getInt("q", trkId-1);
+						paddle.P = hitsBank.getFloat("p", hitIndex);
+						paddle.TRACK_ID = hitsBank.getInt("trackid", hitIndex);
+						paddle.VERTEX_Z = hitsBank.getFloat("vz", hitIndex);
+						paddle.PARTICLE_ID = hitsBank.getInt("pid", hitIndex);
+						paddle.CHARGE = hitsBank.getByte("charge", hitIndex);
 						
 						if (TOFCalibration.maxRcs != 0.0) {
-							paddle.TRACK_REDCHI2 = tbtBank.getFloat("chi2", trkId-1)/tbtBank.getShort("ndf", trkId-1);
+							paddle.TRACK_REDCHI2 = hitsBank.getFloat("chi2", hitIndex)/hitsBank.getShort("NDF", hitIndex);
 						}
 						else {
 							paddle.TRACK_REDCHI2 = -1.0;
 						}
 						
-						if (paddle.getDescriptor().getComponent()==13 &&
-								paddle.getDescriptor().getLayer()== 1 && trkId !=-1) {
-							//refPaddleFound = true;
-						}
-						if (paddle.getDescriptor().getComponent()==35 &&
-								paddle.getDescriptor().getLayer()== 2 && trkId !=-1) {
-							//testPaddleFound = true;
-						}
+//						if (paddle.getDescriptor().getComponent()==13 &&
+//								paddle.getDescriptor().getLayer()== 1 && trkId !=-1) {
+//							//refPaddleFound = true;
+//						}
+//						if (paddle.getDescriptor().getComponent()==35 &&
+//								paddle.getDescriptor().getLayer()== 2 && trkId !=-1) {
+//							//testPaddleFound = true;
+//						}
 
 						// check if it's an electron by matching to the generated particle
-						int    q    = tbtBank.getByte("q",trkId-1);
-						double p0x  = tbtBank.getFloat("p0_x",trkId-1);
-						double p0y  = tbtBank.getFloat("p0_y",trkId-1);
-						double p0z  = tbtBank.getFloat("p0_z",trkId-1);
-						Particle recParticle = new Particle(11,p0x,p0y,p0z,0,0,0);
+//						int    q    = tbtBank.getByte("q",trkId-1);
+//						double p0x  = tbtBank.getFloat("p0_x",trkId-1);
+//						double p0y  = tbtBank.getFloat("p0_y",trkId-1);
+//						double p0z  = tbtBank.getFloat("p0_z",trkId-1);
+//						Particle recParticle = new Particle(11,p0x,p0y,p0z,0,0,0);
 
 //						System.out.println("q "+q);
 //						System.out.println("recParticle.p() "+recParticle.p());
@@ -288,33 +270,32 @@ public class DataProvider {
 //						}
 						
 						// Get the REC::Track and then the REC::Particle
-						setOutput(false);
-						if (event.hasBank("REC::Particle") && event.hasBank("REC::Track") && event.hasBank("REC::Scintillator")) {
+//						setOutput(false);
+//						if (event.hasBank("REC::Particle") && event.hasBank("REC::Track") && event.hasBank("REC::Scintillator")) {
+//							
+//							DataBank  recTrkBank = event.getBank("REC::Track");
+//							DataBank  recSciBank = event.getBank("REC::Scintillator");
+//							int pIdx = -1;
+//							for (int i = 0; i < recTrkBank.rows(); i++) {
+//								if (recTrkBank.getShort("index",i)==trkId-1) {
+//									pIdx = recTrkBank.getShort("pindex", i);
+//									break;
+//								}
+//							}
+//							for (int i = 0; i < recSciBank.rows(); i++) {
+//								if (recSciBank.getShort("pindex",i)==pIdx && recSciBank.getByte("layer", i)==paddle.getDescriptor().getLayer()) {
+//									paddle.PATH_LENGTH = recSciBank.getFloat("path", i);
+//									break;
+//								}
+//							}
+//							
+//							DataBank  recPartBank = event.getBank("REC::Particle");
+//							paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
+//						}
+//						setOutput(true);
 							
-							DataBank  recTrkBank = event.getBank("REC::Track");
-							DataBank  recSciBank = event.getBank("REC::Scintillator");
-							int pIdx = -1;
-							for (int i = 0; i < recTrkBank.rows(); i++) {
-								if (recTrkBank.getShort("index",i)==trkId-1) {
-									pIdx = recTrkBank.getShort("pindex", i);
-									break;
-								}
-							}
-							for (int i = 0; i < recSciBank.rows(); i++) {
-								if (recSciBank.getShort("pindex",i)==pIdx && recSciBank.getByte("layer", i)==paddle.getDescriptor().getLayer()) {
-									paddle.PATH_LENGTH = recSciBank.getFloat("path", i);
-									break;
-								}
-							}
-							
-							DataBank  recPartBank = event.getBank("REC::Particle");
-							paddle.PARTICLE_ID = recPartBank.getInt("pid", pIdx);
-						}
-						setOutput(true);
-							
-					}
-				}
-				
+//					}
+//				}
 				if (paddle.includeInCalib()) {
 					paddleList.add(paddle);
 					if (test) {
@@ -324,7 +305,8 @@ public class DataProvider {
 
 			}
 		}
-		else {
+		else if(event.hasBank("FTOF::adc") && event.hasBank("FTOF::tdc") ) {
+{
 			// no hits bank, so just use adc and tdc
 			
 			// based on cosmic data
@@ -332,6 +314,8 @@ public class DataProvider {
 			// ADC R two indices after ADC L (will assume right is always after left)
 			// TDC bank only has actual hits, so can just search the whole bank for matching SLC
 
+			DataBank adcBank = event.getBank("FTOF::adc");
+			DataBank tdcBank = event.getBank("FTOF::tdc");
 			for (int i = 0; i < adcBank.rows(); i++) {
 				int order = adcBank.getByte("order", i);
 				int adc = adcBank.getInt("ADC", i);
@@ -427,7 +411,7 @@ public class DataProvider {
 					}
 				}
 			}
-
+}
 		}
 
 		return paddleList;
