@@ -191,7 +191,7 @@ public class TofP2PEventListener extends TOFCalibrationEngine {
 
 					if (otherPad.goodTrackFound() 
 							&& otherPad.paddleNumber() != currentPad.paddleNumber()
-							&& otherPad.TRACK_ID != currentPad.TRACK_ID) {
+							&& otherPad.getTRACK_ID() != currentPad.getTRACK_ID()) {
 
 						dataGroups.getItem(sector,layer,component).getH1F("vertexDiffHist").fill(
 								currentPad.startTimeP2PCorr() - otherPad.startTimeP2PCorr());

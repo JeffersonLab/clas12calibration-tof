@@ -546,11 +546,11 @@ public class CTOFCalibration
 					engines[i].processPaddleList(paddleList);
 
 				} else if (event.getType() == DataEventType.EVENT_ACCUMULATE) {
-					if (i == P2P) {
+					/*if (i == P2P) {
 						engines[i].processEvent(event);
-					} else {
+					} else {*/
 						engines[i].processPaddleList(paddleList);
-					}
+					//}
 				} else if (event.getType() == DataEventType.EVENT_STOP) {
 					System.setOut(oldStdout);
 					System.out.println("EVENT_STOP for " + engines[i].stepName + " " + todayString());
@@ -659,7 +659,14 @@ public class CTOFCalibration
 	}
 
 	public void resetEventListener() {
-
+		for (int i = 0; i < engines.length; i++) {
+			engines[i].resetEventListener();
+		}
+		this.timerUpdate();
+		this.innerConfigFrame = new JFrame("Configure CTOF calibration settings");
+		this.configFrame = new JDialog(innerConfigFrame, "Configure CTOF calibration settings");
+		this.configPane = new JTabbedPane();
+		this.configure();
 	}
 
 	public void timerUpdate() {
@@ -812,7 +819,7 @@ public class CTOFCalibration
 
 	public void configure() {
 
-		configFrame.setSize(900, 830);
+		configFrame.setSize(900, 900);
 		// configFrame.setSize(1000, 600);
 		configFrame.setLocationRelativeTo(pane);
 		configFrame.setDefaultCloseOperation(configFrame.DO_NOTHING_ON_CLOSE);

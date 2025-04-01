@@ -337,7 +337,7 @@ public class TofTimeWalkEventListener extends TOFCalibrationEngine {
 				for (int i=0; i<NUM_OFFSET_HISTS; i++) {
 					double n = NUM_OFFSET_HISTS;
 					double offset = i*(BEAM_BUCKET/n);
-					offsetHists.getItem(sector,layer,component,i).fill(paddle.ENERGY, paddle.deltaTTW(offset));
+					offsetHists.getItem(sector,layer,component,i).fill(paddle.getENERGY(), paddle.deltaTTW(offset));
 				}
 			}
 		}

@@ -178,7 +178,7 @@ public class CtofP2PEventListener extends CTOFCalibrationEngine {
 				int component = paddle.getDescriptor().getComponent();
 
 				dataGroups.getItem(sector,layer,component).getH1F("vertexDiffHist").fill(
-								paddle.startTimeP2PCorr() - paddle.ST_TIME);
+								paddle.startTimeP2PCorr() - paddle.getST_TIME());
 			}
 		}
 	}    
