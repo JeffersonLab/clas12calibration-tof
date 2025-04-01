@@ -30,7 +30,7 @@ public class TOFPaddle {
 	private double ENERGY = 0;
 	private float ADC_TIMEL = 0;
 	private float ADC_TIMER = 0;
-    private double LENGTH = 0;
+        private double LENGTH = 0;
 	private double XPOS = 0.0;
 	private double YPOS = 0.0;
 	private double ZPOS = 0.0;
@@ -46,12 +46,12 @@ public class TOFPaddle {
 	private long TRIGGER_BIT = 0;
 	// public double TOF_TIME = 0.0;
 	private double RECON_TIME = 0.0;
-    private double JITTER = 0.0;
+        private double JITTER = 0.0;
 	private int PARTICLE_ID = 0;
 	private int RUN = 0;
 	private long TIMESTAMP = 0;
 
-    private final double DEDX_MIP = 1.956; // units = MeV/g/cm^2
+        private final double DEDX_MIP = 1.956; // units = MeV/g/cm^2
 	private final double C = 29.9792458;
 	public static final double NS_PER_CH = 0.02345;
 	// public static final double NS_PER_CH = 0.024;
@@ -264,7 +264,7 @@ public class TOFPaddle {
 		TIMESTAMP = tIMESTAMP;
 	}
 
-	private void set_paddleNumber() { //no dependence
+	private void setPaddleNumber() { //no dependence
 		final int[] paddleOffset = { 0, 0, 23, 85 };
 		final int sector = this.getDescriptor().getSector();
 		final int layer = this.getDescriptor().getLayer();
@@ -273,13 +273,13 @@ public class TOFPaddle {
 		final int p = component + (sector - 1) * 90 + paddleOffset[layer];
 		paddleNumber=p;
 }
-	private void set_geometricMean() { //Adcl & r
+	private void setGeometricMean() { //Adcl & r
 		geometricMean = Math.sqrt(ADCL * ADCR);			
 }
-	private void set_geometricMeanNorm() { //geometricmean & thickness & Path_length_bar
+	private void setGeometricMeanNorm() { //geometricmean & thickness & Path_length_bar
 		geometricMeanNorm = geometricMean * (thickness/PATH_LENGTH_BAR);
 }
-	private void set_thickness() { //no dependence
+	private void setThickness() { //no dependence
 		double t = 0.0;
 		if (tof=="FTOF") {
 			t = 5.08;
@@ -292,14 +292,14 @@ public class TOFPaddle {
 		}
 		thickness=t;
 }
-	private void set_logRatio() { //Adcl & r
+	private void setLogRatio() { //Adcl & r
 		logRatio = Math.log((double) ADCR / (double) ADCL);
 }
-	private void set_isValidGeoMean() { //geometricmean
+	private void setIsValidGeoMean() { //geometricmean
 		isValidGeoMean = (geometricMean > 100.0);
 
 }
-	private void set_includeInCalib() { //Adcl & r
+	private void setIncludeInCalib() { //Adcl & r
 		// return (ADCR != 0 || ADCL != 0);
 		// return (this.geometricMean() > 100.0 && ADCR>0 && ADCL>0 && TDCL>0 &&
 		// TDCR>0);
@@ -307,61 +307,61 @@ public class TOFPaddle {
 		final int layer = this.getDescriptor().getLayer();
 		includeInCalib = (ADCL > minAdc[layer] && ADCR > minAdc[layer]);
 }
-	private void set_includeInTiming() { //Tdcl & r
+	private void setIncludeInTiming() { //Tdcl & r
 		includeInTiming = (TDCL > 0 && TDCR > 0);
 }
-	private void set_includeInCTOFTiming() { //Tdcl & r & St_time
+	private void setIncludeInCTOFTiming() { //Tdcl & r & St_time
 		includeInCTOFTiming = (TDCL > 0 && TDCR > 0 && ST_TIME != -1000.0);
 }
-	private void set_isValidLogRatio() { //geometricmean
+	private void setIsValidLogRatio() { //geometricmean
 		// only if geometric mean is over a minimum
 		final double[] minGM = { 0.0, 300.0, 500.0, 300.0 };
 		final int layer = this.getDescriptor().getLayer();
 
 		isValidLogRatio = geometricMean > minGM[layer];
 }
-	private void set_mips() { //no dependence
+	private void setMips() { //no dependence
 		// take from target MIP channel for CTOF
 
 		mips = (tof == "FTOF")?(TOFCalibrationEngine.gainValues.getDoubleValue("mipa_left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibration.expectedMipChannel);
 }
-	private void set_veff() { //no dependence
+	private void setVeff() { //no dependence
 		veff = (tof == "FTOF")?(TOFCalibrationEngine.veffValues.getDoubleValue("veff_left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.veffValues.getDoubleValue("veff_upstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
-	private void set_tdcConvL() { //no dependence
+	private void setTdcConvL() { //no dependence
 		tdcConvL = (tof == "FTOF")?(TOFCalibrationEngine.convValues.getDoubleValue("left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.convValues.getDoubleValue("upstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
-	private void set_tdcConvR() { //no dependence
+	private void setTdcConvR() { //no dependence
 		tdcConvR = (tof == "FTOF")?(TOFCalibrationEngine.convValues.getDoubleValue("right", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.convValues.getDoubleValue("downstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
-	private void set_rfpad() { //no dependence
+	private void setRfpad() { //no dependence
 		rfpad = (tof == "FTOF")?(TOFCalibrationEngine.rfpadValues.getDoubleValue("rfpad", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.rfpadValues.getDoubleValue("rfpad", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
-	private void set_tw1() { //no dependence
+	private void setTw1() { //no dependence
 		tw1 = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
-	private void set_tw2() { //no dependence
+	private void setTw2() { //no dependence
 		tw2 = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
-	private void set_tw3() { //no dependence
+	private void setTw3() { //no dependence
 		tw3 = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw3", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
-	private void set_lamL() { //no dependence
+	private void setLamL() { //no dependence
 		lamL = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_left", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
-	private void set_tw1pos() { //no dependence
+	private void setTw1pos() { //no dependence
 		tw1pos = (tof == "FTOF")?(TOFCalibrationEngine.twposValues.getDoubleValue("tw1pos", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
-	private void set_tw2pos() { //no dependence
+	private void setTw2pos() { //no dependence
 		tw2pos = (tof == "FTOF")?(TOFCalibrationEngine.twposValues.getDoubleValue("tw2pos", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
-	private void set_lamR() { //no dependence
+	private void setLamR() { //no dependence
 		lamR = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_right", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
-	private void set_p2p() { //no dependence
+	private void setP2p() { //no dependence
 		p2p = (tof == "FTOF")?(TOFCalibrationEngine.p2pValues.getDoubleValue("paddle2paddle", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.p2pValues.getDoubleValue("paddle2paddle", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
-	private void set_mass() { //Particle_id
+	private void setMass() { //Particle_id
 		double mass = 0.0;
 		final double[] massList = { 0.13957, 0.938272, 0.000511 };
 		if (TOFCalibration.massAss == TOFCalibration.USE_PID) {
@@ -386,28 +386,28 @@ public class TOFPaddle {
 	private void set_beta() { //mass & P
 		beta = P/Math.sqrt(P*P+mass*mass);
 }
-	private void set_startTime() { //beta & averagehittime & Path_length
+	private void setStartTime() { //beta & averagehittime & Path_length
 		final double beta = (this.beta != 0.0)?this.beta:1.0;
 
 		final double startTime = averageHitTime - (PATH_LENGTH / (beta * 29.98));
 		this.startTime = startTime;
 }
-	private void set_startTimeNoTW() { //beta & averagehittimenotw & Path_length
+	private void setStartTimeNoTW() { //beta & averagehittimenotw & Path_length
 		final double beta = (this.beta != 0.0)?this.beta:1.0;
 
 		final double startTime = averageHitTimeNoTW - (PATH_LENGTH / (beta * 29.98));
 		startTimeNoTW = startTime;
 }
-	private void set_reconStartTime() { //beta & Path_length & Recon_time
+	private void setReconStartTime() { //beta & Path_length & Recon_time
 		final double beta = (this.beta != 0.0)?this.beta:1.0;
 
 		final double startTime = RECON_TIME - (PATH_LENGTH / (beta * 29.98));
 		reconStartTime = startTime;
 }
-	private void set_startTimeP2PCorr() { //starttime & rfpad & p2p
+	private void setStartTimeP2PCorr() { //starttime & rfpad & p2p
 		startTimeP2PCorr = startTime + rfpad + p2p;
 }
-	private void set_averageHitTimeNoTW() { //leftrightadjustment & tdctotimel & tdctotimer & veff & paddley & Length
+	private void setAverageHitTimeNoTW() { //leftrightadjustment & tdctotimel & tdctotimer & veff & paddley & Length
 		final double lr = leftRightAdjustment;
 		final double tL = tdcToTimeL - (lr / 2) - ((0.5 * LENGTH + paddleY) / veff);
 
@@ -415,7 +415,7 @@ public class TOFPaddle {
 
 		averageHitTimeNoTW = (tL + tR) / 2.0;
 }
-	private void set_averageHitTime() { //leftrightadjustment & timeleftaftertw & timerightaftertw & veff & paddley & Length
+	private void setAverageHitTime() { //leftrightadjustment & timeleftaftertw & timerightaftertw & veff & paddley & Length
 		final double lr = leftRightAdjustment;
 		final double tL = timeLeftAfterTW - (lr / 2) - ((0.5 * LENGTH + paddleY) / veff);
 
@@ -423,87 +423,87 @@ public class TOFPaddle {
 
 		averageHitTime = (tL + tR) / 2.0;
 }
-	private void set_vertexCorr() { //Vertex_z
+	private void setVertexCorr() { //Vertex_z
 		vertexCorr = (tof == "FTOF" && TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES)?
 		((VERTEX_Z - TOFCalibration.targetPos) / 29.98):0.0;
 }
-	private void set_refTime() { //starttime & vertexcorr & Rf_time
+	private void setRefTime() { //starttime & vertexcorr & Rf_time
 		refTime = RF_TIME - (startTime - vertexCorr);
 }
-	private void set_refTimeNoTW() { //starttimenotw & vertexcorr & Rf_time
+	private void setRefTimeNoTW() { //starttimenotw & vertexcorr & Rf_time
 		refTimeNoTW = RF_TIME - (startTimeNoTW - vertexCorr);
 }
-	private void set_refSTTime() { //starttime & vertexcorr & St_time
+	private void setRefSTTime() { //starttime & vertexcorr & St_time
 		refSTTime = ST_TIME - (startTime - vertexCorr);
 }
-	private void set_refTimeCorr() { //reftime & rfpad & twposcorr
+	private void setRefTimeCorr() { //reftime & rfpad & twposcorr
 		refTimeCorr = refTime - rfpad - TWPosCorr;
 }
-	private void set_refTimeRFCorr() { //reftime & rfpad
+	private void setRefTimeRFCorr() { //reftime & rfpad
 		refTimeRFCorr = refTime - rfpad;
 }
-	private void set_refTimeTWPosCorr() { //reftime & twposcorr
+	private void setRefTimeTWPosCorr() { //reftime & twposcorr
 		refTimeTWPosCorr = refTime - TWPosCorr;
 }
-	private void set_refSTTimeCorr() { //refsttime & rfpad & hposcorr & p2p
+	private void setRefSTTimeCorr() { //refsttime & rfpad & hposcorr & p2p
 		refSTTimeCorr = refSTTime - rfpad - HPosCorr - p2p;
 }
-	private void set_TimeCorr() { //averagehittime & rfpad & hposcorr & twposcorr & p2p
+	private void setTimeCorr() { //averagehittime & rfpad & hposcorr & twposcorr & p2p
 		TimeCorr = averageHitTime + rfpad + HPosCorr + TWPosCorr + p2p;
 }
-	private void set_refSTTimeRFCorr() { //refsttime & rfpad
+	private void setRefSTTimeRFCorr() { //refsttime & rfpad
 		refSTTimeRFCorr = refSTTime - rfpad;
 }
-	private void set_refSTTimeHPosCorr() { //refsttime & hposcorr
+	private void setRefSTTimeHPosCorr() { //refsttime & hposcorr
 		refSTTimeHPosCorr = refSTTime - HPosCorr;
 }
-	private void set_refSTTimeHPosFuncCorr() { //refsttime & rfpad & hposcorrfunc
+	private void setRefSTTimeHPosFuncCorr() { //refsttime & rfpad & hposcorrfunc
 		refSTTimeHPosFuncCorr = refSTTime - rfpad - HPosCorrFunc;
 }
-	private void set_refSTTimeHPosBinCorr() { //refsttime & rfpad & hposcorrbin
+	private void setRefSTTimeHPosBinCorr() { //refsttime & rfpad & hposcorrbin
 		refSTTimeHPosBinCorr = refSTTime - rfpad - HPosCorrBin;
 }
-	private void set_HPosCorr() { //hposcorrfunc & hposcorrbin
+	private void setHPosCorr() { //hposcorrfunc & hposcorrbin
 		HPosCorr = (tof=="CTOF")?(HPosCorrFunc + HPosCorrBin):0.0;
 }
-	private void set_HPosCorrFunc() { //paddley &hposa, b, c
+	private void setHPosCorrFunc() { //paddley &hposa, b, c
 		HPosCorrFunc = (tof=="CTOF")?(hposA*paddleY*paddleY+hposB*paddleY+hposC):0.0;
 }
-	private void set_HPosCorrBin() { //paddley
+	private void setHPosCorrBin() { //paddley
 		HPosCorrBin = (tof=="CTOF")?CTOFCalibrationEngine.hposBinValues.getItem(desc.getSector(), desc.getLayer(), desc.getComponent())[CtofHposBinEventListener.sliceNumber(paddleY)]:0.0;
 }
-	private void set_hposA() { //no dependence
+	private void setHposA() { //no dependence
 		hposA = (tof=="CTOF")?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposa", desc.getSector(), desc.getLayer(),
 		desc.getComponent()):0.0;
 }
-	private void set_hposB() { //no dependence
+	private void setHposB() { //no dependence
 		hposB = (tof=="CTOF")?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposb", desc.getSector(), desc.getLayer(),
 		desc.getComponent()):0.0;
 }
-	private void set_hposC() { //no dependence
+	private void setHposC() { //no dependence
 		hposC = (tof=="CTOF")?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposc", desc.getSector(), desc.getLayer(),
 		desc.getComponent()):0.0;
 }
-	private void set_TWPosCorr() { //paddley & tw1pos & tw2pos
+	private void setTWPosCorr() { //paddley & tw1pos & tw2pos
 		TWPosCorr = (tof=="FTOF")?(tw1pos*paddleY*paddleY + tw2pos*paddleY):0.0;
 }
-	private void set_timeLeftAfterTW() { //tdctimetol && twcorr
+	private void setTimeLeftAfterTW() { //tdctimetol && twcorr
 		timeLeftAfterTW = (tof == "FTOF")?(tdcToTimeL-TWCorr):tdcToTimeL;
 }
-	private void set_timeRightAfterTW() { //tdctimetor && twcorr
+	private void setTimeRightAfterTW() { //tdctimetor && twcorr
 		timeRightAfterTW = (tof == "FTOF")?(tdcToTimeR-TWCorr):tdcToTimeR;
 }
-	private void set_TWCorr() { //tw1 & 2 & 3 & eneregy
+	private void setTWCorr() { //tw1 & 2 & 3 & eneregy
 		TWCorr = tw1*Math.exp(tw2*energy) + tw3/energy;
 }
-	private void set_deltaTTW() { //twcorr (calculate with 0 offset and recalculate later if necessary)
+	private void setDeltaTTW() { //twcorr (calculate with 0 offset and recalculate later if necessary)
 		final double bb = TOFCalibrationEngine.BEAM_BUCKET;
 		deltaTTW = ((-refTimeNoTW - TWCorr/* + offset*/) + (1000 * bb) + (0.5 * bb)) % bb - 0.5 * bb;
 }
-	private void set_ctofCenter() { //no dependence
+	private void setCtofCenter() { //no dependence
 		ctofCenter = (this.getDescriptor().getComponent()%2==0)?(-8.5031 + TOFCalibration.targetPos):(-8.9874 + TOFCalibration.targetPos);
 }
-	private void set_energy() { //mips & thickness & Energy & Adcl & r
+	private void setEnergy() { //mips & thickness & Energy & Adcl & r
 		double energyCalc = ENERGY;
 		if(mips!=0) {
 			final double AdcToEConv = mips / (DEDX_MIP * thickness);
@@ -514,33 +514,33 @@ public class TOFPaddle {
 		}
 		energy = energyCalc;
 }
-	private void set_leftRight() { //timeleftaftertw & timerightaftertw
+	private void setLeftRight() { //timeleftaftertw & timerightaftertw
 		leftRight = timeLeftAfterTW - timeRightAfterTW;
 }
-	private void set_isValidLeftRight() { //tdctotimel & r
+	private void setIsValidLeftRight() { //tdctotimel & r
 		isValidLeftRight = (tdcToTimeL != tdcToTimeR);
 }
-	private void set_tdcToTimeL() { //tdcconvl & Tdcl & Jitter
+	private void setTdcToTimeL() { //tdcconvl & Tdcl & Jitter
 		tdcToTimeL = tdcConvL * TDCL  - JITTER;
 }
-	private void set_tdcToTimeR() { //tdcconvr & Tdcr & Jitter
+	private void setTdcToTimeR() { //tdcconvr & Tdcr & Jitter
 		tdcToTimeR = tdcConvR * TDCR  - JITTER;
 
 }
-	private void set_veffHalfTimeDiff() { //timeleftaftertw & timerightaftertw
+	private void setVeffHalfTimeDiff() { //timeleftaftertw & timerightaftertw
 		veffHalfTimeDiff = (timeLeftAfterTW - timeRightAfterTW) / 2;
 
 }
-	private void set_halfTimeDiff() { //timeleftaftertw & timerightaftertw & leftrightadjustment
+	private void setHalfTimeDiff() { //timeleftaftertw & timerightaftertw & leftrightadjustment
 		halfTimeDiff = (timeLeftAfterTW - timeRightAfterTW - leftRightAdjustment) / 2;
 }
-	private void set_leftRightAdjustment() { //no dependence
+	private void setLeftRightAdjustment() { //no dependence
 		leftRightAdjustment = ((tof == "FTOF")?(TOFCalibrationEngine.leftRightValues.getDoubleValue("left_right", desc.getSector(), desc.getLayer(), 		desc.getComponent())):(CTOFCalibrationEngine.leftRightValues.getDoubleValue("upstream_downstream", desc.getSector(), desc.getLayer(), desc.getComponent())));
 }
-	private void set_position() { //halftimediff & veff & ctofcenter
+	private void setPosition() { //halftimediff & veff & ctofcenter
 		position = halfTimeDiff * veff + ((tof == "CTOF")?ctofCenter:0.0);
 }
-	private void set_paddleY() { //no dependence
+	private void setPaddleY() { //no dependence
 		double y = 0.0;
 		if (tof == "FTOF") {
 			final int sector = desc.getSector();
@@ -551,10 +551,10 @@ public class TOFPaddle {
 		}
 		paddleY = y;
 }
-	private void set_trackFound() { //Track_id
+	private void setTrackFound() { //Track_id
 		trackFound = (TRACK_ID != -1);
 }
-	private void set_goodTrackFound() { //trackfound & chargematch & pidmatch & mass & Track_redchi2 & Vertex_z
+	private void setGoodTrackFound() { //trackfound & chargematch & pidmatch & mass & Track_redchi2 & Vertex_z
 		double maxRcs = 100.0;
 		double minV = -10.0;
 		double maxV = 10.0;
@@ -585,7 +585,7 @@ public class TOFPaddle {
 				&& pidMatch
 				&& mass != 0.0);
 }
-	private void set_pidMatch() { //Particle_id
+	private void setPidMatch() { //Particle_id
 		int selectedPid = 0;
 		if (getDescriptor().getLayer() == 3) {
 			selectedPid = TOFCalibration.trackPid2;
@@ -603,7 +603,7 @@ public class TOFPaddle {
 					(selectedPid==TOFCalibration.PID_LPI && (PARTICLE_ID==11 || PARTICLE_ID==-11)) ||
 					(selectedPid==TOFCalibration.PID_LPI && (PARTICLE_ID==211 || PARTICLE_ID==-211));
 }
-	private void set_chargeMatch() { //Charge
+	private void setChargeMatch() { //Charge
 		final int trackCharge = (tof == "FTOF")?TOFCalibration.trackCharge:CTOFCalibration.trackCharge;
 
 		chargeMatch = (trackCharge == TOFCalibration.TRACK_BOTH || trackCharge == TOFCalibration.TRACK_NEG && CHARGE == -1
@@ -611,78 +611,78 @@ public class TOFPaddle {
 }
 	
 
-	public void Init(){
+	public void init(){
 		if(isInit) return;
-		set_paddleNumber();
-		set_geometricMean();
-		set_thickness();
-		set_geometricMeanNorm();
-		set_logRatio();
-		set_isValidGeoMean();
-		set_includeInCalib();
-		set_includeInTiming();
-		set_includeInCTOFTiming();
-		set_isValidLogRatio();
-		set_mips();
-		set_veff();
-		set_tdcConvL();
-		set_tdcConvR();
-		set_rfpad();
-		set_tw1();
-		set_tw2();
-		set_tw3();
-		set_lamL();
-		set_tw1pos();
-		set_tw2pos();
-		set_lamR();
-		set_p2p();
-		set_mass();
+		setPaddleNumber();
+		setGeometricMean();
+		setThickness();
+		setGeometricMeanNorm();
+		setLogRatio();
+		setIsValidGeoMean();
+		setIncludeInCalib();
+		setIncludeInTiming();
+		setIncludeInCTOFTiming();
+		setIsValidLogRatio();
+		setMips();
+		setVeff();
+		setTdcConvL();
+		setTdcConvR();
+		setRfpad();
+		setTw1();
+		setTw2();
+		setTw3();
+		setLamL();
+		setTw1pos();
+		setTw2pos();
+		setLamR();
+		setP2p();
+		setMass();
 		set_beta();
-		set_reconStartTime();
-		set_vertexCorr();
-		set_leftRightAdjustment();
-		set_paddleY();
-		set_hposA();
-		set_hposB();
-		set_hposC();
-		set_ctofCenter();
-		set_trackFound();
-		set_pidMatch();
-		set_chargeMatch();
-		set_tdcToTimeL();
-		set_tdcToTimeR();
-		set_isValidLeftRight();
-		set_energy();
-		set_TWCorr();
-		set_deltaTTW();
-		set_timeLeftAfterTW();
-		set_timeRightAfterTW();
-		set_leftRight();
-		set_averageHitTime();
-		set_startTime();
-		set_refTime();
-		set_refSTTime();
-		set_averageHitTimeNoTW();
-		set_startTimeNoTW();
-		set_refTimeNoTW();
-		set_startTimeP2PCorr();
-		set_TWPosCorr();
-		set_refTimeCorr();
-		set_refTimeRFCorr();
-		set_refTimeTWPosCorr();
-		set_HPosCorrFunc();
-		set_HPosCorrBin();
-		set_HPosCorr();
-		set_refSTTimeCorr();
-		set_TimeCorr();
-		set_refSTTimeRFCorr();
-		set_refSTTimeHPosCorr();
-		set_refSTTimeHPosFuncCorr();
-		set_refSTTimeHPosBinCorr();
-		set_veffHalfTimeDiff();
-		set_halfTimeDiff();
-		set_position();
-		set_goodTrackFound();
+		setReconStartTime();
+		setVertexCorr();
+		setLeftRightAdjustment();
+		setPaddleY();
+		setHposA();
+		setHposB();
+		setHposC();
+		setCtofCenter();
+		setTrackFound();
+		setPidMatch();
+		setChargeMatch();
+		setTdcToTimeL();
+		setTdcToTimeR();
+		setIsValidLeftRight();
+		setEnergy();
+		setTWCorr();
+		setDeltaTTW();
+		setTimeLeftAfterTW();
+		setTimeRightAfterTW();
+		setLeftRight();
+		setAverageHitTime();
+		setStartTime();
+		setRefTime();
+		setRefSTTime();
+		setAverageHitTimeNoTW();
+		setStartTimeNoTW();
+		setRefTimeNoTW();
+		setStartTimeP2PCorr();
+		setTWPosCorr();
+		setRefTimeCorr();
+		setRefTimeRFCorr();
+		setRefTimeTWPosCorr();
+		setHPosCorrFunc();
+		setHPosCorrBin();
+		setHPosCorr();
+		setRefSTTimeCorr();
+		setTimeCorr();
+		setRefSTTimeRFCorr();
+		setRefSTTimeHPosCorr();
+		setRefSTTimeHPosFuncCorr();
+		setRefSTTimeHPosBinCorr();
+		setVeffHalfTimeDiff();
+		setHalfTimeDiff();
+		setPosition();
+		setGoodTrackFound();
 		isInit = true;
 	}
 
@@ -782,7 +782,7 @@ public class TOFPaddle {
 
 	public boolean includeInCalib() {
 		if (!isInit) {
-			set_includeInCalib();
+			setIncludeInCalib();
 		}
 		return includeInCalib;
 	}
@@ -1080,9 +1080,9 @@ public class TOFPaddle {
     public double energy() {
 		if (!isInit) {
 			//Init();
-			set_mips();
-			set_thickness();
-			set_energy();
+			setMips();
+			setThickness();
+			setEnergy();
 		}
 		return energy;
     }

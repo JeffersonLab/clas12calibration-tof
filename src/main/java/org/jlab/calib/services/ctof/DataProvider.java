@@ -274,7 +274,7 @@ public class DataProvider {
 
 								// System.out.println("Adding paddle to list");
 								if (paddle.includeInCalib()) {
-									paddle.Init();
+									paddle.init();
 									paddleList.add(paddle);
 									if (test)
 										paddle.show();
@@ -373,7 +373,7 @@ public class DataProvider {
 								paddle.setADC_TIMEL(adcTimeL);
 								paddle.setADC_TIMER(adcTimeR);
 
-								paddle.Init();
+								paddle.init();
 
 								// if (paddle.includeInCalib()) {
 
