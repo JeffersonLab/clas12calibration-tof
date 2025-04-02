@@ -53,7 +53,9 @@ import org.jlab.utils.groups.IndexedList;
 public class TOFCalibration
 		implements IDataEventListener, ActionListener, CalibrationConstantsListener, DetectorListener, ChangeListener {
 
-	// main panel
+        public static DetectorType TYPE = DetectorType.FTOF;
+
+        // main panel
 	JPanel pane = null;
 	JFrame innerConfigFrame = new JFrame("Configure FTOF calibration settings");
 	JDialog configFrame = new JDialog(innerConfigFrame, "Configure FTOF calibration settings");
@@ -191,8 +193,6 @@ public class TOFCalibration
 	public final static PrintStream oldStdout = System.out;
 
 	public TOFCalibration() {
-
-		TOFPaddle.tof = "FTOF";
 	
 		GStyle.getAxisAttributesX().setLabelFontName("Avenir");
 		GStyle.getAxisAttributesY().setLabelFontName("Avenir");
@@ -569,7 +569,7 @@ public class TOFCalibration
 
 	private void writeFiles() {
 
-		TofTimingOptionsPanel panel = new TofTimingOptionsPanel();
+		TofTimingOptionsPanel panel = new TofTimingOptionsPanel(TYPE);
 		int result = JOptionPane.showConfirmDialog(null, panel, "Choose file output options",
 				JOptionPane.OK_CANCEL_OPTION);
 

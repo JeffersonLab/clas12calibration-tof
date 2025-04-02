@@ -4,6 +4,7 @@ import org.jlab.calib.services.ctof.CTOFCalibration;
 import org.jlab.calib.services.ctof.CTOFCalibrationEngine;
 import org.jlab.calib.services.ctof.CtofHposBinEventListener;
 import org.jlab.detector.base.DetectorDescriptor;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
  
@@ -13,15 +14,12 @@ import org.jlab.detector.calib.utils.DatabaseConstantProvider;
  */
 public class TOFPaddle {
 
-	private static final int LEFT = 0;
-	private static final int RIGHT = 1;
-	public static String tof = "FTOF";
 	public static CalibrationConstants jitConsts = null;   
 	public static CalibrationConstants lgtConsts = null;   
         public static DatabaseConstantProvider dcp = null;
         public static int currentRun = 0;
 
-	private DetectorDescriptor desc = new DetectorDescriptor();
+	private final DetectorDescriptor desc = new DetectorDescriptor(TOFCalibration.TYPE);
 
 	private int ADCL = 0;
 	private int ADCR = 0;
@@ -281,7 +279,7 @@ public class TOFPaddle {
 }
 	private void setThickness() { //no dependence
 		double t = 0.0;
-		if (tof=="FTOF") {
+		if (this.desc.getType()==DetectorType.FTOF) {
 			t = 5.08;
 			if (this.getDescriptor().getLayer() == 2) {
 				t = 6.0;
@@ -323,43 +321,43 @@ public class TOFPaddle {
 	private void setMips() { //no dependence
 		// take from target MIP channel for CTOF
 
-		mips = (tof == "FTOF")?(TOFCalibrationEngine.gainValues.getDoubleValue("mipa_left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibration.expectedMipChannel);
+		mips = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.gainValues.getDoubleValue("mipa_left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibration.expectedMipChannel);
 }
 	private void setVeff() { //no dependence
-		veff = (tof == "FTOF")?(TOFCalibrationEngine.veffValues.getDoubleValue("veff_left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.veffValues.getDoubleValue("veff_upstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
+		veff = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.veffValues.getDoubleValue("veff_left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.veffValues.getDoubleValue("veff_upstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
 	private void setTdcConvL() { //no dependence
-		tdcConvL = (tof == "FTOF")?(TOFCalibrationEngine.convValues.getDoubleValue("left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.convValues.getDoubleValue("upstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
+		tdcConvL = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.convValues.getDoubleValue("left", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.convValues.getDoubleValue("upstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
 	private void setTdcConvR() { //no dependence
-		tdcConvR = (tof == "FTOF")?(TOFCalibrationEngine.convValues.getDoubleValue("right", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.convValues.getDoubleValue("downstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
+		tdcConvR = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.convValues.getDoubleValue("right", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.convValues.getDoubleValue("downstream", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
 	private void setRfpad() { //no dependence
-		rfpad = (tof == "FTOF")?(TOFCalibrationEngine.rfpadValues.getDoubleValue("rfpad", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.rfpadValues.getDoubleValue("rfpad", desc.getSector(), desc.getLayer(), desc.getComponent()));
+		rfpad = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.rfpadValues.getDoubleValue("rfpad", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.rfpadValues.getDoubleValue("rfpad", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
 	private void setTw1() { //no dependence
-		tw1 = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
+		tw1 = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw1", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
 	private void setTw2() { //no dependence
-		tw2 = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
+		tw2 = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw2", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
 	private void setTw3() { //no dependence
-		tw3 = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw3", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
+		tw3 = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw3", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
 	private void setLamL() { //no dependence
-		lamL = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_left", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
+		lamL = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_left", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
 	private void setTw1pos() { //no dependence
-		tw1pos = (tof == "FTOF")?(TOFCalibrationEngine.twposValues.getDoubleValue("tw1pos", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
+		tw1pos = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.twposValues.getDoubleValue("tw1pos", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
 	private void setTw2pos() { //no dependence
-		tw2pos = (tof == "FTOF")?(TOFCalibrationEngine.twposValues.getDoubleValue("tw2pos", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
+		tw2pos = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.twposValues.getDoubleValue("tw2pos", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
 	private void setLamR() { //no dependence
-		lamR = (tof == "FTOF")?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_right", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
+		lamR = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.timeWalkValues.getDoubleValue("tw0_right", desc.getSector(), desc.getLayer(), desc.getComponent())):0.0;
 }
 	private void setP2p() { //no dependence
-		p2p = (tof == "FTOF")?(TOFCalibrationEngine.p2pValues.getDoubleValue("paddle2paddle", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.p2pValues.getDoubleValue("paddle2paddle", desc.getSector(), desc.getLayer(), desc.getComponent()));
+		p2p = (this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.p2pValues.getDoubleValue("paddle2paddle", desc.getSector(), desc.getLayer(), desc.getComponent())):(CTOFCalibrationEngine.p2pValues.getDoubleValue("paddle2paddle", desc.getSector(), desc.getLayer(), desc.getComponent()));
 }
 	private void setMass() { //Particle_id
 		double mass = 0.0;
@@ -424,7 +422,7 @@ public class TOFPaddle {
 		averageHitTime = (tL + tR) / 2.0;
 }
 	private void setVertexCorr() { //Vertex_z
-		vertexCorr = (tof == "FTOF" && TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES)?
+		vertexCorr = (this.desc.getType() == DetectorType.FTOF && TOFCalibration.vertexCorr == TOFCalibration.VERTEX_CORR_YES)?
 		((VERTEX_Z - TOFCalibration.targetPos) / 29.98):0.0;
 }
 	private void setRefTime() { //starttime & vertexcorr & Rf_time
@@ -464,34 +462,34 @@ public class TOFPaddle {
 		refSTTimeHPosBinCorr = refSTTime - rfpad - HPosCorrBin;
 }
 	private void setHPosCorr() { //hposcorrfunc & hposcorrbin
-		HPosCorr = (tof=="CTOF")?(HPosCorrFunc + HPosCorrBin):0.0;
+		HPosCorr = (this.desc.getType()==DetectorType.CTOF)?(HPosCorrFunc + HPosCorrBin):0.0;
 }
 	private void setHPosCorrFunc() { //paddley &hposa, b, c
-		HPosCorrFunc = (tof=="CTOF")?(hposA*paddleY*paddleY+hposB*paddleY+hposC):0.0;
+		HPosCorrFunc = (this.desc.getType()==DetectorType.CTOF)?(hposA*paddleY*paddleY+hposB*paddleY+hposC):0.0;
 }
 	private void setHPosCorrBin() { //paddley
-		HPosCorrBin = (tof=="CTOF")?CTOFCalibrationEngine.hposBinValues.getItem(desc.getSector(), desc.getLayer(), desc.getComponent())[CtofHposBinEventListener.sliceNumber(paddleY)]:0.0;
+		HPosCorrBin = (this.desc.getType()==DetectorType.CTOF)?CTOFCalibrationEngine.hposBinValues.getItem(desc.getSector(), desc.getLayer(), desc.getComponent())[CtofHposBinEventListener.sliceNumber(paddleY)]:0.0;
 }
 	private void setHposA() { //no dependence
-		hposA = (tof=="CTOF")?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposa", desc.getSector(), desc.getLayer(),
+		hposA = (this.desc.getType()==DetectorType.CTOF)?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposa", desc.getSector(), desc.getLayer(),
 		desc.getComponent()):0.0;
 }
 	private void setHposB() { //no dependence
-		hposB = (tof=="CTOF")?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposb", desc.getSector(), desc.getLayer(),
+		hposB = (this.desc.getType()==DetectorType.CTOF)?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposb", desc.getSector(), desc.getLayer(),
 		desc.getComponent()):0.0;
 }
 	private void setHposC() { //no dependence
-		hposC = (tof=="CTOF")?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposc", desc.getSector(), desc.getLayer(),
+		hposC = (this.desc.getType()==DetectorType.CTOF)?CTOFCalibrationEngine.hposFuncValues.getDoubleValue("hposc", desc.getSector(), desc.getLayer(),
 		desc.getComponent()):0.0;
 }
 	private void setTWPosCorr() { //paddley & tw1pos & tw2pos
-		TWPosCorr = (tof=="FTOF")?(tw1pos*paddleY*paddleY + tw2pos*paddleY):0.0;
+		TWPosCorr = (this.desc.getType()==DetectorType.FTOF)?(tw1pos*paddleY*paddleY + tw2pos*paddleY):0.0;
 }
 	private void setTimeLeftAfterTW() { //tdctimetol && twcorr
-		timeLeftAfterTW = (tof == "FTOF")?(tdcToTimeL-TWCorr):tdcToTimeL;
+		timeLeftAfterTW = (this.desc.getType() == DetectorType.FTOF)?(tdcToTimeL-TWCorr):tdcToTimeL;
 }
 	private void setTimeRightAfterTW() { //tdctimetor && twcorr
-		timeRightAfterTW = (tof == "FTOF")?(tdcToTimeR-TWCorr):tdcToTimeR;
+		timeRightAfterTW = (this.desc.getType() == DetectorType.FTOF)?(tdcToTimeR-TWCorr):tdcToTimeR;
 }
 	private void setTWCorr() { //tw1 & 2 & 3 & eneregy
 		TWCorr = tw1*Math.exp(tw2*energy) + tw3/energy;
@@ -535,14 +533,14 @@ public class TOFPaddle {
 		halfTimeDiff = (timeLeftAfterTW - timeRightAfterTW - leftRightAdjustment) / 2;
 }
 	private void setLeftRightAdjustment() { //no dependence
-		leftRightAdjustment = ((tof == "FTOF")?(TOFCalibrationEngine.leftRightValues.getDoubleValue("left_right", desc.getSector(), desc.getLayer(), 		desc.getComponent())):(CTOFCalibrationEngine.leftRightValues.getDoubleValue("upstream_downstream", desc.getSector(), desc.getLayer(), desc.getComponent())));
+		leftRightAdjustment = ((this.desc.getType() == DetectorType.FTOF)?(TOFCalibrationEngine.leftRightValues.getDoubleValue("left_right", desc.getSector(), desc.getLayer(), 		desc.getComponent())):(CTOFCalibrationEngine.leftRightValues.getDoubleValue("upstream_downstream", desc.getSector(), desc.getLayer(), desc.getComponent())));
 }
 	private void setPosition() { //halftimediff & veff & ctofcenter
-		position = halfTimeDiff * veff + ((tof == "CTOF")?ctofCenter:0.0);
+		position = halfTimeDiff * veff + ((this.desc.getType() == DetectorType.CTOF)?ctofCenter:0.0);
 }
 	private void setPaddleY() { //no dependence
 		double y = 0.0;
-		if (tof == "FTOF") {
+		if (this.desc.getType() == DetectorType.FTOF) {
 			final int sector = desc.getSector();
 			final double rotation = Math.toRadians((sector - 1) * 60);
 			y = YPOS * Math.cos(rotation) - XPOS * Math.sin(rotation);
@@ -560,7 +558,7 @@ public class TOFPaddle {
 		double maxV = 10.0;
 		double minP = 0.0;
 		double maxP = 9.0;
-		if (tof == "FTOF") {
+		if (this.desc.getType() == DetectorType.FTOF) {
 			if (getDescriptor().getLayer() == 3) {
 				maxRcs = TOFCalibration.maxRcs2;
 			}
@@ -604,7 +602,7 @@ public class TOFPaddle {
 					(selectedPid==TOFCalibration.PID_LPI && (PARTICLE_ID==211 || PARTICLE_ID==-211));
 }
 	private void setChargeMatch() { //Charge
-		final int trackCharge = (tof == "FTOF")?TOFCalibration.trackCharge:CTOFCalibration.trackCharge;
+		final int trackCharge = (this.desc.getType() == DetectorType.FTOF)?TOFCalibration.trackCharge:CTOFCalibration.trackCharge;
 
 		chargeMatch = (trackCharge == TOFCalibration.TRACK_BOTH || trackCharge == TOFCalibration.TRACK_NEG && CHARGE == -1
 				|| trackCharge == TOFCalibration.TRACK_POS && CHARGE == 1);
@@ -700,7 +698,7 @@ public class TOFPaddle {
             
             if (RUN != currentRun && RUN!=0) {
                 dcp = new DatabaseConstantProvider(RUN, "default");
-                if (tof == "FTOF") {
+                if (this.desc.getType() == DetectorType.FTOF) {
                     jitConsts = dcp.readConstants("/calibration/ftof/time_jitter");
                     dcp.loadTable("/geometry/ftof/panel1a/paddles");        
                     dcp.loadTable("/geometry/ftof/panel1b/paddles");
@@ -716,7 +714,7 @@ public class TOFPaddle {
             }
             
             
-            if (tof == "FTOF") {
+            if (this.desc.getType() == DetectorType.FTOF) {
                 if(dcp != null) {
                     if(this.getDescriptor().getLayer() == 1) {
                        this.LENGTH = dcp.getDouble("/geometry/ftof/panel1a/paddles/Length", this.getDescriptor().getComponent()-1);
@@ -1052,7 +1050,7 @@ public class TOFPaddle {
 //		double len = 0.0;
 //		int paddle = this.getDescriptor().getComponent();
 //
-//		if (tof == "FTOF") {
+//		if (this.desc.getType() == DetectorType.FTOF) {
 //			int layer = this.getDescriptor().getLayer();
 //			
 //			if (layer == 1 && paddle <= 5) {

@@ -11,6 +11,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import org.jlab.detector.base.DetectorType;
 
 public class TofTimingOptionsPanel extends JPanel implements ActionListener {
 
@@ -23,7 +24,7 @@ public class TofTimingOptionsPanel extends JPanel implements ActionListener {
 	JRadioButton[]   stepRadiosPrev = {new JRadioButton(), new JRadioButton(), new JRadioButton(), new JRadioButton(), new JRadioButton()};
 	JRadioButton[]   stepRadiosNew = {new JRadioButton(), new JRadioButton(), new JRadioButton(), new JRadioButton(), new JRadioButton()};
 
-	public TofTimingOptionsPanel(){
+	public TofTimingOptionsPanel(DetectorType type){
 
 		this.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -38,7 +39,7 @@ public class TofTimingOptionsPanel extends JPanel implements ActionListener {
 
 		String[] stepNames = {"Left Right","RF Paddle","P2P"};
 		int numSteps = 3;
-		if (TOFPaddle.tof == "CTOF") {
+		if (type==DetectorType.CTOF) {
 			stepNames[0] = "Up Down";
 			numSteps = 3;
 		}

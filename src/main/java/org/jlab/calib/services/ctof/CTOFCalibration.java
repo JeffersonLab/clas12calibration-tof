@@ -1,18 +1,12 @@
 package org.jlab.calib.services.ctof;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dialog.ModalityType;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -21,57 +15,39 @@ import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelEvent;
 
 import org.jlab.calib.services.TOFCalibration;
-import org.jlab.calib.services.TOFCustomFitPanel;
 import org.jlab.calib.services.TOFPaddle;
-import org.jlab.calib.services.TofCheckEventListener;
-import org.jlab.calib.services.TofFadcEventListener;
-import org.jlab.calib.services.TofPrevConfigPanel;
 import org.jlab.calib.services.TofTimingOptionsPanel;
 import org.jlab.calib.services.configButtonPanel;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.calib.tasks.CalibrationEngine;
-import org.jlab.detector.calib.tasks.CalibrationEngineView;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.CalibrationConstantsListener;
 import org.jlab.detector.calib.utils.CalibrationConstantsView;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.view.DetectorListener;
 import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
 import org.jlab.groot.base.GStyle;
-import org.jlab.groot.data.H1F;
-import org.jlab.groot.data.H2F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.group.DataGroup;
-import org.jlab.groot.math.F1D;
-import org.jlab.groot.ui.TCanvas;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
 import org.jlab.io.task.DataSourceProcessorPane;
@@ -81,7 +57,9 @@ import org.jlab.utils.groups.IndexedList;
 public class CTOFCalibration
 		implements IDataEventListener, ActionListener, CalibrationConstantsListener, DetectorListener, ChangeListener {
 
-	// main panel
+        public static DetectorType TYPE = DetectorType.CTOF;
+	
+        // main panel
 	JPanel pane = null;
 	JFrame innerConfigFrame = new JFrame("Configure CTOF calibration settings");
 	JDialog configFrame = new JDialog(innerConfigFrame, "Configure CTOF calibration settings");
@@ -205,8 +183,6 @@ public class CTOFCalibration
 	public final static PrintStream oldStdout = System.out;
 
 	public CTOFCalibration() {
-
-		TOFPaddle.tof = "CTOF";
 
 		GStyle.getAxisAttributesX().setLabelFontName("Avenir");
 		GStyle.getAxisAttributesY().setLabelFontName("Avenir");
@@ -574,7 +550,7 @@ public class CTOFCalibration
 
 	private void writeFiles() {
 
-		TofTimingOptionsPanel panel = new TofTimingOptionsPanel();
+		TofTimingOptionsPanel panel = new TofTimingOptionsPanel(TYPE);
 		int result = JOptionPane.showConfirmDialog(null, panel, "Choose time offsets", JOptionPane.OK_CANCEL_OPTION);
 
 		if (result == JOptionPane.OK_OPTION) {

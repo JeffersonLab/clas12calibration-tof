@@ -3,7 +3,6 @@ package org.jlab.calib.services;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.io.base.DataBank;
-//import org.jlab.calib.temp.DataGroup;
 import org.jlab.io.base.DataEvent;
 
 /**
@@ -17,7 +16,8 @@ public class DataProvider {
 	public static void setOutput(boolean outputOn) {
 		if (outputOn) {
 			System.setOut(TOFCalibration.oldStdout);
-		} else {
+		} 
+                else {
 			System.setOut(new java.io.PrintStream(
 					new java.io.OutputStream() {
 						public void write(int b) {
@@ -123,8 +123,7 @@ public class DataProvider {
 			}
 		}
 		
-		// Only continue if we have calib banks
-		if (!event.hasBank("FTOF::calib") || !event.hasBank("RUN::config")) {
+		if (!event.hasBank("RUN::config")) {
 			return paddleList;
 		}
 
@@ -134,11 +133,9 @@ public class DataProvider {
                 long timeStamp  = configBank.getLong("timestamp", 0);
 
                 // iterate through hits bank getting corresponding adc and tdc
-		if (event.hasBank("FTOF::calib") && event.hasBank("REC::Event") && event.hasBank("RUN::config")) {
-
-                        DataBank eventBank = event.getBank("REC::Event");
-					double trf = eventBank.getFloat("RFTime",0);
-			DataBank  hitsBank = event.getBank("FTOF::calib");
+		if (event.hasBank("FTOF::calib")) {
+                    
+                        DataBank  hitsBank = event.getBank("FTOF::calib");
                 
                         for (int hitIndex=0; hitIndex<hitsBank.rows(); hitIndex++) {
 
@@ -167,18 +164,24 @@ public class DataProvider {
 						
 				//System.out.println("Paddle created "+paddle.getDescriptor().getSector()+paddle.getDescriptor().getLayer()+paddle.getDescriptor().getComponent());
 
-                                paddle.setPATH_LENGTH(hitsBank.getFloat("pathLength", hitIndex));
-                                paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
-                                paddle.setRF_TIME(trf);
+                                if (paddle.energy()>TOFCalibration.minE  && event.hasBank("REC::Event")) {
 
-                                paddle.setP(hitsBank.getFloat("p", hitIndex));
-                                paddle.setTRACK_ID(hitsBank.getInt("trackid", hitIndex));
-                                paddle.setVERTEX_Z(hitsBank.getFloat("vz", hitIndex));
-                                paddle.setPARTICLE_ID(hitsBank.getInt("pid", hitIndex));
-                                paddle.setCHARGE(hitsBank.getByte("charge", hitIndex));
+                                        DataBank eventBank = event.getBank("REC::Event");
+                                        double trf = eventBank.getFloat("RFTime",0);
 
-                                if (TOFCalibration.maxRcs != 0.0) {
-                                        paddle.setTRACK_REDCHI2(hitsBank.getFloat("chi2", hitIndex)/hitsBank.getShort("NDF", hitIndex));
+                                        paddle.setPATH_LENGTH(hitsBank.getFloat("pathLength", hitIndex));
+                                        paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
+                                        paddle.setRF_TIME(trf);
+
+                                        paddle.setP(hitsBank.getFloat("p", hitIndex));
+                                        paddle.setTRACK_ID(hitsBank.getInt("trackid", hitIndex));
+                                        paddle.setVERTEX_Z(hitsBank.getFloat("vz", hitIndex));
+                                        paddle.setPARTICLE_ID(hitsBank.getInt("pid", hitIndex));
+                                        paddle.setCHARGE(hitsBank.getByte("charge", hitIndex));
+
+                                        if (TOFCalibration.maxRcs != 0.0) {
+                                                paddle.setTRACK_REDCHI2(hitsBank.getFloat("chi2", hitIndex)/hitsBank.getShort("NDF", hitIndex));
+                                        }
                                 }
 	
                                 if (paddle.includeInCalib()) {
