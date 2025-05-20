@@ -181,15 +181,15 @@ public class DataProvider {
 
                                         if (TOFCalibration.maxRcs != 0.0) {
                                                 paddle.setTRACK_REDCHI2(hitsBank.getFloat("chi2", hitIndex)/hitsBank.getShort("NDF", hitIndex));
+                                        }	
+                                        
+                                        if (paddle.includeInCalib()) {
+                                                paddle.init();
+                                                paddleList.add(paddle);
+                                                if (test) {
+                                                        paddle.show();
+                                                }
                                         }
-                                }
-	
-                                if (paddle.includeInCalib()) {
-					paddle.init();
-                                        paddleList.add(paddle);
-					if (test) {
-						paddle.show();
-					}
 				}
 				
                         }

@@ -270,13 +270,16 @@ public class TOFPaddle {
 
 		final int p = component + (sector - 1) * 90 + paddleOffset[layer];
 		paddleNumber=p;
-}
-	private void setGeometricMean() { //Adcl & r
+        }
+	
+        private void setGeometricMean() { //Adcl & r
 		geometricMean = Math.sqrt(ADCL * ADCR);			
-}
-	private void setGeometricMeanNorm() { //geometricmean & thickness & Path_length_bar
+        }
+	
+        private void setGeometricMeanNorm() { //geometricmean & thickness & Path_length_bar
 		geometricMeanNorm = geometricMean * (thickness/PATH_LENGTH_BAR);
-}
+        }
+        
 	private void setThickness() { //no dependence
 		double t = 0.0;
 		if (this.desc.getType()==DetectorType.FTOF) {
