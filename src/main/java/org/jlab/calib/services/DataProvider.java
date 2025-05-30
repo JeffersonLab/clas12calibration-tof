@@ -203,7 +203,13 @@ public class DataProvider {
 
 					// Identify electrons and store path length etc for time walk
 					int trkId = hitsBank.getShort("trackid", hitIndex);
-
+                                        int trkrow=-1;
+                                        for(int it=0; it<tbtBank.rows(); it++) {
+                                            if(tbtBank.getInt("id",it)==trkId) {
+                                                trkrow=it;
+                                                break;
+                                            }
+                                        }
 					// System.out.println("trkId energy trf "+trkId+" "+energy+" "+trf);
 
 					// only use hit with associated track and a minimum energy
@@ -229,31 +235,31 @@ public class DataProvider {
 
 						if (paddle.energy() > TOFCalibration.minE) {
 
-							double c3x = tbtBank.getFloat("c3_x", trkId - 1);
-							double c3y = tbtBank.getFloat("c3_y", trkId - 1);
-							double c3z = tbtBank.getFloat("c3_z", trkId - 1);
-							double path = tbtBank.getFloat("pathlength", trkId - 1) + Math
+							double c3x = tbtBank.getFloat("c3_x", trkrow);
+							double c3y = tbtBank.getFloat("c3_y", trkrow);
+							double c3z = tbtBank.getFloat("c3_z", trkrow);
+							double path = tbtBank.getFloat("pathlength", trkrow) + Math
 									.sqrt((tx - c3x) * (tx - c3x) + (ty - c3y) * (ty - c3y) + (tz - c3z) * (tz - c3z));
 							paddle.setPATH_LENGTH(path);
 							paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
 							paddle.setRF_TIME(trf);
 
 							// Get the momentum and record the beta using the mass assumption
-							double px = tbtBank.getFloat("p0_x", trkId - 1);
-							double py = tbtBank.getFloat("p0_y", trkId - 1);
-							double pz = tbtBank.getFloat("p0_z", trkId - 1);
+							double px = tbtBank.getFloat("p0_x", trkrow);
+							double py = tbtBank.getFloat("p0_y", trkrow);
+							double pz = tbtBank.getFloat("p0_z", trkrow);
 							double mom = Math.sqrt(px * px + py * py + pz * pz);
 							// double mass = massList[TOFCalibration.massAss];
 							// double beta = mom/Math.sqrt(mom*mom+mass*mass);
 							// paddle.BETA = beta;
 							paddle.setP(mom);
 							paddle.setTRACK_ID(trkId);
-							paddle.setVERTEX_Z(tbtBank.getFloat("Vtx0_z", trkId - 1));
-							paddle.setCHARGE(tbtBank.getInt("q", trkId - 1));
+							paddle.setVERTEX_Z(tbtBank.getFloat("Vtx0_z", trkrow));
+							paddle.setCHARGE(tbtBank.getInt("q", trkrow));
 
 							if (TOFCalibration.maxRcs != 0.0) {
 								paddle.setTRACK_REDCHI2(
-										tbtBank.getFloat("chi2", trkId - 1) / tbtBank.getShort("ndf", trkId - 1));
+										tbtBank.getFloat("chi2", trkrow) / tbtBank.getShort("ndf", trkrow));
 							} else {
 								paddle.setTRACK_REDCHI2(-1.0);
 							}
@@ -297,7 +303,7 @@ public class DataProvider {
 								DataBank recSciBank = event.getBank("REC::Scintillator");
 								int pIdx = -1;
 								for (int i = 0; i < recTrkBank.rows(); i++) {
-									if (recTrkBank.getShort("index", i) == trkId - 1) {
+									if (recTrkBank.getShort("index", i) == trkrow && recTrkBank.getByte("detector", i)==DetectorType.DC.getDetectorId()) {
 										pIdx = recTrkBank.getShort("pindex", i);
 										break;
 									}

@@ -654,7 +654,6 @@ public class TOFPaddle {
 		set_isValidLeftRight();
 		set_energy();
 		set_TWCorr();
-		set_deltaTTW();
 		set_timeLeftAfterTW();
 		set_timeRightAfterTW();
 		set_leftRight();
@@ -665,6 +664,7 @@ public class TOFPaddle {
 		set_averageHitTimeNoTW();
 		set_startTimeNoTW();
 		set_refTimeNoTW();
+		set_deltaTTW();
 		set_startTimeP2PCorr();
 		set_TWPosCorr();
 		set_refTimeCorr();
