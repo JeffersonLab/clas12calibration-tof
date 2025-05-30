@@ -39,7 +39,7 @@ public class TOFPaddle {
 	private double P = 0.0;
 	private int TRACK_ID = -1;
 	private double VERTEX_Z = 0.0;
-	private double TRACK_REDCHI2 = 0.0;
+	private double TRACK_REDCHI2 = -1.0;
 	private int CHARGE = 0;
 	private double RF_TIME = 124.25;
 	private double ST_TIME = -1000.0;
