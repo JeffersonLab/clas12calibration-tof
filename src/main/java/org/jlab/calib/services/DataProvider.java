@@ -190,10 +190,10 @@ public class DataProvider {
                                                         paddle.show();
                                                 }
                                         }
-				}
-				
-                        }
-		}
+							}
+
+							}
+							}
 		else if(event.hasBank("FTOF::adc") && event.hasBank("FTOF::tdc") ) {
 			// no hits bank, so just use adc and tdc
 
