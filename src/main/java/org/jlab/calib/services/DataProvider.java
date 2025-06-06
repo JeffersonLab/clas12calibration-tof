@@ -173,7 +173,9 @@ public class DataProvider {
                                         paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
                                         paddle.setRF_TIME(trf);
 
-                                        paddle.setP(hitsBank.getFloat("p", hitIndex));
+                                        paddle.setP(Math.sqrt(Math.pow(hitsBank.getFloat("px", hitIndex),2)+
+                                                              Math.pow(hitsBank.getFloat("py", hitIndex),2)+
+                                                              Math.pow(hitsBank.getFloat("pz", hitIndex),2)));
                                         paddle.setTRACK_ID(hitsBank.getInt("trackid", hitIndex));
                                         paddle.setVERTEX_Z(hitsBank.getFloat("vz", hitIndex));
                                         paddle.setPARTICLE_ID(hitsBank.getInt("pid", hitIndex));
