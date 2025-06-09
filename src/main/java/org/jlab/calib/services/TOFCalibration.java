@@ -222,6 +222,7 @@ public class TOFCalibration
 		GStyle.getAxisAttributesZ().setTitleFontName("Avenir");
 		GStyle.setGraphicsFrameLineWidth(1);
 		GStyle.getH1FAttributes().setLineWidth(1);
+                GStyle.getH1FAttributes().setOptStat("111111");
 
 		configFrame.setModalityType(ModalityType.APPLICATION_MODAL);
 		configure();
