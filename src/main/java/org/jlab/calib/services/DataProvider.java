@@ -240,7 +240,7 @@ public class DataProvider {
 							double c3z = tbtBank.getFloat("c3_z", trkrow);
 							double path = tbtBank.getFloat("pathlength", trkrow) + Math
 									.sqrt((tx - c3x) * (tx - c3x) + (ty - c3y) * (ty - c3y) + (tz - c3z) * (tz - c3z));
-							paddle.setPATH_LENGTH(path);
+							paddle.setPATH_LENGTH(0);
 							paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
 							paddle.setRF_TIME(trf);
 
@@ -301,7 +301,10 @@ public class DataProvider {
 
 								DataBank recTrkBank = event.getBank("REC::Track");
 								DataBank recSciBank = event.getBank("REC::Scintillator");
-								int pIdx = -1;
+								DataBank recParBank = event.getBank("REC::Particle");
+								if(recParBank.getInt("pid", 0)!=11 || ((int) (Math.abs(recParBank.getShort("status", 0))/1000))!=2)
+                                                                        continue;
+                                                                int pIdx = -1;
 								for (int i = 0; i < recTrkBank.rows(); i++) {
 									if (recTrkBank.getShort("index", i) == trkrow && recTrkBank.getByte("detector", i)==DetectorType.DC.getDetectorId()) {
 										pIdx = recTrkBank.getShort("pindex", i);
@@ -325,7 +328,7 @@ public class DataProvider {
 								paddle.Init();
 								paddleList.add(paddle);
 								if (test) {
-									paddle.show();
+                                                                    paddle.show();
 								}
 							}
 
