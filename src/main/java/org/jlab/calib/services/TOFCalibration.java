@@ -84,7 +84,7 @@ public class TOFCalibration
 
 	// event reading panel
 	DataSourceProcessorPane processorPane = null;
-	public final int UPDATE_RATE = 2000000;
+	public final int UPDATE_RATE = 200000;
 
 	// calibration view
 	EmbeddedCanvas canvas = null;
@@ -222,7 +222,6 @@ public class TOFCalibration
 		GStyle.getAxisAttributesZ().setTitleFontName("Avenir");
 		GStyle.setGraphicsFrameLineWidth(1);
 		GStyle.getH1FAttributes().setLineWidth(1);
-		GStyle.getH1FAttributes().setOptStat("111111");
 
 		configFrame.setModalityType(ModalityType.APPLICATION_MODAL);
 		configure();
@@ -1032,8 +1031,8 @@ public class TOFCalibration
 		c.gridx = 0;
 		c.gridy = y;
 		trPanel.add(new JLabel("RF Period:"), c);
-		trfList.addItem(2.004);
 		trfList.addItem(4.008);
+		trfList.addItem(2.004);
 		trfList.addActionListener(this);
 		c.gridx = 1;
 		c.gridy = y;

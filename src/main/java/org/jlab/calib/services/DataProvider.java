@@ -295,7 +295,7 @@ public class DataProvider {
 							// }
 
 							// Get the REC::Track and then the REC::Particle
-//							setOutput(false);
+							setOutput(false);
 							if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")
 									&& event.hasBank("REC::Scintillator")) {
 

@@ -53,8 +53,7 @@ implements ActionListener, FocusListener {
 		radGroup.add(defaultRad);
 		radGroup.add(fileRad);
 		radGroup.add(dbRad);
-dbRad.setSelected(true);
-                defaultRad.addActionListener(this);
+		defaultRad.addActionListener(this);
 		fileRad.addActionListener(this);
 		dbRad.addActionListener(this);
 
@@ -87,7 +86,7 @@ dbRad.setSelected(true);
 		add(runLabel,c);
 		c.gridx = 2;
 		c.gridy = 2;
-		add(runText,c);runText.setText("20369");
+		add(runText,c);
 		runText.addFocusListener(this);
 
 		this.setBorder(BorderFactory.createTitledBorder(engine.stepName));
