@@ -193,6 +193,7 @@ public class CTOFCalibration
 		GStyle.setGraphicsFrameLineWidth(1);
 		GStyle.getH1FAttributes().setLineWidth(1);
 
+                TOFCalibration.TYPE = TYPE;
 		TOFCalibration.vertexCorr = TOFCalibration.VERTEX_CORR_NO;
 
 		configFrame.setModalityType(ModalityType.APPLICATION_MODAL);
