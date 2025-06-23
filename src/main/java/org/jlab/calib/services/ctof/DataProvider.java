@@ -171,9 +171,17 @@ public class DataProvider {
 						DataBank trkBank = event.getBank("CVTRec::Tracks");
 
 						int trkId = hitsBank.getShort("trkID", hitIndex);
-						// Get track
+                                                // Find the matching CVTRec::Tracks bank
+                                                int trkIdx = -1;
+                                                for (int i = 0; i < trkBank.rows(); i++) {
+                                                        if (trkBank.getShort("ID", i) == trkId) {
+                                                                trkIdx = i;
+                                                                break;
+                                                        }
+                                                }
+                                                // Get track
 						// only use hit with associated track and a minimum energy
-						if (trkId != -1) {
+						if (trkIdx != -1) {
 
 							double tx = hitsBank.getFloat("tx", hitIndex);
 							double ty = hitsBank.getFloat("ty", hitIndex);
@@ -212,14 +220,14 @@ public class DataProvider {
 
 							if (paddle.energy() > 0.5) {
 
-								// Find the matching CVTRec::Tracks bank
-								int trkIdx = -1;
-								for (int i = 0; i < trkBank.rows(); i++) {
-									if (trkBank.getShort("ID", i) == trkId) {
-										trkIdx = i;
-										break;
-									}
-								}
+//								// Find the matching CVTRec::Tracks bank
+//								int trkIdx = -1;
+//								for (int i = 0; i < trkBank.rows(); i++) {
+//									if (trkBank.getShort("ID", i) == trkId) {
+//										trkIdx = i;
+//										break;
+//									}
+//								}
 
 								// path length from bank
 								paddle.setPATH_LENGTH(trkBank.getFloat("pathlength", trkIdx));
@@ -257,7 +265,7 @@ public class DataProvider {
 									DataBank recTrkBank = event.getBank("REC::Track");
 									int pIdx = -1;
 									for (int i = 0; i < recTrkBank.rows(); i++) {
-										if (recTrkBank.getShort("index", i) == trkId - 1
+										if (recTrkBank.getShort("index", i) == trkIdx
 												&& recTrkBank.getByte("detector", i) == DetectorType.CVT
 														.getDetectorId()) {
 											pIdx = i;
@@ -276,7 +284,7 @@ public class DataProvider {
 								if (paddle.includeInCalib()) {
 									paddle.Init();
 									paddleList.add(paddle);
-									if (test)
+									if (test || true)
 										paddle.show();
 								}
 							}
