@@ -148,6 +148,7 @@ public class DataProvider {
                                         paddle.setP(Math.sqrt(Math.pow(hitsBank.getFloat("px", hitIndex),2)+
                                                               Math.pow(hitsBank.getFloat("py", hitIndex),2)+
                                                               Math.pow(hitsBank.getFloat("pz", hitIndex),2)));
+                                        paddle.setP(hitsBank.getFloat("px", hitIndex));
                                         paddle.setTRACK_ID(hitsBank.getInt("trackid", hitIndex));
                                         paddle.setVERTEX_Z(hitsBank.getFloat("vz", hitIndex));
                                         paddle.setPARTICLE_ID(hitsBank.getInt("pid", hitIndex));

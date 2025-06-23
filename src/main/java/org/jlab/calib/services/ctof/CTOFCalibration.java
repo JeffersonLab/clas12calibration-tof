@@ -192,6 +192,7 @@ public class CTOFCalibration
 		GStyle.getAxisAttributesZ().setTitleFontName("Avenir");
 		GStyle.setGraphicsFrameLineWidth(1);
 		GStyle.getH1FAttributes().setLineWidth(1);
+                GStyle.getH1FAttributes().setOptStat("11111111");
 
                 TOFCalibration.TYPE = TYPE;
 		TOFCalibration.vertexCorr = TOFCalibration.VERTEX_CORR_NO;
