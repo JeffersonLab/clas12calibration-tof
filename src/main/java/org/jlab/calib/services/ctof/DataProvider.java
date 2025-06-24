@@ -183,10 +183,6 @@ public class DataProvider {
 						// only use hit with associated track and a minimum energy
 						if (trkIdx != -1) {
 
-							double tx = hitsBank.getFloat("tx", hitIndex);
-							double ty = hitsBank.getFloat("ty", hitIndex);
-							double tz = hitsBank.getFloat("tz", hitIndex);
-
 							int component = (int) hitsBank.getShort("component", hitIndex);
 
 							int adcIdx1 = hitsBank.getShort("adc_idx1", hitIndex);
@@ -212,93 +208,74 @@ public class DataProvider {
 							paddle.setRun(run, triggerBit, timeStamp);
 
 							paddle.setAdcTdc(adcL, adcR, tdcL, tdcR);
-							paddle.setPos(tx, ty, tz);
 							paddle.setADC_TIMEL(adcBank.getFloat("time", adcIdx1));
 							paddle.setADC_TIMER(adcBank.getFloat("time", adcIdx2));
 							paddle.setRECON_TIME(hitsBank.getFloat("time", hitIndex));
 							paddle.setENERGY(hitsBank.getFloat("energy", hitIndex));
 
-							if (paddle.energy() > 0.5) {
+							if (paddle.energy() > 0.5 && event.hasBank("REC::Event") && 
+                                                                                     event.hasBank("REC::Particle") && 
+                                                                                     event.hasBank("REC::Track")  && 
+                                                                                     event.hasBank("REC::Scintillator")) {
 
-//								// Find the matching CVTRec::Tracks bank
-//								int trkIdx = -1;
-//								for (int i = 0; i < trkBank.rows(); i++) {
-//									if (trkBank.getShort("ID", i) == trkId) {
-//										trkIdx = i;
-//										break;
-//									}
-//								}
+                                                                DataBank recEvnBank = event.getBank("REC::Event");
+                                                                DataBank recParBank = event.getBank("REC::Particle");
+                                                                DataBank recSciBank = event.getBank("REC::Scintillator");
+                                                                DataBank recTrkBank = event.getBank("REC::Track");
 
-								// path length from bank
-//								paddle.setPATH_LENGTH(trkBank.getFloat("pathlength", trkIdx));
-								paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
-								// System.out.println("Louise 237");
+                                                                double trf = recEvnBank.getFloat("RFTime", 0);
 
-								// Get the momentum and record the beta (assuming every hit is a pion!)
-								double mom = trkBank.getFloat("p", trkIdx);
-								// double mass = massList[CTOFCalibration.massAss];
-								// double beta = mom/Math.sqrt(mom*mom+0.139*0.139);
-								// double beta = mom / Math.sqrt(mom * mom + mass * mass);
-								// paddle.BETA = beta;
-								paddle.setP(mom);
-								paddle.setTRACK_ID(trkId);
+                                                                int pIdx = -1;
+                                                                int sIdx = -1;
+                                                                int tIdx = -1;
 
-								// For CTOF vertex z in cm:
-								paddle.setVERTEX_Z(trkBank.getFloat("z0", trkIdx));
-								// For CTOF vertex z in mm -> convert to cm
-								// paddle.VERTEX_Z = trkBank.getFloat("z0", trkIdx) / 10.0;
-
-//								paddle.setCHARGE(trkBank.getByte("q", trkIdx));
-
-								if (CTOFCalibration.maxRcs != 0.0) {
-									// paddle.TRACK_REDCHI2 = trkBank.getFloat("circlefit_chi2_per_ndf", trkIdx);
-									paddle.setTRACK_REDCHI2(trkBank.getFloat("chi2", trkIdx)
-											/ trkBank.getShort("ndf", trkIdx));
-								} else {
-									paddle.setTRACK_REDCHI2(-1.0);
-								}
-
-								// Get the REC::Track and then the REC::Particle
-								// setOutput(false);
-								if (event.hasBank("REC::Particle") && event.hasBank("REC::Track")  && event.hasBank("REC::Scintillator")) {
-
-									DataBank recTrkBank = event.getBank("REC::Track");
-        								DataBank recSciBank = event.getBank("REC::Scintillator");
-                                                                        DataBank eventBank = event.getBank("REC::Event");
-                                                                        double trf = eventBank.getFloat("RFTime", 0);
-									int pIdx = -1;
-									for (int i = 0; i < recTrkBank.rows(); i++) {
-										if (recTrkBank.getShort("index", i) == trkIdx
-												&& recTrkBank.getByte("detector", i) == DetectorType.CVT
-														.getDetectorId()) {
-											pIdx = i;
-											break;
-										}
-									}
-                                                                        for (int i = 0; i < recSciBank.rows(); i++) {
-                                                                                if (recSciBank.getShort("pindex", i) == pIdx
-												&& recSciBank.getByte("detector", i) == DetectorType.CTOF.getDetectorId()) {
-                                                                                        paddle.setPATH_LENGTH(recSciBank.getFloat("path", i));
-                                                                                        break;
-                                                                                }
+                                                                for (int i = 0; i < recTrkBank.rows(); i++) {
+                                                                        if (recTrkBank.getShort("index", i) == trkIdx && 
+                                                                            recTrkBank.getByte("detector", i) == DetectorType.CVT.getDetectorId()) {
+                                                                                tIdx = i;
+                                                                                pIdx = recTrkBank.getShort("pindex", i);
+                                                                                break;
                                                                         }
+                                                                }
+                                                                if(tIdx<0 || pIdx<0) continue;
 
-									DataBank recPartBank = event.getBank("REC::Particle");
-									paddle.setPARTICLE_ID(recPartBank.getInt("pid", pIdx));
-									paddle.setCHARGE(recPartBank.getByte("charge", pIdx));
-									paddle.setRF_TIME(trf);
-                                                                        if (recPartBank.getInt("pid", 0) == 11)
-										paddle.setST_TIME(recPartBank.getFloat("vt", pIdx));
-                                                                        else
-                                                                            continue;
-								}
-								// setOutput(true);		
+                                                                for (int i = 0; i < recSciBank.rows(); i++) {
+                                                                        if (recSciBank.getShort("pindex", i) == pIdx &&
+                                                                            recSciBank.getByte("detector", i) == DetectorType.CTOF.getDetectorId()) {
+                                                                                sIdx = i;
+                                                                                break;
+                                                                        }
+                                                                }	
+                                                                if(sIdx<0) continue;
+
+                                                                paddle.setTRACK_ID(trkId);
+                                                                paddle.setPATH_LENGTH_BAR(hitsBank.getFloat("pathLengthThruBar", hitIndex));
+                                                                paddle.setPATH_LENGTH(recSciBank.getFloat("path", sIdx));
+                                                                paddle.setPos(recSciBank.getFloat("hx", sIdx), 
+                                                                              recSciBank.getFloat("hy", sIdx), 
+                                                                              recSciBank.getFloat("hz", sIdx));
+								if (CTOFCalibration.maxRcs != 0.0) {
+									paddle.setTRACK_REDCHI2(recTrkBank.getFloat("chi2", tIdx)
+										               /recTrkBank.getShort("NDF", tIdx));
+								}// System.out.println("Louise 237");
+								paddle.setP(Math.sqrt(Math.pow(recParBank.getFloat("px", pIdx),2)
+                                                                                     +Math.pow(recParBank.getFloat("py", pIdx),2)
+                                                                                     +Math.pow(recParBank.getFloat("pz", pIdx),2)));
+								paddle.setVERTEX_Z(recParBank.getFloat("vz", pIdx));
+								paddle.setPARTICLE_ID(recParBank.getInt("pid", pIdx));
+                                                                paddle.setCHARGE(recParBank.getByte("charge", pIdx));
+                                                                paddle.setRF_TIME(trf);
+                                                                if (recParBank.getInt("pid", 0) == 11)
+                                                                        paddle.setST_TIME(recParBank.getFloat("vt", pIdx));
+                                                                else
+                                                                    continue;
+                                                        	// setOutput(true);		
 
 								// System.out.println("Adding paddle to list");
 								if (paddle.includeInCalib()) {
 									paddle.Init();
 									paddleList.add(paddle);
-									if (test || true)
+									if (test)
 										paddle.show();
 								}
 							}
